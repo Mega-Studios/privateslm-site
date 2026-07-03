@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>privateSLM 2.0: a chat app that uses the model already inside your phone — privateSLM blog</title>
+  <meta name="description" content="privateSLM 2.0 uses Apple Intelligence's built-in model by default — nothing to download — with a local GGUF fallback. Chat history, voice both ways, and everything stays on device.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+
+  <article>
+    <h1>privateSLM 2.0: a chat app that uses the model already inside your phone</h1>
+    <div class="meta">July 2026 · 4 min read</div>
+
+    <p>Most local-AI apps start the same way: pick a model from a long list, download a couple of gigabytes, wait, and hope you chose well. We think that first experience is exactly backwards — especially now that your device probably ships with a very good small model already installed.</p>
+
+    <p><strong>privateSLM 2.0</strong> is a complete rebuild around one idea: <em>use the best brain the device already has.</em></p>
+
+    <h2>Zero-download by default</h2>
+    <p>On devices with Apple Intelligence (iPhone, iPad, Mac), privateSLM talks to Apple's built-in ~3B model through the Foundation Models framework. Install the app, open it, type. No model list, no gigabytes, no setup. It runs on the Neural Engine and never touches the network.</p>
+    <p>No Apple Intelligence? The built-in model manager downloads a small open model — Llama 3.2 1B, Qwen2.5 1.5B or Gemma 2 2B — once, and runs it locally through llama.cpp. The engine switch is automatic and visible in the Models screen.</p>
+
+    <h2>A real chat app, not a tech demo</h2>
+    <ul>
+      <li><strong>Chat history that actually exists.</strong> Multiple conversations, search across titles and content, rename, delete. Your chats survive a restart — table stakes that local-AI apps somehow keep skipping.</li>
+      <li><strong>Voice both ways.</strong> Dictate a question, hear the answer read aloud — a hands-free loop, fully offline.</li>
+      <li><strong>Control over the generation.</strong> Edit any message and regenerate from that point. Stop mid-reply. Copy anything. Tune the system prompt, temperature and sampling.</li>
+    </ul>
+
+    <h2>Privacy as a property, not a promise</h2>
+    <p>There is no account, no analytics, no server component at all. The airplane-mode test passes: everything above works with the radio off. Chats are stored only in the app's local database on your device.</p>
+
+    <h2>One price</h2>
+    <p>privateSLM is a one-time purchase — $4.99, family sharing included. No subscription, because on-device inference costs us nothing per message, so it shouldn't cost you either.</p>
+
+    <p><a class="btn primary" style="background:var(--purple);color:#fff" href="https://apps.apple.com/app/id6504996891">Get privateSLM on the App Store</a></p>
+
+    <p style="margin-top:24px">Curious how the Foundation Models integration works under the hood — including the streaming bug we caught the day before review? Read <a href="apple-foundation-models.html">Apple Intelligence for developers</a>.</p>
+  </article>
+
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="./">← All posts</a>
+  </footer>
+</div>
+</body>
+</html>
