@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What is an SLM? Small language models, explained — privateSLM blog</title>
+  <meta name="description" content="Small language models (SLMs) are 1–3B parameter AI models that run on phones and laptops. What they are, how they compare to LLMs, and why they matter for privacy.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">private<span>SLM</span></a>
+    <div class="links">
+      <a href="/blog/">Blog</a>
+      <a href="/circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+
+  <article>
+    <h1>What is an SLM? Small language models, explained</h1>
+    <div class="meta">July 2026 · 6 min read</div>
+
+    <p>Everyone knows the acronym LLM by now. The models behind ChatGPT, Claude and Gemini are <em>large</em> language models — hundreds of billions of parameters, running in data centers, reachable only through an internet connection and someone else's servers.</p>
+
+    <p>An <strong>SLM — a small language model</strong> — is the same technology at a radically different scale: roughly 1 to 3 billion parameters, compressed to a few hundred megabytes or a couple of gigabytes. Small enough to fit in your phone's memory. Fast enough to answer on the chip in your pocket.</p>
+
+    <h2>Small doesn't mean dumb</h2>
+    <p>The surprising story of the past two years is how much capability survived the shrinking. Modern SLMs — Llama 3.2 1B, Qwen2.5 1.5B, Gemma 2 2B, Phi-3 Mini, Apple's ~3B on-device model — handle the tasks most people actually use AI for:</p>
+    <ul>
+      <li>Answering everyday questions and explaining concepts</li>
+      <li>Drafting and rewriting messages, emails and notes</li>
+      <li>Summarizing text, brainstorming ideas, translating</li>
+      <li>Casual conversation with real context memory</li>
+    </ul>
+    <p>Three things made this possible: better training data (quality beats quantity at small scale), distillation from larger teacher models, and aggressive quantization — storing weights in 4 bits instead of 16 with minimal quality loss.</p>
+
+    <h2>Why run a model on the device at all?</h2>
+    <p><strong>Privacy, by physics rather than by promise.</strong> A cloud provider says "we don't store your conversations." An on-device model can't send them anywhere in the first place — turn on airplane mode and it keeps working. For anything sensitive — health, money, work, feelings — that's a different kind of guarantee.</p>
+    <p><strong>Latency and availability.</strong> No round trip to a server means answers start instantly, on a plane, in the subway, on a hike.</p>
+    <p><strong>Cost.</strong> Inference on your own chip is free. No subscription meter running while you think.</p>
+
+    <h2>Where SLMs still lose</h2>
+    <p>Honesty matters: a 1–3B model will not out-reason a frontier model. Long chains of logic, obscure facts, complex code — the big models are still clearly better. The right mental model is a <em>very capable assistant</em>, not an oracle. For a large share of everyday tasks, that's exactly enough.</p>
+
+    <h2>The platform shift is already here</h2>
+    <p>Apple ships a ~3B model inside iOS and macOS and lets apps call it directly through the Foundation Models framework. Google ships Gemini Nano inside Android via AICore. The operating systems themselves have decided: small models belong on the device.</p>
+
+    <blockquote>The model comes to your data — instead of your data going to the model.</blockquote>
+
+    <p>That's the idea <a href="/">privateSLM</a> is built on: use the system model when your device has one, or download an open SLM and run it locally. Either way, your conversations stay yours.</p>
+  </article>
+
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="/blog/">← All posts</a>
+  </footer>
+</div>
+</body>
+</html>

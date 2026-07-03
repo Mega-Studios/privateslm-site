@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Intelligence for developers: the Foundation Models framework — privateSLM blog</title>
+  <meta name="description" content="iOS 26 gives every app direct access to Apple's on-device ~3B model via the Foundation Models framework. LanguageModelSession, streaming, availability — and lessons from shipping with it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">private<span>SLM</span></a>
+    <div class="links">
+      <a href="/blog/">Blog</a>
+      <a href="/circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+
+  <article>
+    <h1>Apple Intelligence for developers: the Foundation Models framework</h1>
+    <div class="meta">July 2026 · 7 min read</div>
+
+    <p>With iOS 26 and macOS 26, Apple did something quietly radical: it opened the model behind Apple Intelligence to every third-party app. The <strong>Foundation Models framework</strong> gives you direct Swift access to the ~3-billion-parameter model that ships inside the operating system — no download, no API key, no per-token bill.</p>
+
+    <h2>The API in three lines</h2>
+    <p>The entry point is <code>LanguageModelSession</code>:</p>
+    <ul>
+      <li><code>SystemLanguageModel.default.availability</code> — check the device supports it and Apple Intelligence is enabled</li>
+      <li><code>LanguageModelSession(instructions:)</code> — open a session, optionally with a system prompt</li>
+      <li><code>session.streamResponse(to:)</code> — stream a reply as an async sequence</li>
+    </ul>
+    <p>Multi-turn context lives inside the session. Everything runs on the Neural Engine; nothing leaves the device.</p>
+
+    <h2>What we learned shipping privateSLM with it</h2>
+    <p>We use Foundation Models as the default engine in <a href="/">privateSLM</a>, with a llama.cpp fallback for devices without Apple Intelligence. Some field notes:</p>
+    <ol>
+      <li><strong>The stream yields snapshots, not deltas.</strong> Each iteration of <code>streamResponse</code> gives you the <em>cumulative</em> text so far. If your UI appends chunks, diff against the previous snapshot and emit only the suffix — and read <code>partial.content</code>, not the snapshot object itself. Our first build stringified the whole struct and users would have seen <code>Snapshot(content: …)</code> in every reply. Live testing caught it before review did.</li>
+      <li><strong>Availability is a spectrum, not a boolean.</strong> The model can be unsupported (old hardware), disabled (Apple Intelligence off), or still downloading. Treat anything but <code>.available</code> as "use your fallback."</li>
+      <li><strong>Guard with <code>#available</code> and <code>canImport</code>.</strong> Older toolchains can't even import the framework — wrap the bridge so the same codebase builds everywhere and degrades cleanly.</li>
+      <li><strong>Design for both engines from day one.</strong> A thin engine interface (system model | local GGUF) kept our UI identical across devices and made the fallback path testable.</li>
+    </ol>
+
+    <h2>What it means for users</h2>
+    <p>Apps no longer have to choose between "smart" and "private." The smartest assistant experience on a modern iPhone can be one where the words never leave the phone — and the OS itself provides the brain. That's the bet we've made with privateSLM.</p>
+  </article>
+
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="/blog/">← All posts</a>
+  </footer>
+</div>
+</body>
+</html>

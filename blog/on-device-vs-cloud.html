@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why on-device AI beats the cloud for privacy — privateSLM blog</title>
+  <meta name="description" content="Cloud AI privacy is a policy; on-device AI privacy is physics. Threat models, airplane-mode tests, and why local inference changes the trust equation.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="/">private<span>SLM</span></a>
+    <div class="links">
+      <a href="/blog/">Blog</a>
+      <a href="/circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+
+  <article>
+    <h1>Why on-device AI beats the cloud for privacy</h1>
+    <div class="meta">July 2026 · 5 min read</div>
+
+    <p>Every cloud AI provider makes roughly the same promise: <em>your data is encrypted, we don't train on it, you can delete it anytime.</em> Some of them even mean it. But a promise is a policy — and policies change with acquisitions, subpoenas, breaches and business models.</p>
+
+    <p>On-device AI makes a different kind of claim. Your words are processed by a model running on your own chip, in your own RAM. There is no server to breach, no logs to subpoena, no retention policy to read, because <strong>the data never travels</strong>.</p>
+
+    <h2>Policy vs physics</h2>
+    <p>Think about what you'd have to trust in each case:</p>
+    <ul>
+      <li><strong>Cloud:</strong> the provider's intentions, their security team, every employee with access, their subprocessors, the jurisdiction they operate in, and their future owners.</li>
+      <li><strong>On-device:</strong> the app doesn't send data out. That's it — and it's verifiable: turn on airplane mode and keep chatting.</li>
+    </ul>
+
+    <blockquote>The airplane-mode test is the simplest privacy audit in software: if it works offline, your words stayed home.</blockquote>
+
+    <h2>When it actually matters</h2>
+    <p>Most questions are harmless. But the ones where AI helps most are often exactly the ones you'd never type into a stranger's server: health symptoms, money problems, a hard conversation you're rehearsing, your company's unreleased plans, your kid's situation at school. That's the gap on-device AI closes — assistance for the sensitive parts of life without a confession to a third party.</p>
+
+    <h2>The honest trade-offs</h2>
+    <p>Local models are smaller, so peak intelligence is lower than frontier cloud models. Long documents and complex reasoning may still call for the big guns. The point isn't that the cloud is useless — it's that <em>the default should be local</em>, and the cloud should be a deliberate exception, not the silent norm.</p>
+
+    <h2>The good news: the default is changing</h2>
+    <p>Apple ships an on-device model in iOS and macOS; Google ships Gemini Nano in Android. The hardware — Neural Engines, NPUs — is already in hundreds of millions of pockets. Apps like <a href="/">privateSLM</a> just connect the dots: the best available local brain, a real chat experience, and a hard guarantee that your conversations are yours.</p>
+  </article>
+
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="/blog/">← All posts</a>
+  </footer>
+</div>
+</body>
+</html>
