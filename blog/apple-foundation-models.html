@@ -11,10 +11,10 @@
 <body>
 <div class="wrap">
   <nav>
-    <a class="logo" href="/">private<span>SLM</span></a>
+    <a class="logo" href="../">private<span>SLM</span></a>
     <div class="links">
-      <a href="/blog/">Blog</a>
-      <a href="/circuitai/">circuitAI</a>
+      <a href="./">Blog</a>
+      <a href="../circuitai/">circuitAI</a>
       <a href="https://apps.apple.com/app/id6504996891">App Store</a>
     </div>
   </nav>
@@ -35,7 +35,7 @@
     <p>Multi-turn context lives inside the session. Everything runs on the Neural Engine; nothing leaves the device.</p>
 
     <h2>What we learned shipping privateSLM with it</h2>
-    <p>We use Foundation Models as the default engine in <a href="/">privateSLM</a>, with a llama.cpp fallback for devices without Apple Intelligence. Some field notes:</p>
+    <p>We use Foundation Models as the default engine in <a href="../">privateSLM</a>, with a llama.cpp fallback for devices without Apple Intelligence. Some field notes:</p>
     <ol>
       <li><strong>The stream yields snapshots, not deltas.</strong> Each iteration of <code>streamResponse</code> gives you the <em>cumulative</em> text so far. If your UI appends chunks, diff against the previous snapshot and emit only the suffix — and read <code>partial.content</code>, not the snapshot object itself. Our first build stringified the whole struct and users would have seen <code>Snapshot(content: …)</code> in every reply. Live testing caught it before review did.</li>
       <li><strong>Availability is a spectrum, not a boolean.</strong> The model can be unsupported (old hardware), disabled (Apple Intelligence off), or still downloading. Treat anything but <code>.available</code> as "use your fallback."</li>
@@ -50,7 +50,7 @@
   <footer>
     <span>© 2026 privateSLM</span>
     <span class="spacer"></span>
-    <a href="/blog/">← All posts</a>
+    <a href="./">← All posts</a>
   </footer>
 </div>
 </body>
