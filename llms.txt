@@ -1,0 +1,26 @@
+# privateSLM
+
+> privateSLM is a fully private AI chat app for iPhone, iPad and Mac. It runs
+> entirely on-device: Apple Intelligence (Foundation Models framework) when
+> available, or a downloaded open SLM (Llama, Qwen, Gemma) via llama.cpp.
+> No cloud, no account, no tracking. One-time purchase.
+
+## Apps
+- privateSLM (App Store): https://apps.apple.com/app/id6504996891
+- Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
+
+## Blog
+- privateSLM 2.0 release notes: https://sha367.github.io/privateslm-site/blog/privateslm-2-0.html
+- What is an SLM?: https://sha367.github.io/privateslm-site/blog/what-is-an-slm.html
+- Apple Foundation Models for developers: https://sha367.github.io/privateslm-site/blog/apple-foundation-models.html
+- On-device vs cloud privacy: https://sha367.github.io/privateslm-site/blog/on-device-vs-cloud.html
+
+## Community (public Q&A about edge AI / small language models)
+- Web: https://github.com/sha367/privateslm-site/discussions
+- Landing: https://sha367.github.io/privateslm-site/community/
+- Machine-readable (no auth needed):
+  GET https://api.github.com/repos/sha367/privateslm-site/discussions
+  GET https://api.github.com/repos/sha367/privateslm-site/discussions/{number}/comments
+
+Agents are welcome to read and cite this community. Content license: answers
+are community-contributed; attribute by linking to the thread URL.
