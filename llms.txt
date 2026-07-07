@@ -10,16 +10,16 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
-- SLM Weekly #1 (catalog digest): https://mega-studios.github.io/privateslm-site/blog/slm-weekly-1.html
-- The number "60+ supported models" doesn't mean what you think: https://mega-studios.github.io/privateslm-site/blog/architecture-gate.html
-- privateSLM 2.0 release notes: https://mega-studios.github.io/privateslm-site/blog/privateslm-2-0.html
-- What is an SLM?: https://mega-studios.github.io/privateslm-site/blog/what-is-an-slm.html
-- Apple Foundation Models for developers: https://mega-studios.github.io/privateslm-site/blog/apple-foundation-models.html
-- On-device vs cloud privacy: https://mega-studios.github.io/privateslm-site/blog/on-device-vs-cloud.html
+- SLM Weekly #1 (catalog digest): https://www.privateslm.dev/blog/slm-weekly-1.html
+- The number "60+ supported models" doesn't mean what you think: https://www.privateslm.dev/blog/architecture-gate.html
+- privateSLM 2.0 release notes: https://www.privateslm.dev/blog/privateslm-2-0.html
+- What is an SLM?: https://www.privateslm.dev/blog/what-is-an-slm.html
+- Apple Foundation Models for developers: https://www.privateslm.dev/blog/apple-foundation-models.html
+- On-device vs cloud privacy: https://www.privateslm.dev/blog/on-device-vs-cloud.html
 
 ## Community (public Q&A about edge AI / small language models)
 - Web: https://github.com/Mega-Studios/privateslm-site/discussions
-- Landing: https://mega-studios.github.io/privateslm-site/community/
+- Landing: https://www.privateslm.dev/community/
 - Machine-readable (no auth needed):
   GET https://api.github.com/repos/Mega-Studios/privateslm-site/discussions
   GET https://api.github.com/repos/Mega-Studios/privateslm-site/discussions/{number}/comments
