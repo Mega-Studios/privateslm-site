@@ -1,7 +1,15 @@
-# privateslm.app — site
+# privateslm.dev — site
 
 Static site: privateSLM landing, circuitAI landing, and the on-device AI blog.
-Hosted on GitHub Pages. When the `privateslm.app` domain is purchased:
-1. Add a `CNAME` file containing `privateslm.app`
-2. Point the domain's DNS (A/AAAA or ALIAS) at GitHub Pages
-3. Enable "Enforce HTTPS" (required for .app domains)
+
+Domain `privateslm.dev` is purchased through Vercel Domains. Hosting is migrating
+from GitHub Pages to Vercel to avoid manual DNS config (Vercel domains attach to
+Vercel projects with zero DNS records) and to avoid two live copies of the same
+site (duplicate content is bad for SEO):
+
+1. Import this repo as a Vercel project (Framework Preset: Other — no build step,
+   it's plain static HTML).
+2. Project Settings → Domains → add `privateslm.dev`. Since the domain is owned by
+   the same Vercel account, it attaches without copying any DNS records.
+3. Once the Vercel deployment is confirmed working, disable the GitHub Pages
+   deployment for this repo so `privateslm.dev` is the single canonical origin.
