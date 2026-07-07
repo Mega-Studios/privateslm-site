@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- SLM Weekly #1 (catalog digest): https://mega-studios.github.io/privateslm-site/blog/slm-weekly-1.html
+- The number "60+ supported models" doesn't mean what you think: https://mega-studios.github.io/privateslm-site/blog/architecture-gate.html
 - privateSLM 2.0 release notes: https://mega-studios.github.io/privateslm-site/blog/privateslm-2-0.html
 - What is an SLM?: https://mega-studios.github.io/privateslm-site/blog/what-is-an-slm.html
 - Apple Foundation Models for developers: https://mega-studios.github.io/privateslm-site/blog/apple-foundation-models.html

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The number "60+ supported models" doesn't mean what you think — privateSLM blog</title>
+  <meta name="description" content="Local-AI apps advertise huge model counts, but a GGUF only runs if the bundled inference engine recognizes its architecture tag. Most apps never publish that list. Here's how to check any app's for yourself.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="../community/">Forum</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>The number "60+ supported models" doesn't mean what you think</h1>
+    <div class="meta">July 2026 · 9 min read</div>
+
+    <p>Every local-AI app's description carries the same kind of number: 40 models, 60 models, "every open-source LLM." Our own vendored engine recognizes exactly three Qwen-family architectures. None of them is the one Qwen's current releases actually use. That gap between "model families supported" and "will load on the build installed on your phone right now" is the whole story, and almost nobody discloses it.</p>
+
+    <h2>The setup: two models, same size class, same week</h2>
+    <p>We run a weekly check on new small on-device models. This week two similar-looking candidates came up, both distilled/quantized down to roughly 1–2 GB, both from reputable quantizers:</p>
+
+    <table>
+      <tr><th>Candidate</th><th>Base architecture</th><th>Size</th><th>Result</th></tr>
+      <tr><td>DeepSeek-R1-Distill-Qwen-1.5B</td><td>Qwen2.5</td><td>1.04 GB</td><td>✓ loads fine</td></tr>
+      <tr><td>Qwen3.5-2B</td><td>Qwen3.5</td><td>~1.2 GB</td><td>⚠ would not load</td></tr>
+    </table>
+
+    <p>Both are "a small Qwen-family model" to a casual reader. Only one of them would actually run on the version of <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> we currently ship. The difference has nothing to do with quantization quality, parameter count, or benchmark scores — it comes down to a single enum value inside the C++ source of the inference engine.</p>
+
+    <h2>What actually decides whether a model runs</h2>
+    <p>llama.cpp (and everything built on it — including most "local AI chat" apps in the App Store and Play Store) reads a GGUF file's metadata header, extracts an architecture string like <code>"qwen2"</code> or <code>"qwen3"</code>, and maps it to an internal enum. If that enum entry doesn't exist in the specific build of the engine you're running, the file cannot be loaded — full stop, regardless of file size, quantization method, or how recently it was released.</p>
+
+    <p>We checked our own vendored engine directly:</p>
+
+    <pre><code>$ grep -oP 'LLM_ARCH_\w+(?=,)' packages/maid_llm/src/llama_cpp/src/llama.cpp | sort -u | wc -l
+39
+
+$ grep -oP 'LLM_ARCH_\w+(?=,)' packages/maid_llm/src/llama_cpp/src/llama.cpp | grep -i qwen
+LLM_ARCH_QWEN
+LLM_ARCH_QWEN2
+LLM_ARCH_QWEN2MOE</code></pre>
+
+    <p>Three Qwen-family entries. Not four. <code>LLM_ARCH_QWEN3</code> is absent — and neither is <code>LLM_ARCH_GEMMA3</code> or an Llama-4 entry. Our engine is pinned to a build that predates several current model families. That's not a hypothetical; it's the literal reason a real download would have failed for our users this week if we hadn't checked first.</p>
+
+    <h2>Why "supported model families" and "will load on your build" are different claims</h2>
+    <p>A marketing page listing "Qwen 2.5, Qwen 3" as supported families is describing what the <em>upstream</em> llama.cpp project can theoretically parse across its entire commit history — not what any specific shipped app build actually contains. Every app vendors (bundles, compiles in) a specific commit or release of the engine. Unless that vendored copy is updated every time the upstream project adds a new architecture, the model-family list on the App Store page silently drifts ahead of what the installed binary can do.</p>
+
+    <p>Nobody is lying, exactly. Nobody is publishing the one number that would actually answer the user's question either: <em>which architectures does the copy of the engine on my phone, right now, actually implement?</em></p>
+
+    <h2>How to check this for any local-AI app that's open-source</h2>
+    <p>If the app vendors llama.cpp (or a fork of it) and the source is public, the check is one command against the vendored copy, not the upstream project:</p>
+
+    <pre><code>$ grep -oP 'LLM_ARCH_\w+(?=,)' path/to/vendored/llama.cpp/src/llama.cpp | sort -u</code></pre>
+
+    <p>Cross-reference the output against the architecture string in any GGUF's metadata (visible via <code>gguf-dump.py</code> from llama.cpp's own tools, or the "general.architecture" field shown on most Hugging Face model cards). If the string isn't in the list, that specific file will not load on that specific build — independent of what the app's marketing copy claims to support.</p>
+
+    <h2>Reading the metadata yourself, no engine required</h2>
+    <p>You don't even need the app's source to check a specific GGUF file — just the file itself and llama.cpp's own inspection tool:</p>
+
+    <pre><code>$ python gguf-dump.py DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf | grep architecture
+general.architecture: qwen2
+
+$ python gguf-dump.py Qwen3.5-2B-Q4_K_M.gguf | grep architecture
+general.architecture: qwen3</code></pre>
+
+    <p>Two lines of output settle the whole question for any file, before you download a single byte of it. If an app published this check as part of its model catalog — "here is the exact architecture string of every file we offer, and here is what our engine build recognizes" — a user could verify compatibility themselves in under a minute. As far as we can tell, no app in this category currently does.</p>
+
+    <h2>A three-question checklist for other builders</h2>
+    <p>If you maintain a local-AI app on a vendored inference engine, here's what we'd ask of our own catalog pipeline, and now do:</p>
+    <ol>
+      <li><strong>What architecture strings does the engine build you actually ship recognize?</strong> Not the upstream project's total — the exact commit or release tag compiled into your current app binary.</li>
+      <li><strong>Does every model in your catalog or download list pass that check?</strong> Not "is it a well-known model family" — does its specific GGUF's <code>general.architecture</code> field match an enum your binary implements.</li>
+      <li><strong>When a model fails the check, what happens?</strong> Silently omitted, or listed with an honest "needs an engine update" status? The difference is the whole trust question this post is about.</li>
+    </ol>
+
+    <h2>The fix has a name and a number</h2>
+    <p>Upstream, this gap already closed: <a href="https://github.com/ggml-org/llama.cpp/pull/12828">llama.cpp PR #12828, "Support Qwen3 and Qwen3MoE"</a>, added the missing architecture entries to the project. Pinning our next engine update to that commit or later is a known, scoped piece of work, not an open-ended research problem. The gap isn't that the fix doesn't exist. It's that shipping it into an app is a separate release cycle from the fix landing upstream, and until that cycle runs, the gate stays closed for us specifically.</p>
+
+    <h2>What we're doing about it</h2>
+    <p>Two concrete changes, starting this week:</p>
+    <ol>
+      <li><strong>An explicit engine-compatibility gate in our own model pipeline.</strong> Before any model is added to the catalog, we check it against our vendored engine's real architecture list — not the upstream project's. Qwen3.5-2B failed that check this week and was correctly held back (see <a href="./slm-weekly-1.html">this week's digest</a>) instead of shipped and silently broken.</li>
+      <li><strong>Publishing what we skip, not just what we ship.</strong> "Not added — needs an engine update first" is a real, honest status, and it's the one most competitors' release notes never mention at all.</li>
+    </ol>
+
+    <h2>The uncomfortable generalization</h2>
+    <p>This isn't a privateSLM problem or a llama.cpp problem — it's structural to every app built on a vendored, versioned inference engine plus a constantly-moving catalog of open models. The model ecosystem now ships new architectures (Qwen3, Qwen3.5, Gemma 3, Llama 4) on a cadence of weeks. Engine updates inside shipped apps happen on the cadence of app releases — weeks to months, gated by app store review. That gap is not a bug either side can fully close; it's a permanent structural lag. The only honest response is to disclose it, check for it explicitly, and refuse to ship a model past a gate it fails — rather than let a user find out via a crash on first load.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions/5">Discuss this on the forum →</a> — if you maintain or use a different local-AI app, we'd like to know: does it publish its actual vendored architecture list anywhere?</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — engine-gated model catalog, checked every week</a></div>
+  </article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We checked two similar 1.5B models this week. Only one would load. — privateSLM blog</title>
+  <meta name="description" content="SLM Weekly #1: what we added (DeepSeek R1 Distill Qwen 1.5B), what we skipped (Qwen3.5-2B), and the engine compatibility gate most local-AI apps never disclose.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="../community/">Forum</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>We checked two similar 1.5B models this week. Only one would load.</h1>
+    <div class="meta">July 2026 · 5 min read</div>
+
+    <p>One <code>grep</code> command against our own inference engine just saved our users a download that would not have worked. This is the first privateSLM weekly catalog check-in: what we added, what we deliberately skipped, and the exact command that told us which was which.</p>
+
+    <h2>What we added: a reasoning specialist, 1.04 GB</h2>
+    <p><a href="https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF">DeepSeek-R1-Distill-Qwen-1.5B</a>, quantized by <a href="https://huggingface.co/bartowski">bartowski</a> at Q4_K_M. It's a 1.5B model distilled from DeepSeek-R1's chain-of-thought reasoning onto a Qwen2.5 base — small enough for a phone, but tuned to work through math and logic step-by-step instead of pattern-matching an answer.</p>
+
+    <table>
+      <tr><th>Field</th><th>Value</th><th>How we verified it</th></tr>
+      <tr><td>File</td><td>DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf</td><td>bartowski repo listing</td></tr>
+      <tr><td>Size</td><td>1,117,320,800 bytes (1.04 GB)</td><td><code>curl -sI</code> — real Content-Length, not an estimate</td></tr>
+      <tr><td>Base architecture</td><td>Qwen2 (qwen2.5 lineage)</td><td>model card + our own engine's arch table (below)</td></tr>
+      <tr><td>License</td><td>Apache 2.0</td><td>inherited from Qwen2.5 base</td></tr>
+    </table>
+
+    <p>We don't add a model on vibes. Before it goes in the catalog, we run an actual HTTP HEAD request against the download URL and use the real <code>Content-Length</code> — guessing a file size is how apps end up promising a 2 GB download that's actually 3.4 GB on a metered connection.</p>
+
+    <pre><code>$ curl -sI -L "https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf" | grep -i content-length
+content-length: 1117320800</code></pre>
+
+    <h2>What we skipped: Qwen3.5-2B — and why that's the actual story</h2>
+    <p>Qwen's model family has moved fast: Qwen, Qwen2, Qwen2.5, Qwen3, Qwen3.5, and (per public benchmarking write-ups) Qwen3.6 variants already exist. A fresh <a href="https://huggingface.co/bartowski/Qwen_Qwen3.5-2B-GGUF">Qwen3.5-2B GGUF from bartowski</a> is exactly the size class we want for a phone.</p>
+
+    <p>We didn't add it. Here's why, and it's the more interesting part of this post.</p>
+
+    <h2>The gate nobody publishes: does your engine even know this architecture exists?</h2>
+    <p>privateSLM's llama.cpp fallback runs on a specific, pinned build of <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>. A GGUF file is only as useful as the inference engine's ability to read its architecture tag. We grepped our own vendored source for every architecture it currently knows about:</p>
+
+    <pre><code>$ grep -oP 'LLM_ARCH_\w+(?=,)' packages/maid_llm/src/llama_cpp/src/llama.cpp | sort -u
+LLM_ARCH_ARCTIC      LLM_ARCH_GPT2        LLM_ARCH_OLMO
+LLM_ARCH_BAICHUAN    LLM_ARCH_GPTJ        LLM_ARCH_OPENELM
+LLM_ARCH_BERT        LLM_ARCH_GPTNEOX     LLM_ARCH_ORION
+LLM_ARCH_BITNET      LLM_ARCH_GROK        LLM_ARCH_PHI2
+LLM_ARCH_BLOOM       LLM_ARCH_INTERNLM2   LLM_ARCH_PHI3
+LLM_ARCH_CHATGLM     LLM_ARCH_JAIS        LLM_ARCH_PLAMO
+LLM_ARCH_CODESHELL   LLM_ARCH_JINA_BERT_V2 LLM_ARCH_QWEN
+LLM_ARCH_COMMAND_R   LLM_ARCH_LLAMA       LLM_ARCH_QWEN2
+LLM_ARCH_DBRX        LLM_ARCH_MAMBA       LLM_ARCH_QWEN2MOE
+LLM_ARCH_DEEPSEEK2   LLM_ARCH_MINICPM     LLM_ARCH_REFACT
+LLM_ARCH_FALCON      LLM_ARCH_MPT         LLM_ARCH_STABLELM
+LLM_ARCH_GEMMA       LLM_ARCH_STARCODER
+LLM_ARCH_GEMMA2      LLM_ARCH_STARCODER2, ...</code></pre>
+
+    <p><strong>No <code>LLM_ARCH_QWEN3</code>. No Gemma 3. No Llama 4.</strong> Our runtime would either refuse to load a Qwen3.5 GGUF or, worse on some engine versions, silently misinterpret its tensor layout. Either outcome is bad — but shipping a 2 GB download that fails on first launch is the one that actually damages trust.</p>
+
+    <p>The DeepSeek-R1-Distill model got through the exact same gate because its base is Qwen2.5 — an architecture our engine has supported for a long time. Same "small reasoning model" pitch, same file size ballpark, completely different outcome, purely because of which architecture tag is baked into the GGUF header.</p>
+
+    <h2>Why this matters beyond our app</h2>
+    <p>App Store descriptions in this category love the number "60+ supported models." That number describes the model <em>family list</em>, not a guarantee that the exact quant you download today will load on the exact engine build shipping inside the app you have installed right now. Engine and model catalog are two different release trains, and most apps don't publish which architectures their bundled engine actually implements. We think that's a disclosure gap worth closing, so we're closing it here, on our own product, first.</p>
+
+    <p><strong>Verdict on Qwen3.5-2B: not added this week — it ships after our next engine update.</strong> We'd rather tell you that plainly than add a model that quietly fails to load.</p>
+
+    <h2>The current privateSLM catalog</h2>
+    <table>
+      <tr><th>Model</th><th>Size</th><th>Best for</th></tr>
+      <tr><td>Llama 3.2 1B Instruct</td><td>808 MB</td><td>Smallest & fastest, older phones</td></tr>
+      <tr><td>Qwen2.5 1.5B Instruct</td><td>1.0 GB</td><td>Balanced general chat</td></tr>
+      <tr><td>Gemma 2 2B Instruct</td><td>1.7 GB</td><td>Highest quality, recent phones</td></tr>
+      <tr><td>DeepSeek R1 Distill Qwen 1.5B <em>(new)</em></td><td>1.04 GB</td><td>Step-by-step math & logic</td></tr>
+    </table>
+
+    <p>Plus whatever your device's built-in system model already gives you for free — Apple Intelligence or Gemini Nano — which needs no download and no engine gate at all, since Apple and Google ship and update that model themselves.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions/5">Discuss this week's pick on the forum →</a> — if you've run DeepSeek-R1-Distill-Qwen-1.5B on-device already, tell us your tokens/sec and which device.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the new model is in the catalog now</a></div>
+  </article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
