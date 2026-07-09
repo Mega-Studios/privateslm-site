@@ -10,6 +10,12 @@
       "slug": "engine-architecture-compatibility-gate",
       "summary": "Apps advertise '60+ supported models' but the vendored llama.cpp build only recognizes specific LLM_ARCH_* tags, so many trending releases (e.g. Qwen3.x) silently can't load.",
       "post": "blog/architecture-gate.html"
+    },
+    {
+      "date": "2026-07-09",
+      "slug": "gguf-quant-label-gap",
+      "summary": "The GGUF quant label (e.g. Q4_K_M) is not a standardized artifact — different quantizers (and even a vendor's own official QAT release) produce measurably different quality/size under the identical nominal tag.",
+      "post": "blog/gguf-quant-label-gap.html"
     }
   ],
   "discussionsCreated": [
@@ -23,8 +29,8 @@
   "notes": [
     {
       "date": "2026-07-09",
-      "event": "run-attempted-no-publish",
-      "reason": "No GitHub Discussions tool available in this environment (no gh CLI per session policy, no GraphQL/Discussions MCP tool, WebFetch gets 403 on the Discussions API). Forum thread creation and daily backlog-answering are hard requirements of the routine and a blog post cannot carry a compliant 'discuss on the forum' link without one, so the run failed safe before drafting/publishing any blog content. State file recreated from git history (autopilot-state.json did not previously exist; prior run evidence taken from commit 0518802 on 2026-07-07)."
+      "event": "published-deep-dive-no-forum-thread",
+      "reason": "Published blog/gguf-quant-label-gap.html (deep-dive only, no numbered digest — digestCounter not bumped). Catalog check found zero qualifying candidates (LFM2.5-230M is the one genuinely new small release but is blocked by an unsupported LFM2 architecture tag; noted in the post). Forum thread creation and backlog-answering were NOT performed: no GitHub Discussions tool is available in this environment (no gh CLI per session policy, no GraphQL/Discussions MCP tool, WebFetch gets 403 on the Discussions API). The post's 'Discuss this on the forum' link points to the general Discussions index rather than a dedicated thread as a workaround. Published on explicit user instruction to prioritize getting content onto https://www.privateslm.dev/ over the forum-thread requirement; the underlying tooling gap for Discussions (create/list/reply) still needs to be fixed for the FORUM step and daily backlog-answering to run as designed."
     }
   ]
 }
