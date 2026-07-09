@@ -1,0 +1,30 @@
+{
+  "lastRunDate": "2026-07-09",
+  "digestCounter": 1,
+  "catalogIdsEverAdded": [
+    "deepseek-r1-distill-qwen-1.5b-q4"
+  ],
+  "deepDiveThesesUsed": [
+    {
+      "date": "2026-07-07",
+      "slug": "engine-architecture-compatibility-gate",
+      "summary": "Apps advertise '60+ supported models' but the vendored llama.cpp build only recognizes specific LLM_ARCH_* tags, so many trending releases (e.g. Qwen3.x) silently can't load.",
+      "post": "blog/architecture-gate.html"
+    }
+  ],
+  "discussionsCreated": [
+    {
+      "number": 5,
+      "date": "2026-07-07",
+      "url": "https://github.com/Mega-Studios/privateslm-site/discussions/5",
+      "title": "SLM Weekly #1"
+    }
+  ],
+  "notes": [
+    {
+      "date": "2026-07-09",
+      "event": "run-attempted-no-publish",
+      "reason": "No GitHub Discussions tool available in this environment (no gh CLI per session policy, no GraphQL/Discussions MCP tool, WebFetch gets 403 on the Discussions API). Forum thread creation and daily backlog-answering are hard requirements of the routine and a blog post cannot carry a compliant 'discuss on the forum' link without one, so the run failed safe before drafting/publishing any blog content. State file recreated from git history (autopilot-state.json did not previously exist; prior run evidence taken from commit 0518802 on 2026-07-07)."
+    }
+  ]
+}
