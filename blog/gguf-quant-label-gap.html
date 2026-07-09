@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three "Q4_K_M" downloads of the same model. 2.13 GB apart. — privateSLM blog</title>
+  <meta name="description" content="Same model, same quant label, three different files. We compared bartowski, Unsloth and AesSedai's Q4_K_M builds of Qwen3.5-35B-A3B and Unsloth's Dynamic 2.0 Gemma 3 27B against Google's own QAT checkpoint — the label tells you almost nothing.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/gguf-quant-label-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Three "Q4_K_M" downloads of the same model. 2.13 GB apart.</h1>
+    <div class="meta">July 9, 2026 · 8 min read</div>
+
+    <p>Three Hugging Face repos all label their Qwen3.5-35B-A3B build <code>Q4_K_M</code>. The files are 18.49 GB, 19.77 GB and 20.62 GB — a 2.13 GB spread between the smallest and the largest, for a name that's supposed to describe one specific quantization recipe. We went looking for a new catalog model today and found this instead: the four-character label on a GGUF file tells you almost nothing about which file you're actually getting.</p>
+
+    <h2>What "Q4_K_M" is actually supposed to mean</h2>
+    <p>llama.cpp's k-quants pack model weights into roughly 4 bits per parameter using a mix of block sizes and bit-widths tuned per tensor type — "K_M" is the "medium" mixing preset. In theory, two different people running the same quantization command on the same base weights should produce near-identical files. In practice, quantizer authors adjust the recipe: which layers get extra bits, whether an "importance matrix" (imatrix) calibrates rounding against real text, which calibration corpus that imatrix used. None of that shows up in the four-character label. It shows up in the file.</p>
+
+    <h2>The test: same model, three quantizers, one label</h2>
+    <p>Unsloth publishes its own quantization benchmark suite — over 150 KL-divergence (KLD) comparisons run across roughly 9 TB of GGUFs, checking how far a quantized model's output token distribution drifts from the unquantized original. Lower KLD means the quantized model's predictions track the full-precision model more closely; perplexity (PPL) measures roughly how "surprised" the model is by held-out text, with lower generally better but far less sensitive to small quality differences. Their published table for Qwen3.5-35B-A3B includes the same <code>Q4_K_M</code> label from three different quantizer sources:</p>
+
+    <table>
+      <tr><th>Quantizer</th><th>File label</th><th>Disk size</th><th>Perplexity</th><th>KLD (99.9th pct)</th></tr>
+      <tr><td>AesSedai</td><td>Q4_K_M</td><td>20.62 GB</td><td>6.5665</td><td><strong>0.3171</strong></td></tr>
+      <tr><td>bartowski</td><td>Q4_K_M</td><td>19.77 GB</td><td>6.6097</td><td>0.5771</td></tr>
+      <tr><td>Unsloth</td><td>Q4_K_M</td><td>18.49 GB</td><td>6.6053</td><td>0.5478</td></tr>
+    </table>
+    <p class="cite">Source: Unsloth's own published GGUF benchmark documentation for Qwen3.5-35B-A3B (unsloth.ai/docs). Self-reported by a quantizer that's also being compared, which is exactly why the raw numbers — not just the conclusion — are worth showing.</p>
+
+    <p>Look at the perplexity column first, because it's the number most people actually check: 6.5665, 6.6097, 6.6053. That's a spread under 0.7%. If PPL were the only metric you looked at, you'd reasonably conclude these three files are interchangeable. Now look at KLD: 0.3171 versus 0.5771 versus 0.5478 — the two smaller files show roughly <strong>1.8x the distributional drift</strong> of the largest one, at the identical nominal quant level. Perplexity is a coarse, single-number summary; KLD is a more sensitive probe of how much the quantized model's actual output distribution has shifted. Two metrics, same three files, two different stories. If you picked a "Q4_K_M" download by file size alone — smaller is better, right, less to download — you'd have picked the one furthest from the original model's behavior by the more sensitive measure.</p>
+
+    <h2>Why the same label produces different files</h2>
+    <p>"Q4_K_M" only fixes the bit-width mix per tensor type — it doesn't fix everything else that goes into producing the actual numbers. Most modern k-quants use an <strong>importance matrix</strong> (imatrix): a pass over a calibration text corpus that measures how sensitive each weight is to rounding error, so the quantizer can spend its limited bits where they matter most. Two quantizers running "the same" Q4_K_M recipe can pick different calibration corpora, different corpus sizes, different tokenization edge-case handling, and different rounding tie-breaks — none of which shows up in the four-character label, all of which shows up in the KLD number. The GGUF format has no field for "which imatrix corpus was this calibrated on." You're trusting whoever wrote the repo's README, if they wrote one at all.</p>
+
+    <h2>It's not just third-party quantizers — official releases aren't immune either</h2>
+    <p>The same benchmark suite compared Unsloth's own "Dynamic 2.0" GGUFs of Gemma 3 27B against Google's official quantization-aware-trained (QAT) checkpoint — the version Google trained specifically to hold up under quantization, which is the closest thing to a "reference" 4-bit release a vendor can ship:</p>
+
+    <table>
+      <tr><th>Build</th><th>Quant label</th><th>MMLU (5-shot)</th><th>Disk size</th></tr>
+      <tr><td>Google official QAT</td><td>Q4_K_M-class</td><td>70.64%</td><td>17.2 GB</td></tr>
+      <tr><td>Unsloth Dynamic 2.0</td><td>Q4_K_XL</td><td><strong>71.47%</strong></td><td><strong>15.64 GB</strong></td></tr>
+      <tr><td>Unsloth Dynamic 2.0 + QAT weights</td><td>Q4_K_XL</td><td>71.07%</td><td>15.64 GB</td></tr>
+    </table>
+    <p class="cite">Source: Unsloth's Dynamic 2.0 GGUF documentation (unsloth.ai/docs), citing their own MMLU 5-shot evaluation.</p>
+
+    <p>A third-party dynamic quant beat the vendor's own quantization-aware-trained checkpoint on MMLU, while using 1.56 GB less disk. That's not a knock on Google's QAT work — QAT is solving a real problem (weights trained to survive quantization, not just rounded after the fact) — it's a demonstration that "the vendor's official quantized release" isn't automatically the quality ceiling either. There is no single authority you can defer to and stop checking.</p>
+
+    <h2>What this means if you're picking a GGUF, not just reading about one</h2>
+    <p>Our own catalog rules require a quantizer to be "reputable" — bartowski, Unsloth, lmstudio-community, ggml-org, or the model's own vendor — and until today we treated that list as roughly interchangeable, a checkbox rather than a variable. The numbers above say that's not quite right: reputable doesn't mean equivalent, even when the label on the file is identical. Three concrete takeaways, in order of how actionable they are:</p>
+    <ul>
+      <li><strong>Perplexity alone won't catch this.</strong> All three Qwen3.5-35B-A3B files scored within 0.7% PPL of each other while differing by ~1.8x in KLD. If a comparison only quotes PPL, treat it as a floor, not a full picture.</li>
+      <li><strong>File size is a proxy for calibration effort, not just compression.</strong> The larger AesSedai file wasn't "less compressed" in a way that only cost disk space — it tracked the source model's output distribution measurably more closely at the same nominal quant level.</li>
+      <li><strong>"Official" isn't automatically "best."</strong> Google's own QAT Gemma 3 27B lost to a third-party dynamic quant on both size and MMLU. Check for a published benchmark before assuming the vendor release is the safe default.</li>
+    </ul>
+
+    <h2>What to actually do before you download a "Q4_K_M"</h2>
+    <p>You're not going to run your own KLD benchmark before every download, and you shouldn't have to. Three cheap checks that catch most of the gap above:</p>
+    <ul>
+      <li><strong>Search for a published benchmark before trusting a label.</strong> Unsloth, bartowski and a handful of others publish comparison tables for their popular quants. If one exists for the model you want, five minutes of reading beats guessing.</li>
+      <li><strong>Treat file-size differences between "identical" quants as a signal, not noise.</strong> If two Q4_K_M files of the same base model differ by more than a percent or two, something in the recipe differs — that's worth a search before you pick the smaller one purely to save bandwidth.</li>
+      <li><strong>Prefer quantizers who disclose their calibration method.</strong> A README that names the imatrix corpus and quantization tool version is a weak but real signal that someone was paying attention to more than just hitting the target bit-width.</li>
+    </ul>
+    <p>We apply a version of this ourselves when we vet a catalog addition — verified download size via HTTP HEAD, a license check, an architecture check against our own engine — but until today we hadn't cross-checked whether "reputable quantizer" (our own catalog rule) should also mean "benchmarked quantizer for this specific model." It should. We're adding that check to how we read a candidate's model card before the next addition, for whichever specific model actually publishes one.</p>
+
+    <h2>Today's catalog check: nothing new made it in, and here's why</h2>
+    <p>We also swept for new small-model releases today. One genuinely new one showed up: <a href="https://huggingface.co/LiquidAI/LFM2.5-230M-GGUF">LFM2.5-230M</a> from Liquid AI, released June 25 — a 230M-parameter model with a Q4_K_M GGUF around 153 MB, easily phone-sized. It doesn't ship in the privateSLM catalog today, and the reason is the same engine-compatibility gate we wrote about two days ago: LFM2.5 uses Liquid AI's own hybrid convolution-plus-attention architecture, tagged <code>LFM2</code> in a GGUF header, and that architecture tag doesn't exist in our vendored llama.cpp build's supported list. Mainline llama.cpp has since picked up LFM2 support upstream — our pinned engine hasn't caught up yet. Verdict: blocked, ships after the next engine update, not today.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run cross-quantizer comparisons on your own hardware, or you've hit a "same label, different behavior" surprise with a GGUF you downloaded, tell us what you found.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
