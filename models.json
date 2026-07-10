@@ -1,12 +1,12 @@
 {
-  "schema": 1,
-  "updated": "2026-07-07",
   "models": [
     {
       "id": "llama-3.2-1b-instruct-q4",
       "name": "Llama 3.2 1B Instruct",
+      "category": "Generalists",
       "description": "Smallest & fastest. Good for older phones.",
       "url": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF",
       "fileName": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
       "sizeBytes": 847249408,
       "minRamMb": 2048
@@ -14,8 +14,10 @@
     {
       "id": "qwen2.5-1.5b-instruct-q4",
       "name": "Qwen2.5 1.5B Instruct",
-      "description": "Strong reasoning for its size. Balanced choice.",
+      "category": "Generalists",
+      "description": "Strong for its size. Balanced everyday choice.",
       "url": "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF",
       "fileName": "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
       "sizeBytes": 1073741824,
       "minRamMb": 3072
@@ -23,20 +25,134 @@
     {
       "id": "gemma-2-2b-it-q4",
       "name": "Gemma 2 2B Instruct",
-      "description": "Highest quality. Needs a recent phone.",
+      "category": "Generalists",
+      "description": "Very fluid conversation for a compact model.",
       "url": "https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/gemma-2-2b-it-GGUF",
       "fileName": "gemma-2-2b-it-Q4_K_M.gguf",
       "sizeBytes": 1793064960,
       "minRamMb": 4096
     },
     {
-      "id": "deepseek-r1-distill-qwen-1.5b-q4",
-      "name": "DeepSeek R1 Distill Qwen 1.5B",
-      "description": "Reasoning specialist — thinks step-by-step before answering. Best for math and logic.",
-      "url": "https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
-      "fileName": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
-      "sizeBytes": 1117320800,
-      "minRamMb": 2048
+      "id": "llama-3.2-3b-instruct-q4",
+      "name": "Llama 3.2 3B Instruct",
+      "category": "Generalists",
+      "description": "Best all-round chat. Huge 128K context. 6 GB+ RAM.",
+      "url": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "fileName": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "sizeBytes": 2019377696,
+      "minRamMb": 4096
+    },
+    {
+      "id": "phi-4-mini-instruct-q4",
+      "name": "Phi-4 Mini 3.8B",
+      "category": "Generalists",
+      "description": "Microsoft model that punches above its size. Recent phones.",
+      "url": "https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF/resolve/main/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "fileName": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+      "sizeBytes": 2491874688,
+      "minRamMb": 6144
+    },
+    {
+      "id": "qwen3.5-4b-q4",
+      "name": "Qwen3.5 4B",
+      "category": "Generalists",
+      "description": "Newest generation, very long context. For 8 GB+ phones.",
+      "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF",
+      "fileName": "Qwen3.5-4B-Q4_K_M.gguf",
+      "sizeBytes": 2740937888,
+      "minRamMb": 6144
+    },
+    {
+      "id": "qwen2.5-coder-3b-q4",
+      "name": "Qwen2.5 Coder 3B",
+      "category": "Coding & SQL",
+      "description": "Fast, accurate code & SQL. Great on-device autocomplete.",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+      "hfRepoUrl": "https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF",
+      "fileName": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+      "sizeBytes": 2104932800,
+      "minRamMb": 6144
+    },
+    {
+      "id": "qwen2.5-coder-7b-q4",
+      "name": "Qwen2.5 Coder 7B",
+      "category": "Coding & SQL",
+      "description": "Benchmark leader for local coding. Refactors & finds bugs. 8 GB+.",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+      "hfRepoUrl": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+      "fileName": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+      "sizeBytes": 4683073536,
+      "minRamMb": 8192
+    },
+    {
+      "id": "granite-3.1-8b-instruct-q4",
+      "name": "IBM Granite 3.1 8B",
+      "category": "Coding & SQL",
+      "description": "Enterprise model, strong at SQL & backend scripting. 8 GB+.",
+      "url": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF/resolve/main/granite-3.1-8b-instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF",
+      "fileName": "granite-3.1-8b-instruct-Q4_K_M.gguf",
+      "sizeBytes": 4942858720,
+      "minRamMb": 8192
+    },
+    {
+      "id": "qwen2.5-math-7b-q4",
+      "name": "Qwen2.5 Math 7B",
+      "category": "Math & STEM",
+      "description": "Dedicated math engine — algebra, calculus, LaTeX output. 8 GB+.",
+      "url": "https://huggingface.co/bartowski/Qwen2.5-Math-7B-Instruct-GGUF/resolve/main/Qwen2.5-Math-7B-Instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/Qwen2.5-Math-7B-Instruct-GGUF",
+      "fileName": "Qwen2.5-Math-7B-Instruct-Q4_K_M.gguf",
+      "sizeBytes": 4683074272,
+      "minRamMb": 8192
+    },
+    {
+      "id": "biomistral-7b-q4",
+      "name": "BioMistral 7B",
+      "category": "Medical",
+      "description": "Fine-tuned on PubMed. General health & biomedical Q&A. 8 GB+.",
+      "url": "https://huggingface.co/MaziyarPanahi/BioMistral-7B-GGUF/resolve/main/BioMistral-7B.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/MaziyarPanahi/BioMistral-7B-GGUF",
+      "fileName": "BioMistral-7B.Q4_K_M.gguf",
+      "sizeBytes": 4368439424,
+      "minRamMb": 8192
+    },
+    {
+      "id": "finance-llm-7b-q4",
+      "name": "Finance LLM 7B",
+      "category": "Finance",
+      "description": "Finance-domain model for reports, statements & market terms. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/finance-LLM-GGUF/resolve/main/finance-llm.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/finance-LLM-GGUF",
+      "fileName": "finance-llm.Q4_K_M.gguf",
+      "sizeBytes": 4081009920,
+      "minRamMb": 8192
+    },
+    {
+      "id": "towerinstruct-7b-q4",
+      "name": "TowerInstruct 7B",
+      "category": "Translation",
+      "description": "Specialist translator across many languages, tone-aware. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/TowerInstruct-7B-v0.1-GGUF/resolve/main/towerinstruct-7b-v0.1.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/TowerInstruct-7B-v0.1-GGUF",
+      "fileName": "towerinstruct-7b-v0.1.Q4_K_M.gguf",
+      "sizeBytes": 4081044608,
+      "minRamMb": 8192
+    },
+    {
+      "id": "llama-guard-3-8b-q4",
+      "name": "Llama Guard 3 8B",
+      "category": "Cybersecurity",
+      "description": "Safety classifier — flags unsafe prompts & jailbreaks (not a chatbot). 8 GB+.",
+      "url": "https://huggingface.co/QuantFactory/Llama-Guard-3-8B-GGUF/resolve/main/Llama-Guard-3-8B.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/QuantFactory/Llama-Guard-3-8B-GGUF",
+      "fileName": "Llama-Guard-3-8B.Q4_K_M.gguf",
+      "sizeBytes": 4920735552,
+      "minRamMb": 8192
     }
   ]
 }
