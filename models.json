@@ -153,6 +153,83 @@
       "fileName": "Llama-Guard-3-8B.Q4_K_M.gguf",
       "sizeBytes": 4920735552,
       "minRamMb": 8192
+    },
+    {
+      "id": "deepseek-coder-6.7b-instruct-q4",
+      "name": "DeepSeek Coder 6.7B",
+      "category": "Coding & SQL",
+      "description": "Strong dedicated code model — completion, refactoring, many languages. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/deepseek-coder-6.7B-instruct-GGUF/resolve/main/deepseek-coder-6.7b-instruct.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/deepseek-coder-6.7B-instruct-GGUF",
+      "fileName": "deepseek-coder-6.7b-instruct.Q4_K_M.gguf",
+      "sizeBytes": 4083015904,
+      "minRamMb": 8192
+    },
+    {
+      "id": "numinamath-7b-tir-q4",
+      "name": "NuminaMath 7B TIR",
+      "category": "Math & STEM",
+      "description": "Math-olympiad winner. Multi-step problem solving with tool-integrated reasoning. 8 GB+.",
+      "url": "https://huggingface.co/bartowski/NuminaMath-7B-TIR-GGUF/resolve/main/NuminaMath-7B-TIR-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/NuminaMath-7B-TIR-GGUF",
+      "fileName": "NuminaMath-7B-TIR-Q4_K_M.gguf",
+      "sizeBytes": 4223358784,
+      "minRamMb": 8192
+    },
+    {
+      "id": "meditron-7b-chat-q4",
+      "name": "Meditron 7B Chat",
+      "category": "Medical",
+      "description": "Clinical model (EPFL) for medical Q&A and terminology. Not medical advice. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/meditron-7B-chat-GGUF/resolve/main/meditron-7b-chat.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/meditron-7B-chat-GGUF",
+      "fileName": "meditron-7b-chat.Q4_K_M.gguf",
+      "sizeBytes": 4082074240,
+      "minRamMb": 8192
+    },
+    {
+      "id": "finance-chat-7b-q4",
+      "name": "Finance Chat 7B",
+      "category": "Finance",
+      "description": "Conversational finance assistant — earnings, filings, market questions. Not financial advice. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/finance-chat-GGUF/resolve/main/finance-chat.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/finance-chat-GGUF",
+      "fileName": "finance-chat.Q4_K_M.gguf",
+      "sizeBytes": 4081010048,
+      "minRamMb": 8192
+    },
+    {
+      "id": "saul-instruct-v1-q4",
+      "name": "SaulLM 7B (Legal)",
+      "category": "Lawyer",
+      "description": "Legal-domain specialist — contracts, clauses, statutes. Not legal advice. 8 GB+.",
+      "url": "https://huggingface.co/MaziyarPanahi/Saul-Instruct-v1-GGUF/resolve/main/Saul-Instruct-v1.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/MaziyarPanahi/Saul-Instruct-v1-GGUF",
+      "fileName": "Saul-Instruct-v1.Q4_K_M.gguf",
+      "sizeBytes": 4368439488,
+      "minRamMb": 8192
+    },
+    {
+      "id": "law-chat-7b-q4",
+      "name": "Law Chat 7B",
+      "category": "Lawyer",
+      "description": "Conversational legal assistant for contracts & regulations. Not legal advice. 8 GB+.",
+      "url": "https://huggingface.co/TheBloke/law-chat-GGUF/resolve/main/law-chat.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/TheBloke/law-chat-GGUF",
+      "fileName": "law-chat.Q4_K_M.gguf",
+      "sizeBytes": 4081010048,
+      "minRamMb": 8192
+    },
+    {
+      "id": "mentallama-chat-7b-q4",
+      "name": "MentaLLaMA Chat 7B",
+      "category": "Mental Health",
+      "description": "Empathetic, reflective dialogue (research model). Not a substitute for professional care. 8 GB+.",
+      "url": "https://huggingface.co/QuantFactory/MentaLLaMA-chat-7B-GGUF/resolve/main/MentaLLaMA-chat-7B.Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/QuantFactory/MentaLLaMA-chat-7B-GGUF",
+      "fileName": "MentaLLaMA-chat-7B.Q4_K_M.gguf",
+      "sizeBytes": 4081004544,
+      "minRamMb": 8192
     }
   ]
 }
