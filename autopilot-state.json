@@ -1,5 +1,5 @@
 {
-  "lastRunDate": "2026-07-09",
+  "lastRunAt": "2026-07-13T07:26:41Z",
   "digestCounter": 1,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4"
@@ -18,6 +18,24 @@
       "post": "blog/gguf-quant-label-gap.html"
     }
   ],
+  "diyProjectsFeatured": [],
+  "postsPublished": [
+    {
+      "slug": "slm-weekly-1",
+      "type": "digest",
+      "publishedAt": "2026-07-07T00:00:00Z"
+    },
+    {
+      "slug": "architecture-gate",
+      "type": "deepdive",
+      "publishedAt": "2026-07-07T00:00:00Z"
+    },
+    {
+      "slug": "gguf-quant-label-gap",
+      "type": "deepdive",
+      "publishedAt": "2026-07-09T00:00:00Z"
+    }
+  ],
   "discussionsCreated": [
     {
       "number": 5,
@@ -31,6 +49,12 @@
       "date": "2026-07-09",
       "event": "published-deep-dive-no-forum-thread",
       "reason": "Published blog/gguf-quant-label-gap.html (deep-dive only, no numbered digest — digestCounter not bumped). Catalog check found zero qualifying candidates (LFM2.5-230M is the one genuinely new small release but is blocked by an unsupported LFM2 architecture tag; noted in the post). Forum thread creation and backlog-answering were NOT performed: no GitHub Discussions tool is available in this environment (no gh CLI per session policy, no GraphQL/Discussions MCP tool, WebFetch gets 403 on the Discussions API). The post's 'Discuss this on the forum' link points to the general Discussions index rather than a dedicated thread as a workaround. Published on explicit user instruction to prioritize getting content onto https://www.privateslm.dev/ over the forum-thread requirement; the underlying tooling gap for Discussions (create/list/reply) still needs to be fixed for the FORUM step and daily backlog-answering to run as designed."
+    },
+    {
+      "date": "2026-07-13",
+      "event": "no-publish-nothing-new-cleared-bar",
+      "reason": "Researched since 2026-07-09 (HF trending/GGUF, bartowski, unsloth, llama.cpp releases b9973-b9982, r/LocalLLaMA, exo, NetworkChuck, Habr, Raspberry Pi coverage). Nothing cleared the bar: Gemma 4 E2B/E4B GGUF (unsloth) looked promising from a search snippet but the primary source (HF file tree) shows the actual .gguf files are ~2 months old (MTP addon ~1 month old) — not a genuinely new datapoint since last run, so excluded per quality bar (would also fail size: Q4_K_M 3.11GB > 2.5GB cap, and arch 'gemma4' is unsupported by the production engine — confirmed via llama.cpp issue #21314/PR #21309, landed build b8637, absent from the pinned flutter-legacy llama_cpp source). Qwen3-Coder-Next (Feb 2026, 80B total/3B active, 48.7GB Q4_K_M) — old news and far oversized. NVIDIA-Nemotron-3-Nano-4B-GGUF (March 2026, 2.84GB, arch 'nemotron_h') — old and oversized/unsupported. Fresh LFM2.5-230M community fine-tunes appeared but the base LFM2 architecture gate was already disclosed in the 2026-07-09 post (would be a near-duplicate, quality bar #9). No verifiable, individually-credited DIY builder project surfaced in this pass (Raspberry Pi/local-LLM search results were generic SEO content farms, not attributable individual builds) — skipped rather than force a weak spotlight. Catalog: no additions. Digest/deep-dive: none published this run — correct 'nothing qualified' outcome per routine design.",
+      "important_finding": "The privateslm APP repo's `main` branch was completely rewritten from Flutter to native SwiftUI in the days immediately before this run (commits through 2026-07-13T06:04:54Z, 'Native Phase 2a-4 tail'): no more `lib/`, `pubspec.yaml`, or `packages/maid_llm/src/llama_cpp` — replaced by `Sources/*.swift`, XcodeGen `project.yml`, and llama.cpp linked as a prebuilt `Frameworks/llama.xcframework` fetched fresh from the latest ggml-org/llama.cpp GitHub release via `scripts/fetch-llama.sh` (README: 'current upstream — supports Qwen3/Gemma 3/Granite'). This is UNRELEASED (bundle id suffix `.native`, MARKETING_VERSION reset to 0.1.0, docs/native-qa.md reads as a pre-launch simulator/device QA checklist, StoreKit one-time-purchase at $9.99 configured but not confirmed live in App Store Connect). The old Flutter app (presumably what's actually live at App Store id 6504996891) is preserved on the `flutter-legacy` branch and the `v2.2.0-flutter` tag — its vendored llama.cpp (grepped from flutter-legacy) still lacks GEMMA3/GEMMA4/QWEN3/LFM2 arch tags, matching prior posts' findings. This run used flutter-legacy's engine as the conservative/production ENGINE COMPATIBILITY gate since that's what's actually live, but the routine's hardcoded paths (`lib/llm/model_catalog.dart`, `packages/maid_llm/src/llama_cpp/src/llama.cpp`) no longer exist on the app repo's default branch and will break a naive future run. Also noted: the site's models.json catalog already holds 21 models (added via manual PRs #13/#14 'add 7 expert models', outside the autopilot flow) — well over the 8-model cap, and several entries (7-8B models, a Qwen3.5 build) don't match standard catalog rules on size/recency/engine-arch. Not modified this run (out of scope / not autopilot-added); flagged for the owner's awareness. Sent a push notification about this since it affects every future run's correctness."
     }
   ]
 }
