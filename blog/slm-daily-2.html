@@ -56,8 +56,8 @@ $ grep -n -E 'LLM_ARCH_(QWEN3|QWEN3MOE|GEMMA3|LLAMA4|LFM2|LFM2MOE)\b' src/llama-
     <h2>What else we swept</h2>
     <p>Outside LFM2.5, today's pass over Hugging Face's trending GGUF list and bartowski's recent uploads turned up mostly 9B to 284B roleplay merges and fine-tunes, well outside our 2.5 GB phone-download budget regardless of architecture. No catalog change today. That's the check working as designed, not a gap in it.</p>
 
-    <h2>The catalog, unchanged</h2>
-    <p>21 models across 9 categories, same as yesterday: Generalists, Coding &amp; SQL, Math &amp; STEM, Medical, Finance, Lawyer, Mental Health, Translation, Cybersecurity. Plus Apple Intelligence, when your device has it, at zero download and zero engine-version question of its own, since Apple ships and updates that model.</p>
+    <h2>The catalog, trimmed by two</h2>
+    <p>19 models across 9 categories: Generalists, Coding &amp; SQL, Math &amp; STEM, Medical, Finance, Lawyer, Mental Health, Translation, Cybersecurity. Not from today's sweep — a separate pass caught two existing entries that shouldn't have been there in the first place: Qwen3.5 4B (2.74 GB) and IBM Granite 3.1 8B (4.94 GB) both exceed our own 2.5 GB phone-download cap, and Qwen3.5 4B's architecture wasn't even engine-supported at the time it was added. Both are pulled now. Plus Apple Intelligence, when your device has it, at zero download and zero engine-version question of its own, since Apple ships and updates that model.</p>
 
     <p>One loose end from the rewrite, worth flagging rather than burying: there's no screen anywhere in the app that shows which llama.cpp release is actually embedded in a given build. The About screen shows the app's own version number and nothing else. We dig into why that specific gap matters, and what replaced the July 7 problem, in today's deep-dive.</p>
 
