@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- llama.cpp shipped three releases in under three hours. Our app has no idea which one it's running.: https://www.privateslm.dev/blog/engine-version-blind-spot.html
+- SLM Daily #2 (catalog digest): https://www.privateslm.dev/blog/slm-daily-2.html
 - Three "Q4_K_M" downloads of the same model. 2.13 GB apart.: https://www.privateslm.dev/blog/gguf-quant-label-gap.html
 - SLM Weekly #1 (catalog digest): https://www.privateslm.dev/blog/slm-weekly-1.html
 - The number "60+ supported models" doesn't mean what you think: https://www.privateslm.dev/blog/architecture-gate.html

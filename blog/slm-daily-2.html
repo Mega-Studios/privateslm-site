@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our engine went from recognizing 3 architectures to 135. We still added zero models today. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #2: the engine no longer vendors an old llama.cpp. It fetches ggml-org/llama.cpp's latest release at build time, and we verified it now covers Qwen3, Gemma 3, Llama 4 and LFM2. The catalog didn't grow today anyway, for a specific, boring reason.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/slm-daily-2.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Our engine went from recognizing 3 architectures to 135. We still added zero models today.</h1>
+    <div class="meta">July 13, 2026 · 5 min read</div>
+
+    <p>Six days ago our own vendored engine recognized three Qwen-family architecture tags. Today, checking the same way, the number is 135. The engine that made both checks possible isn't the same one: the app got rewritten in between.</p>
+
+    <h2>What actually changed: a full rewrite, not a patch</h2>
+    <p>On July 10, privateSLM's main branch stopped being a Flutter app. Pull request #21, "Native Swift rewrite, pivot main off Flutter," merged that day, and every phase since (settings, SwiftData chat history, the model catalog screen, Apple Intelligence, speech and TTS, StoreKit) has landed as native Swift/SwiftUI. The old engine path, a vendored copy of llama.cpp's C++ source inside a Flutter package, is gone. In its place: a prebuilt <code>llama.xcframework</code>, linked as a binary dependency, fetched by a build script that resolves whatever ggml-org/llama.cpp shipped as its "latest" GitHub release, every time it runs:</p>
+
+    <pre><code># scripts/fetch-llama.sh (excerpt)
+URL=$(curl -sL https://api.github.com/repos/ggml-org/llama.cpp/releases/latest \
+  | grep -oE '"browser_download_url": *"[^"]*xcframework[^"]*\.zip"' \
+  | head -1 | sed -E 's/.*"(https[^"]+)".*/\1/')</code></pre>
+
+    <h2>The July 7 gap is closed, by a wide margin</h2>
+    <p>We ran the same check as the July 7 post, this time against the real upstream source instead of a vendored copy, at llama.cpp's current tag <code>b9982</code> (published 2026-07-13, 01:28 UTC):</p>
+
+    <pre><code>$ grep -oE 'LLM_ARCH_[A-Z0-9_]+' src/llama-arch.h | sort -u | wc -l
+135
+$ grep -n -E 'LLM_ARCH_(QWEN3|QWEN3MOE|GEMMA3|LLAMA4|LFM2|LFM2MOE)\b' src/llama-arch.h
+16:    LLM_ARCH_LLAMA4,
+41:    LLM_ARCH_QWEN3,
+42:    LLM_ARCH_QWEN3MOE,
+61:    LLM_ARCH_GEMMA3,
+123:    LLM_ARCH_LFM2,
+124:    LLM_ARCH_LFM2MOE,</code></pre>
+
+    <p>Every architecture the July 7 post flagged as missing (Qwen3, Gemma 3, Llama 4) is now recognized. So is LFM2, Liquid AI's hybrid convolution-plus-attention architecture, the exact one we cited as the blocker in the July 9 post.</p>
+
+    <h2>So why didn't LFM2.5-230M make the catalog today?</h2>
+    <p>Because the reason changed, not because it disappeared. LFM2.5-230M shipped June 25: a 230M-parameter model, Q4_K_M GGUF at 153 MB, easily phone-sized, quantized by Liquid AI itself. In July it failed our engine gate outright. Today it clears that gate clean. It still isn't in the catalog, for two separate and much more boring reasons: it's now 18 days old, past our 14-day freshness window, and it ships under a custom "lfm1.0" license we haven't read closely enough yet to confirm against our "permits end-user download and use" rule. Neither reason is a repeat of the engine story. That's worth being explicit about.</p>
+
+    <h2>What else we swept</h2>
+    <p>Outside LFM2.5, today's pass over Hugging Face's trending GGUF list and bartowski's recent uploads turned up mostly 9B to 284B roleplay merges and fine-tunes, well outside our 2.5 GB phone-download budget regardless of architecture. No catalog change today. That's the check working as designed, not a gap in it.</p>
+
+    <h2>The catalog, unchanged</h2>
+    <p>21 models across 9 categories, same as yesterday: Generalists, Coding &amp; SQL, Math &amp; STEM, Medical, Finance, Lawyer, Mental Health, Translation, Cybersecurity. Plus Apple Intelligence, when your device has it, at zero download and zero engine-version question of its own, since Apple ships and updates that model.</p>
+
+    <p>One loose end from the rewrite, worth flagging rather than burying: there's no screen anywhere in the app that shows which llama.cpp release is actually embedded in a given build. The About screen shows the app's own version number and nothing else. We dig into why that specific gap matters, and what replaced the July 7 problem, in today's deep-dive.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've hit a model that fails to load despite passing a check like this one, tell us about it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
