@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>llama.cpp shipped three releases in under three hours. Our app has no idea which one it's running. — privateSLM blog</title>
+  <meta name="description" content="Our build script fetches whatever ggml-org/llama.cpp calls 'latest' at compile time and never records the tag. Real release-cadence and PR-merge data show why that's a subtler problem than the pinned-old-engine gap we wrote about a week ago, not a rehash of it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/engine-version-blind-spot.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>llama.cpp shipped three releases in under three hours. Our app has no idea which one it's running.</h1>
+    <div class="meta">July 13, 2026 · 8 min read</div>
+
+    <p>Between 10:48 PM on July 12 and 1:28 AM on July 13 UTC, ggml-org/llama.cpp tagged three releases: b9980, b9981, b9982, about 35 minutes apart at the tightest gap. Our app's build script fetches whichever one happens to be "latest" at compile time. It embeds that build as a binary framework and never records which tag it got.</p>
+
+    <p>Six days ago we published a post about our engine silently missing architectures newer models needed. That gap is closed now, and closed well: the current release recognizes 135 distinct architecture tags, including everything we flagged as missing back then. This post is about the problem that closing it left behind, and why it's a genuinely different problem, not the same one wearing a new hat.</p>
+
+    <h2>What the July 7 post got right, and what's changed since</h2>
+    <p>The July 7 piece was about a Flutter app that vendored a specific, pinned commit of llama.cpp's C++ source. That commit was old: three Qwen-family architecture tags, no Gemma 3, no Llama 4. The fix we described then was scoped and correct: update the pinned commit on a known release cycle.</p>
+    <p>On July 10, the app stopped being that app. Pull request #21 rewrote privateSLM as native Swift, and the engine stopped being vendored source at all. It's now a prebuilt <code>llama.xcframework</code>, and the script that fetches it doesn't pin anything:</p>
+
+    <pre><code># scripts/fetch-llama.sh
+echo "Resolving latest llama.cpp release…"
+URL=$(curl -sL https://api.github.com/repos/ggml-org/llama.cpp/releases/latest \
+  | grep -oE '"browser_download_url": *"[^"]*xcframework[^"]*\.zip"' \
+  | head -1 | sed -E 's/.*"(https[^"]+)".*/\1/')
+...
+cp -R "$SRC" "$DEST/"</code></pre>
+
+    <p>No tag is written down anywhere in that process. The framework lands in <code>Frameworks/llama.xcframework</code>, which is gitignored (it's roughly 450 MB, too big to commit), and the script's only cache check is "does a directory already exist here," not "which version is it." Run this script on two different days and, unless GitHub's "latest release" pointer hasn't moved, you get two different binaries with no record of which one you got.</p>
+
+    <h2>How often does "latest" actually move?</h2>
+    <p>We checked the three most recent tags against llama.cpp's own releases page directly:</p>
+
+    <table>
+      <tr><th>Tag</th><th>Published / created</th><th>Gap to next</th></tr>
+      <tr><td>b9980</td><td>2026-07-12 22:48 UTC</td><td>&#8212;</td></tr>
+      <tr><td>b9981</td><td>2026-07-13 00:53 UTC</td><td>~2h 05m</td></tr>
+      <tr><td>b9982</td><td>2026-07-13 01:28 UTC</td><td>~35m</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://github.com/ggml-org/llama.cpp/releases">github.com/ggml-org/llama.cpp/releases</a>, checked 2026-07-13. b9982's release notes describe a reasoning-budget token-handling fix in chat completions, not a new architecture, which is the more common kind of release in this pipeline. The page shows the same pattern further back: tags b9973 through b9982, ten in total, all inside roughly a day.</p>
+
+    <p>Most of these releases are not architecture additions. They're the normal churn of an active C++ project: fixes, backend tuning, small feature work. That distinction matters for the next section, because it means "latest" moving fast doesn't mean new model support is arriving fast. It means the <em>binary</em> is changing fast, for reasons that mostly have nothing to do with what GGUF files it can load.</p>
+
+    <h2>When it's actually a new architecture, the timeline looks completely different</h2>
+    <p>We pulled recent merged pull requests on ggml-org/llama.cpp that added or extended architecture support, and independently checked two of them directly against their own GitHub pages:</p>
+
+    <table>
+      <tr><th>PR</th><th>What it added</th><th>Opened</th><th>Merged</th><th>Time to merge</th></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/23966">#23966</a></td><td>Mellum architecture</td><td>Jun 1, 2026</td><td>Jun 2, 2026</td><td>~1 day</td></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/24031">#24031</a></td><td>Qwen3 SSM arch test coverage</td><td>Jun 2, 2026</td><td>Jun 3, 2026</td><td>~15 hours</td></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/23346">#23346</a></td><td>DeepSeek V3.2 / DSA</td><td>May 19, 2026</td><td>May 29, 2026</td><td>10 days</td></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/23545">#23545</a></td><td>Granite 4 Vision</td><td>May 22, 2026</td><td>Jun 5, 2026</td><td>14 days</td></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/23398">#23398</a></td><td>Gemma 4 MTP</td><td>May 20, 2026</td><td>Jun 7, 2026</td><td>18 days</td></tr>
+      <tr><td><a href="https://github.com/ggml-org/llama.cpp/pull/24162">#24162</a></td><td>DeepSeek V4</td><td>Jun 5, 2026</td><td>Jun 29, 2026</td><td>24 days</td></tr>
+    </table>
+    <p class="cite">#23966 and #24162 dates independently verified directly against their GitHub PR pages; the remaining four are drawn from GitHub's pull request history for the repository and linked so you can check them yourself.</p>
+
+    <p>Read the "time to merge" column and a pattern falls out: extending an architecture the project already understands (test coverage for Qwen3's state-space variant, a multi-token-prediction head for a model whose base is already supported) lands in about a day. A genuinely new architecture family, the kind that needs its own tensor-loading and inference path written from scratch, takes ten days to over three weeks. DeepSeek V4 took 24 days from open to merge.</p>
+
+    <p>That's the actual promise our build script is making, whether it says so or not. "You'll get new architecture support": true. "On a lag of roughly ten days to over three weeks for anything structurally new": unstated, buried in PR history nobody reading an App Store listing will ever check.</p>
+
+    <h2>The failure mode this creates is not the one we wrote about last week</h2>
+    <p>The July 7 story was about staleness: a pinned engine falling behind a moving catalog, predictably, in one direction, until someone bumps the pin. You could describe its exact gap at any moment, because there was one engine, one commit, sitting still.</p>
+    <p>This is a different shape of problem. There's no longer one engine. There's whatever "latest release" resolved to on whichever machine built whichever copy of the app is currently on a given user's phone, and that resolution isn't recorded anywhere:</p>
+
+    <pre><code>// Sources/AboutView.swift, in full: what the About screen shows.
+private var version: String {
+    let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+    return "Version \(v) (\(b))"
+}</code></pre>
+
+    <p>That's the app's own marketing version, "0.1.0 (1)" as of this writing, not the engine's. A build cut the morning of July 12 and one cut that evening could embed genuinely different sets of supported architectures, and there is no field, screen, or log line anywhere in the app that would let a user, a support engineer, or us reading a bug report tell which one shipped. Two people on the identical app version from the App Store, if the App Store's CDN happened to serve binaries built hours apart, could have the same model load successfully for one and fail for the other, with zero visible explanation.</p>
+
+    <p>We have not observed this actually happening in the wild yet. This is a structural read of the build script plus the release-cadence data above, not a reported incident. We're publishing it as a real risk we found in our own pipeline, not as something a user has already hit.</p>
+
+    <h2>Why we're not just re-running the July 7 post with new numbers</h2>
+    <p>It would be easy to file this under "same gate, new week." We don't think that's accurate. The July 7 problem was a disclosure problem: an app claiming broad support while a static, checkable engine build actually supported less. The fix was checkable and bounded: bump the pin, check again. This problem is a reproducibility problem: there is no longer a single, checkable "the engine" to describe, and the thing that makes a bug report useful, being able to say what version of the software produced it, is missing for a component that determines whether a whole category of file loads at all. Different root cause (static staleness versus dynamic non-determinism), different fix, different failure signature. Adjacent, not identical.</p>
+
+    <h2>What an actual fix looks like</h2>
+    <p>Two changes, neither shipped yet, both small:</p>
+    <ol>
+      <li><strong>Pin the fetch, don't chase "latest."</strong> <code>scripts/fetch-llama.sh</code> should target a specific release tag, bumped deliberately (the same discipline the July 7 post already argued for), instead of resolving <code>/releases/latest</code> fresh on every build.</li>
+      <li><strong>Surface the tag somewhere a human can see it.</strong> A build-time value, written into <code>Generated/Info.plist</code> alongside the app version and printed on the About screen, would turn "which engine is this" from an unanswerable question into a one-line read: <code>llama.cpp b9982</code> next to the existing <code>Version 0.1.0 (1)</code>.</li>
+    </ol>
+    <p>Neither change is speculative engineering. Both are the same discipline the July 7 post already asked of us, applied to the part of the pipeline that changed underneath that post six days after we wrote it.</p>
+
+    <h2>The generalization, updated</h2>
+    <p>Vendoring a versioned inference engine used to mean choosing a fixed point and living with its lag. Fetching "the latest release" at build time trades that lag for something that looks like freshness but is actually variance: correctness now depends on exactly when a build happened to run, a fact the shipped artifact itself doesn't record. Neither approach is free. The honest fix isn't picking one; it's disclosing which one you picked, and proving it with a version string a user can actually read.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if your app fetches a dependency by "latest" instead of a pin, we'd like to know whether you've hit a build-to-build inconsistency like this one, or whether we're describing a risk that hasn't bitten anyone yet.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
