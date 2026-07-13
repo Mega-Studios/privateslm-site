@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke. — privateSLM blog</title>
+  <meta name="description" content="A researched tour of small language models in DIY robotics: a $5 ESP32 running its own model, a Jetson robot that won an NVIDIA award, and the honest limits of a Raspberry Pi Zero. 25 sourced builds, 10 categories, one video.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/slm-diy-robotics.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke.</h1>
+    <div class="meta">July 13, 2026 · 9 min read · video</div>
+
+    <p>An ESP32-S3 dev board costs about five dollars. It has less RAM than a Nintendo 64. Right now, a small community of hobbyists has it running its own language model &mdash; no cloud, no API key, no subscription. That's the extreme end of a much bigger pattern we spent this week researching: small language models (SLMs) have quietly become real infrastructure for DIY robotics, not a research curiosity.</p>
+
+    <p>We pulled together 25 verified builds &mdash; checked against primary repos, Hackaday coverage, and published benchmarks &mdash; sorted them into 10 categories, and turned the whole thing into a video with MegaBrain. Watch it below, or read the written breakdown after.</p>
+
+    <div class="video-embed" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:2rem 0;">
+      <iframe src="https://www.youtube-nocookie.com/embed/xiLUjSPSwq0" title="This $5 Chip Runs Its Own AI — SLMs in DIY Robotics" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+    </div>
+    <p><a href="https://www.youtube.com/watch?v=xiLUjSPSwq0" target="_blank" rel="noopener">Watch on YouTube →</a> — full sources and timestamps in the video description. Made with MegaBrain; sponsored by privateSLM.</p>
+
+    <h2>The floor: a language model on a $5 chip</h2>
+    <p>Developer <a href="https://github.com/DaveBben/esp32-llm" target="_blank" rel="noopener">DaveBben</a> got a 260,000-parameter TinyLlamas checkpoint running directly on an ESP32-S3FH4R2 &mdash; 2MB PSRAM, dual-core at 240MHz &mdash; hitting 19.13 tokens/second by his own account (not independently reproduced, worth saying plainly). Even the author calls it "possible, though probably not very useful." That honesty is exactly what makes the hobbyist scene worth taking seriously: nobody's overselling this.</p>
+
+    <h2>The ceiling: a robot that won an NVIDIA award</h2>
+    <p>At the other end, <a href="https://www.hackster.io/davesarmoury/interactive-animatronic-glados-8b4238" target="_blank" rel="noopener">Dave Niewinski's GLaDOS build</a> runs OpenChat 3.5 (Q4_K_S quantization) through llama.cpp with full GPU acceleration on an NVIDIA Jetson AGX Orin, paired with a Unitree Z1 robotic arm and a custom-trained voice. It won first place in NVIDIA's own AI Innovation Challenge. A later, cheaper version of the same idea ran on a $250 Jetson Orin Nano.</p>
+
+    <h2>The honest limit</h2>
+    <p>Not every build works. One maker tried a small model on the cheapest Raspberry Pi available &mdash; the Zero 2W &mdash; and watched core temperature hit 68&deg;C with the board going sluggish after a single response. Their follow-up on a Raspberry Pi 5 was dramatically faster. Same idea, right hardware: that gap is most of the story of edge AI in one before-and-after.</p>
+
+    <h2>Picking a model, if you're building one of these</h2>
+    <p>Independent benchmarking from <a href="https://www.stratosphereips.org/blog/2025/6/5/how-well-do-llms-perform-on-a-raspberry-pi-5" target="_blank" rel="noopener">Stratosphere Laboratory</a> on a Raspberry Pi 5 found Gemma3:1b fastest (~12 tok/s, ~1.5GB RAM), BitNet B1.58 2B most memory-efficient (8+ tok/s at ~2GB RAM), and Qwen2.5 1.5B/3B the most reliable all-rounder for real projects.</p>
+
+    <h2>Ten categories, in short</h2>
+    <p>Voice assistants that never phone home. Robot arms that gesture from conversation. Animatronic personalities. Vision-language robots. Voice-controlled smart-home actuation. ROS2-integrated robot brains. On-device reasoning. Microcontroller-class SLMs. Benchmark-driven model selection. And the honest hardware floor. Full detail, every source, and a video-production ranking are in our <a href="https://claude.ai/code/artifact/35671cbf-2fb4-4e1d-a8cf-f63da1b1ec93" target="_blank" rel="noopener">research brief</a>.</p>
+
+    <p>Every one of these builders already understands the thing privateSLM is built around: the model doesn't need the cloud. It needs to be close to your data, not the other way around.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> &mdash; building something like this yourself? Tell us what hardware and model you're running.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
