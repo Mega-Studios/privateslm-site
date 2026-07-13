@@ -24,6 +24,16 @@
       "post": "blog/engine-version-blind-spot.html"
     }
   ],
+  "diyProjectsFeatured": [
+    {
+      "name": "SLMs in DIY Robotics (10-category roundup, 25 sources) — anchor project: GLaDOS by Dave Niewinski",
+      "sourceUrl": "https://www.hackster.io/davesarmoury/interactive-animatronic-glados-8b4238",
+      "date": "2026-07-13",
+      "post": "blog/slm-diy-robotics.html",
+      "video": "https://www.youtube.com/watch?v=xiLUjSPSwq0",
+      "note": "Multi-project roundup (not a single spotlight) with a sponsored companion video made with MegaBrain (Blotato-published to their connected YouTube account). Full source list and video-potential ranking: https://claude.ai/code/artifact/35671cbf-2fb4-4e1d-a8cf-f63da1b1ec93"
+    }
+  ],
   "discussionsCreated": [
     {
       "number": 5,
@@ -47,6 +57,11 @@
       "date": "2026-07-13",
       "event": "published-digest-and-deep-dive-app-repo-pivoted-to-swift",
       "reason": "Major environment change discovered at run start: the privateslm app repo pivoted from Flutter to native Swift/SwiftUI on 2026-07-10 (PR #21), unrelated to and prior to this autopilot run. lib/llm/model_catalog.dart and packages/maid_llm/src/llama_cpp no longer exist. The engine is now a prebuilt llama.xcframework fetched by scripts/fetch-llama.sh from whatever ggml-org/llama.cpp's GitHub 'latest release' resolves to at build time (no pinned commit, unlike the old Flutter build). Adapted the engine-compatibility gate accordingly: checked the actual current upstream source (tag b9982, verified 135 LLM_ARCH_* entries via direct grep of a locally fetched src/llama-arch.h, confirming Qwen3/Qwen3MoE/Gemma3/Llama4/LFM2/LFM2MoE are all now recognized). Published two pieces: SLM Daily #2 (digest) and a deep-dive on engine-version non-determinism introduced by the build-time 'fetch latest' script (verified directly against Sources/AboutView.swift, Sources/SettingsView.swift, and .gitignore that no engine version is surfaced anywhere in the app). Catalog: zero new candidates qualified (LFM2.5-230M now passes the engine gate but is 18 days old, past the 14-day freshness window, and carries an unverified custom 'lfm1.0' license). This PR was rebuilt on top of main after discovering a concurrent run's PR #16 had already merged, pulling two oversized entries (qwen3.5-4b-q4, granite-3.1-8b-instruct-q4) from models.json — 'catalog, trimmed by two' section corrected to 19 models before this version was pushed. Both hooks self-graded against the inferred post-grader rubric since no /post-grader skill or forum/Discussions tooling exists in this session; the Discussions tooling gap noted 2026-07-09 is still unresolved."
+    },
+    {
+      "date": "2026-07-13",
+      "event": "published-sponsored-video-and-post-diy-robotics",
+      "reason": "User-directed (not autonomous autopilot) session: produced a full narrated video ('This $5 Chip Runs Its Own AI. No Cloud, No Subscription.', https://www.youtube.com/watch?v=xiLUjSPSwq0) covering SLMs in DIY robotics, sponsored by privateSLM, published to the MegaBrain YouTube channel via Blotato, and a companion blog post (blog/slm-diy-robotics.html) embedding it. Research done via the deep-research workflow (108 agents, 25 sources, 21/25 spot-verified claims); 4 claims flagged as disputed/refuted and either softened or excluded. Video pipeline: Blotato's ai-story-video template hit 'insufficient-credits' (empty draft only) — switched to a custom pipeline via a separate API gateway (OmniRoute, env var OMNIROUTE_API_KEY, https://omniroute-mds.fly.dev/v1, OpenAI-compatible) for fal-ai/flux-2-pro (images), openai/gpt-4o-mini-tts (voice), and openai/whisper-1 word-level timestamps (real synced captions, not estimated), assembled locally with ffmpeg (Ken Burns pans on photo scenes, burned-in captions, hard cuts between scenes). Title/thumbnail hook-grading was supposed to go through Blotato per user instruction but blotato_create_source (perplexity-query) also hit a quota-exceeded error — self-graded 5 title candidates instead and flagged this as a stopgap needing a real Blotato re-check once credits are restored (not done before publish; user explicitly said to proceed anyway). See docs/weekly-slm-routine.md in the privateslm app repo for the now-documented OmniRoute fallback for future runs when Blotato lacks video-generation credits."
     }
   ]
 }
