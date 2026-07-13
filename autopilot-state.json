@@ -32,6 +32,14 @@
       "post": "blog/slm-diy-robotics.html",
       "video": "https://www.youtube.com/watch?v=xiLUjSPSwq0",
       "note": "Multi-project roundup (not a single spotlight) with a sponsored companion video made with MegaBrain (Blotato-published to their connected YouTube account). Full source list and video-potential ranking: https://claude.ai/code/artifact/35671cbf-2fb4-4e1d-a8cf-f63da1b1ec93"
+    },
+    {
+      "name": "SLMs in DIY Robotics — Top 5 countdown (same source pool, second video/post, different format+thesis)",
+      "sourceUrl": "https://github.com/DaveBben/esp32-llm",
+      "date": "2026-07-13",
+      "post": "blog/slm-diy-robotics-top5.html",
+      "video": "https://www.youtube.com/watch?v=cnCzAzU85DY",
+      "note": "Countdown-format (5->1) companion video, rendered with Kling 3.0 (fal.ai) for real generated motion instead of Ken-Burns-panned stills. Title+closing hook-graded through Blotato's text-source (not perplexity-query, which was still quota-blocked): title iterated 5/10 -> 9/10; closing narration plateaued at 8/10 after 3 honest iterations — declined Blotato's suggested fix because it required misquoting the ESP32 builder's actual words ('possible, though probably not very useful' -> a fabricated 'surprisingly useful'). Do not re-feature this same 5-project set as a 'new' spotlight without a materially new build/update."
     }
   ],
   "discussionsCreated": [
@@ -62,6 +70,11 @@
       "date": "2026-07-13",
       "event": "published-sponsored-video-and-post-diy-robotics",
       "reason": "User-directed (not autonomous autopilot) session: produced a full narrated video ('This $5 Chip Runs Its Own AI. No Cloud, No Subscription.', https://www.youtube.com/watch?v=xiLUjSPSwq0) covering SLMs in DIY robotics, sponsored by privateSLM, published to the MegaBrain YouTube channel via Blotato, and a companion blog post (blog/slm-diy-robotics.html) embedding it. Research done via the deep-research workflow (108 agents, 25 sources, 21/25 spot-verified claims); 4 claims flagged as disputed/refuted and either softened or excluded. Video pipeline: Blotato's ai-story-video template hit 'insufficient-credits' (empty draft only) — switched to a custom pipeline via a separate API gateway (OmniRoute, env var OMNIROUTE_API_KEY, https://omniroute-mds.fly.dev/v1, OpenAI-compatible) for fal-ai/flux-2-pro (images), openai/gpt-4o-mini-tts (voice), and openai/whisper-1 word-level timestamps (real synced captions, not estimated), assembled locally with ffmpeg (Ken Burns pans on photo scenes, burned-in captions, hard cuts between scenes). Title/thumbnail hook-grading was supposed to go through Blotato per user instruction but blotato_create_source (perplexity-query) also hit a quota-exceeded error — self-graded 5 title candidates instead and flagged this as a stopgap needing a real Blotato re-check once credits are restored (not done before publish; user explicitly said to proceed anyway). See docs/weekly-slm-routine.md in the privateslm app repo for the now-documented OmniRoute fallback for future runs when Blotato lacks video-generation credits."
+    },
+    {
+      "date": "2026-07-13",
+      "event": "published-second-video-top5-countdown-kling",
+      "reason": "Follow-up to the same-day DIY-robotics content: user asked 'where's the full top-10' and proposed a second video using a real video-generation model (Veo 3.1 first considered, then switched to Kling 3.0 via fal.ai after the user supplied a FAL_AI_API_KEY directly in chat — handled as a live credential, not echoed back or committed anywhere). Confirmed Kling 3.0 leads blind-human-vote video-gen arenas (Elo 2040) but is unavailable via OmniRoute; accessed directly via fal.ai's queue API instead (fal-ai/kling-video/v3/standard/text-to-video, duration parameter dynamically matched 3-15s to each scene's actual TTS audio length via ceil(), clips shorter than needed were extended with ffmpeg tpad frame-hold rather than left short). Format: countdown 5->1 (user's explicit choice over the top-down pyramid style of video 1), title 'From a $5 Chip to an NVIDIA Award: 5 Robots Running AI With Zero Internet.' Hook-grading: user specifically asked to 'always run everything through Blotato' — blotato_create_source with sourceType:'text' turned out to be a SEPARATE quota pool from perplexity-query (which was still exhausted) and worked without credits; used it for real iterative grading (title 5/10 -> 9/10 across 2 rounds; closing narration iterated 3x, plateaued honestly at 8/10 after declining Blotato's own suggested fix, which required fabricating a reversed version of the ESP32 builder's actual quote — refused on data-integrity grounds and told the user directly). This is the same 5-project pool as the July 13 10-category roundup (see diyProjectsFeatured) — do not treat as new source material for a future run, only as a different edit/format of already-covered builds."
     }
   ]
 }
