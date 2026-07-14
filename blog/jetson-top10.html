@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only — privateSLM blog</title>
+  <meta name="description" content="Ten verified, individually-credited DIY projects running AI directly on NVIDIA Jetson boards — from a Star Wars droid to a matcha-making robot arm — ranked with real builder-published numbers. Companion countdown video for the top 5.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/jetson-top10.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only</h1>
+    <div class="meta">July 14, 2026 · 9 min read · video</div>
+
+    <p>One of them — a $249 Jetson Orin Nano — just out-detected a Mac Mini, 33 frames a second to 21, in a builder's own published benchmark. We traced ten Jetson-based projects to their original sources this week: real hardware, real builders, real numbers, ranked by what each one proves about running AI without a server in the loop.</p>
+
+    <p>Every project below is sourced to the builder's own writeup, repo, or video — no secondhand roundups, no invented specs. We deliberately left out GLaDOS, the animatronic Portal robot by Dave Niewinski, even though it runs on a Jetson AGX Orin — <a href="slm-diy-robotics-top5.html">we already spotlighted it</a> and it hasn't had a material update since.</p>
+
+    <h2>The top 5, as a countdown video</h2>
+    <div class="video-embed" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:2rem 0;">
+      <iframe src="https://www.youtube-nocookie.com/embed/TnRkMZWAO3U" title="A $249 NVIDIA Chip Just Beat a Mac Mini at AI — No Cloud, No Subscription" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+    </div>
+    <p><a href="https://www.youtube.com/watch?v=TnRkMZWAO3U" target="_blank" rel="noopener">Watch on YouTube →</a> — full sources and timestamps in the description. Built almost entirely from the builders' own real photos, screenshots, and demo footage rather than AI-generated video — narration and captions are synthesized, everything you see of the actual hardware is real.</p>
+
+    <h2>The full ten, ranked</h2>
+
+    <p><strong>#10 — gpt-oss-20b Storyteller</strong> (Timothy Lovett): a projector-based storytelling device for kids — a MIDI-synth wand triggers a spoken prompt, GPT-OSS-20B writes the story locally via Ollama, SDXL illustrates it live, Piper narrates it. Built for an OpenAI hackathon on a Jetson AGX Orin. <a href="https://www.hackster.io/timo614/gpt-oss-20b-storyteller-c91042" target="_blank" rel="noopener">hackster.io — gpt-oss-20b Storyteller</a></p>
+
+    <p><strong>#9 — Cooking Meals with a Local AI Assistant</strong> (Dimiter Kendri): a multi-agent voice assistant that gives cooking advice from camera context, no cloud API calls — Mistral and OpenHermes via Ollama, LLaVA:13B for vision, CrewAI for orchestration. 3rd place, NVIDIA AI Innovation Challenge, on a 64GB Jetson AGX Orin. <a href="https://www.hackster.io/dhq/cooking-meals-with-a-local-ai-assistant-on-jetson-axg-orin-2fcb98" target="_blank" rel="noopener">hackster.io — Cooking Meals with a Local AI Assistant</a></p>
+
+    <p><strong>#8 — AI-Powered Application for the Blind and Visually Impaired</strong> (Nurgaliyev Shakhizat): real-time image-to-speech description via LLaVA served through llama.cpp/MLC-LLM, with NVIDIA Riva handling ASR/TTS — on a 64GB Jetson AGX Orin. <a href="https://www.hackster.io/shahizat/ai-powered-application-for-the-blind-and-visually-impaired-df3f9e" target="_blank" rel="noopener">hackster.io — AI app for the blind and visually impaired</a></p>
+
+    <p><strong>#7 — Local AI RAG Agent with n8n</strong> (also Nurgaliyev Shakhizat): the closest thing on this list to what privateSLM does on a phone — a fully local RAG chatbot over Telegram, reachable only via WireGuard VPN, no cloud tunneling. Qwen3-4B served via SGLang, Snowflake-Arctic-Embed2 for embeddings, Qdrant as the vector store. <a href="https://www.hackster.io/shahizat/build-local-ai-rag-agent-with-n8n-on-nvidia-jetson-agx-orin-665914" target="_blank" rel="noopener">hackster.io — Local AI RAG Agent with n8n</a></p>
+
+    <p><strong>#6 — The Curious Frame</strong> (Frédéric Collonval): a screen-free, cardboard "viewfinder" for kids — point it at an object, it identifies and explains it out loud, in English or (with a paper flag) French. Moondream2 for vision, Gemma 3n for description, Piper for speech, on an 8GB Jetson Orin Nano — RAM-constrained enough that the builder had to disable the GUI and add swap. <a href="https://www.hackster.io/frederic-collonval/the-curious-frame-an-offline-ai-tutor-for-kids-686677" target="_blank" rel="noopener">hackster.io — The Curious Frame</a> · <a href="https://www.youtube.com/watch?v=yx0OXfG8UnQ" target="_blank" rel="noopener">demo video</a></p>
+
+    <p><strong>#5 — Pit Droid</strong> (Goran Vuksic): a life-size, 3D-printed Star Wars Pit Droid replica whose head turns to track whoever's nearby, via SSD-Mobilenet object detection (dusty-nv/jetson-inference) on a Jetson Orin Nano. Profiled directly by NVIDIA. <a href="https://www.hackster.io/gvuksic/nvidia-jetson-orin-nano-powered-pit-droid-7da0e8" target="_blank" rel="noopener">hackster.io — Pit Droid</a> · <a href="https://blogs.nvidia.com/blog/goran-vuksic-pit-droid/" target="_blank" rel="noopener">NVIDIA blog profile</a></p>
+
+    <p><strong>#4 — OpenClaw on Jetson AGX Thor</strong> (Ajeet Singh Raina): a private coding assistant on NVIDIA's newest board, with the most complete builder-published benchmark table on this list — SmolLM2 at ~40 tok/s, Llama 3.2 3B at 17.3 tok/s generation / 26.8 tok/s prompt processing, Qwen3 8B at 12–15 tok/s, cold start ~1.3s, warm start under 0.2s, board power draw under 130W. <a href="https://www.ajeetraina.com/how-to-run-openclaw-moltbot-on-nvidia-jetson-thor-with-docker-model-runner-your-private-ai-assistant-at-the-edge/" target="_blank" rel="noopener">ajeetraina.com — OpenClaw on Jetson Thor</a></p>
+
+    <p><strong>#3 — YOLOv8 vs. a Mac Mini</strong> (jiajin lu): the sharpest data point in this whole roundup. The builder rewrote YOLOv8n inference in raw C++/TensorRT on a 4GB Jetson Orin Nano to beat Python's overhead, then benchmarked it against the same model on a Mac Mini:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 260" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">Object detection throughput, same YOLOv8n model — frames per second</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="199" height="28" fill="#5AD46A"></rect>
+        <text x="205" y="49" fill="currentColor">Jetson Orin Nano, C++/TensorRT — 33.2 fps</text>
+        <rect x="0" y="68" width="96" height="28" fill="#3E8E4F"></rect>
+        <text x="102" y="87" fill="currentColor">Jetson Orin Nano, Python/ONNX — 16.0 fps</text>
+        <rect x="0" y="106" width="129" height="28" fill="#8888A0"></rect>
+        <text x="135" y="125" fill="currentColor">Mac Mini, CPU — 21.4 fps</text>
+        <rect x="0" y="144" width="123" height="28" fill="#6E6E88"></rect>
+        <text x="129" y="163" fill="currentColor">Mac Mini, MPS/GPU — 20.5 fps</text>
+      </g>
+      <text x="0" y="195" font-size="11" fill="#888">Source: jiajin lu, Hackster.io — "Pushing Limits: YOLOv8 vs v26 on Jetson Orin Nano"</text>
+    </svg>
+    </div>
+
+    <p>A palm-sized, 4GB board — the cheapest in this whole list — beat a desktop computer at real-time object detection, purely by moving inference from Python to C++/TensorRT. <a href="https://www.hackster.io/qwe018931/pushing-limits-yolov8-vs-v26-on-jetson-orin-nano-b89267" target="_blank" rel="noopener">hackster.io — Pushing Limits: YOLOv8 vs Mac Mini</a></p>
+
+    <p><strong>#2 — GPS-Denied Drone with Visual SLAM</strong> (Andrew Bernas): a quadcopter that holds square, circle, and figure-8 flight patterns with zero GPS, fusing a stereo camera and IMU through NVIDIA Isaac ROS Visual SLAM and an EKF, on a Jetson Orin Nano drawing a builder-stated max of 36W. The repo has 107 GitHub stars and active commits. <a href="https://www.hackster.io/bandofpv/gps-denied-drone-with-nvidia-jetson-orin-nano-9f3417" target="_blank" rel="noopener">hackster.io — GPS-Denied Drone</a> · <a href="https://github.com/bandofpv/VSLAM-UAV" target="_blank" rel="noopener">github.com/bandofpv/VSLAM-UAV</a> · <a href="https://www.youtube.com/watch?v=ImaltGOlEDc" target="_blank" rel="noopener">demo video</a></p>
+
+    <p><strong>#1 — Matcha Bot</strong> (SIGRobotics, UIUC — Filip Kujawa, Sanjit Kumar, Stephen Zhu, Hasan Al Saeedi): a bimanual robot that pours matcha powder, pours water, and whisks it, running NVIDIA's GR00T N1.5 vision-language-action foundation model on a Jetson Thor, controlling two modified SO-101 arms. 1st place, SIGRobotics' Embodied AI Hackathon. The most technically advanced project on this list — a full VLA model driving physical manipulation, not just perception. <a href="https://www.hackster.io/sigrobotics/matcha-bot-sigrobotics-embodied-ai-hackathon-1st-place-f0e520" target="_blank" rel="noopener">hackster.io — Matcha Bot</a> · <a href="https://www.youtube.com/watch?v=FEa4-pXqAoE" target="_blank" rel="noopener">demo video</a></p>
+
+    <h2>What we skipped</h2>
+    <p>We checked and rejected several leads that didn't clear our sourcing bar: a "Sprout" autonomous microfarm (Devpost page not independently fetchable, so model names and claims couldn't be verified), and a handful of listicle-style "Jetson AI projects" articles with no named, credited builder behind them. If you know of a Jetson project we're missing — ideally with the builder's own writeup or repo — <a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">tell us on the forum</a>.</p>
+
+    <p>What ties all ten together: none of them phoned home to run the model. That's the same bet privateSLM makes on the device already in your pocket.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — which of the ten would you rank differently?</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
