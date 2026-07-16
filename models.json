@@ -8,8 +8,9 @@
       "url": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
       "hfRepoUrl": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF",
       "fileName": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-      "sizeBytes": 847249408,
-      "minRamMb": 2048
+      "sizeBytes": 807694464,
+      "minRamMb": 2048,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
     },
     {
       "id": "qwen2.5-1.5b-instruct-q4",
@@ -19,8 +20,9 @@
       "url": "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
       "hfRepoUrl": "https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF",
       "fileName": "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
-      "sizeBytes": 1073741824,
-      "minRamMb": 3072
+      "sizeBytes": 986048768,
+      "minRamMb": 3072,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
     },
     {
       "id": "gemma-2-2b-it-q4",
@@ -30,8 +32,9 @@
       "url": "https://huggingface.co/bartowski/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf",
       "hfRepoUrl": "https://huggingface.co/bartowski/gemma-2-2b-it-GGUF",
       "fileName": "gemma-2-2b-it-Q4_K_M.gguf",
-      "sizeBytes": 1793064960,
-      "minRamMb": 4096
+      "sizeBytes": 1708582752,
+      "minRamMb": 4096,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/gemma-2-2b-it-Q4_K_M.gguf"
     },
     {
       "id": "llama-3.2-3b-instruct-q4",
@@ -42,7 +45,8 @@
       "hfRepoUrl": "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF",
       "fileName": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
       "sizeBytes": 2019377696,
-      "minRamMb": 4096
+      "minRamMb": 4096,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
     },
     {
       "id": "phi-4-mini-instruct-q4",
@@ -53,7 +57,20 @@
       "hfRepoUrl": "https://huggingface.co/bartowski/microsoft_Phi-4-mini-instruct-GGUF",
       "fileName": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
       "sizeBytes": 2491874688,
-      "minRamMb": 6144
+      "minRamMb": 6144,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3.5-4b-q4",
+      "name": "Qwen3.5 4B",
+      "category": "Generalists",
+      "description": "Newest generation, very long context. For 8 GB+ phones.",
+      "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF",
+      "fileName": "Qwen3.5-4B-Q4_K_M.gguf",
+      "sizeBytes": 2740937888,
+      "minRamMb": 6144,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Qwen3.5-4B-Q4_K_M.gguf"
     },
     {
       "id": "qwen2.5-coder-3b-q4",
@@ -64,7 +81,8 @@
       "hfRepoUrl": "https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF",
       "fileName": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
       "sizeBytes": 2104932800,
-      "minRamMb": 6144
+      "minRamMb": 6144,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/qwen2.5-coder-3b-instruct-q4_k_m.gguf"
     },
     {
       "id": "qwen2.5-coder-7b-q4",
@@ -75,7 +93,20 @@
       "hfRepoUrl": "https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
       "fileName": "qwen2.5-coder-7b-instruct-q4_k_m.gguf",
       "sizeBytes": 4683073536,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+    },
+    {
+      "id": "granite-3.1-8b-instruct-q4",
+      "name": "IBM Granite 3.1 8B",
+      "category": "Coding & SQL",
+      "description": "Enterprise model, strong at SQL & backend scripting. 8 GB+.",
+      "url": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF/resolve/main/granite-3.1-8b-instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF",
+      "fileName": "granite-3.1-8b-instruct-Q4_K_M.gguf",
+      "sizeBytes": 4942858720,
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/granite-3.1-8b-instruct-Q4_K_M.gguf"
     },
     {
       "id": "qwen2.5-math-7b-q4",
@@ -86,7 +117,8 @@
       "hfRepoUrl": "https://huggingface.co/bartowski/Qwen2.5-Math-7B-Instruct-GGUF",
       "fileName": "Qwen2.5-Math-7B-Instruct-Q4_K_M.gguf",
       "sizeBytes": 4683074272,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Qwen2.5-Math-7B-Instruct-Q4_K_M.gguf"
     },
     {
       "id": "biomistral-7b-q4",
@@ -97,7 +129,8 @@
       "hfRepoUrl": "https://huggingface.co/MaziyarPanahi/BioMistral-7B-GGUF",
       "fileName": "BioMistral-7B.Q4_K_M.gguf",
       "sizeBytes": 4368439424,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/BioMistral-7B.Q4_K_M.gguf"
     },
     {
       "id": "finance-llm-7b-q4",
@@ -108,7 +141,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/finance-LLM-GGUF",
       "fileName": "finance-llm.Q4_K_M.gguf",
       "sizeBytes": 4081009920,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/finance-llm.Q4_K_M.gguf"
     },
     {
       "id": "towerinstruct-7b-q4",
@@ -119,7 +153,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/TowerInstruct-7B-v0.1-GGUF",
       "fileName": "towerinstruct-7b-v0.1.Q4_K_M.gguf",
       "sizeBytes": 4081044608,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/towerinstruct-7b-v0.1.Q4_K_M.gguf"
     },
     {
       "id": "llama-guard-3-8b-q4",
@@ -130,7 +165,8 @@
       "hfRepoUrl": "https://huggingface.co/QuantFactory/Llama-Guard-3-8B-GGUF",
       "fileName": "Llama-Guard-3-8B.Q4_K_M.gguf",
       "sizeBytes": 4920735552,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Llama-Guard-3-8B.Q4_K_M.gguf"
     },
     {
       "id": "deepseek-coder-6.7b-instruct-q4",
@@ -141,7 +177,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/deepseek-coder-6.7B-instruct-GGUF",
       "fileName": "deepseek-coder-6.7b-instruct.Q4_K_M.gguf",
       "sizeBytes": 4083015904,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
     },
     {
       "id": "numinamath-7b-tir-q4",
@@ -152,7 +189,8 @@
       "hfRepoUrl": "https://huggingface.co/bartowski/NuminaMath-7B-TIR-GGUF",
       "fileName": "NuminaMath-7B-TIR-Q4_K_M.gguf",
       "sizeBytes": 4223358784,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/NuminaMath-7B-TIR-Q4_K_M.gguf"
     },
     {
       "id": "meditron-7b-chat-q4",
@@ -163,7 +201,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/meditron-7B-chat-GGUF",
       "fileName": "meditron-7b-chat.Q4_K_M.gguf",
       "sizeBytes": 4082074240,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/meditron-7b-chat.Q4_K_M.gguf"
     },
     {
       "id": "finance-chat-7b-q4",
@@ -174,7 +213,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/finance-chat-GGUF",
       "fileName": "finance-chat.Q4_K_M.gguf",
       "sizeBytes": 4081010048,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/finance-chat.Q4_K_M.gguf"
     },
     {
       "id": "saul-instruct-v1-q4",
@@ -185,7 +225,8 @@
       "hfRepoUrl": "https://huggingface.co/MaziyarPanahi/Saul-Instruct-v1-GGUF",
       "fileName": "Saul-Instruct-v1.Q4_K_M.gguf",
       "sizeBytes": 4368439488,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Saul-Instruct-v1.Q4_K_M.gguf"
     },
     {
       "id": "law-chat-7b-q4",
@@ -196,7 +237,8 @@
       "hfRepoUrl": "https://huggingface.co/TheBloke/law-chat-GGUF",
       "fileName": "law-chat.Q4_K_M.gguf",
       "sizeBytes": 4081010048,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/law-chat.Q4_K_M.gguf"
     },
     {
       "id": "mentallama-chat-7b-q4",
@@ -207,7 +249,8 @@
       "hfRepoUrl": "https://huggingface.co/QuantFactory/MentaLLaMA-chat-7B-GGUF",
       "fileName": "MentaLLaMA-chat-7B.Q4_K_M.gguf",
       "sizeBytes": 4081004544,
-      "minRamMb": 8192
+      "minRamMb": 8192,
+      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/MentaLLaMA-chat-7B.Q4_K_M.gguf"
     }
   ]
 }
