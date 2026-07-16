@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bonsai 27B's high-quality build needs 7.2 GB. Its maker's own phone budget is 6. — privateSLM blog</title>
+  <meta name="description" content="PrismML calls Bonsai 27B the first 27B-class model that runs on a phone. Its own Hugging Face model card says the high-quality 'ternary' build needs 1.2 GB more than the phone memory budget PrismML itself defines, and the version that does fit drops tool-calling accuracy by 17.5%.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-16-bonsai-27b-phone-memory-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Bonsai 27B's high-quality build needs 7.2 GB. Its maker's own phone budget is 6.</h1>
+    <div class="meta">July 16, 2026 · 9 min read</div>
+
+    <p>PrismML's launch post calls Bonsai 27B, a heavily compressed build of Qwen3.6-27B, <a href="https://prismml.com/news/bonsai-27b">"the first model of its capability class to run on a phone."</a> Read past the headline to the model's own Hugging Face card and the number moves: the high-quality "Ternary" variant needs a ~7.2 GB deployed footprint to hit its claimed 95% of full-precision quality — 1.2 GB over the ~6 GB per-app memory budget PrismML's own announcement gives a 12 GB iPhone. The version that does fit inside that budget gives up 14 points of tool-calling accuracy to get there.</p>
+
+    <p>We went looking for a deep-dive this week and found Bonsai 27B sitting at 680 points on Hacker News, with real users already finding a version of this gap independently, before we'd finished reading the model cards ourselves. Here's what the primary sources actually say, next to what the headline says.</p>
+
+    <h2>Two variants, one headline</h2>
+    <p>Bonsai 27B ships as two GGUF builds, both derived from Qwen3.6-27B via extreme low-bit quantization — ternary {&minus;1, 0, +1} weights for one, binary {&minus;1, +1} for the other, both with FP16 group-wise scaling:</p>
+    <table>
+      <tr><th>Variant</th><th>Weight format</th><th>Announced size</th><th>FP16 quality retained</th></tr>
+      <tr><td>Ternary Bonsai 27B</td><td>1.71 bits/weight</td><td>5.9 GB</td><td>95% (80.49 avg / 15 benchmarks)</td></tr>
+      <tr><td>1-bit Bonsai 27B</td><td>1.125 bits/weight</td><td>3.9 GB</td><td>89.5% (76.11 vs 85.07 avg / 15 benchmarks)</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://prismml.com/news/bonsai-27b">prismml.com/news/bonsai-27b</a> (announced sizes, retention headline numbers) and the model cards at <a href="https://huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf">huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf</a> and <a href="https://huggingface.co/prism-ml/Bonsai-27B-gguf">huggingface.co/prism-ml/Bonsai-27B-gguf</a> (exact benchmark averages), checked 2026-07-16.</p>
+
+    <p>The launch post's framing is simple: the Ternary build is the "high quality" option, the 1-bit build is the "phone" option, pick based on your hardware. Read the model cards instead of the announcement and the framing gets more complicated, because the phone the launch post is talking about can't actually hold the high-quality option.</p>
+
+    <h2>The 6 GB budget, in PrismML's own words</h2>
+    <p>The announcement states the constraint plainly: "A 12 GB iPhone offers about 6 GB for the model to use on-device, and the model shares that budget with its KV cache and activations." That's the number the 1-bit variant is sized against — it's the reason a 3.9 GB build exists at all.</p>
+    <p>The Ternary model card, a separate page from the announcement, states the same budget and reaches the opposite conclusion about its own variant: "the ternary build (~7.2 GB) exceeds the ~6 GB per-app iOS memory budget." Not close to the limit — 1.2 GB over it, before KV cache and activations even enter the picture.</p>
+    <p>There's a second discrepancy worth flagging on its own: the announcement lists the Ternary build at 5.9 GB. The actual file in that same team's repository is listed at 7.17 GB in Q2_0 format (7.59 GB in the alternate Q2_0_g64 grouping) — and the repo's own README describes a "~7.2 GB deployed footprint," the number it then measures against the phone budget and finds 1.2 GB over. Whichever number is "correct," the launch post's 5.9 GB undersells what you'd actually be downloading by at least 1.2 GB.</p>
+
+    <h2>The version that does fit: what you give up</h2>
+    <p>The 1-bit build's own model card breaks its 89.5%-average retention down by category, and the loss isn't uniform — it's concentrated on two specific capabilities:</p>
+    <table>
+      <tr><th>Category</th><th>FP16 score</th><th>1-bit score</th><th>Change</th></tr>
+      <tr><td>Agentic / tool-calling (BFCL v3, &tau;&sup2;-Bench)</td><td>80.00</td><td>66.03</td><td>&minus;13.97 pts (&minus;17.5% relative)</td></tr>
+      <tr><td>Vision (MMMU-Pro, OCR Bench v2)</td><td>72.61</td><td>59.57</td><td>&minus;13.04 pts (&minus;18.0% relative)</td></tr>
+      <tr><td>15-benchmark average</td><td>85.07</td><td>76.11</td><td>&minus;8.96 pts (&minus;10.5% relative)</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://huggingface.co/prism-ml/Bonsai-27B-gguf">huggingface.co/prism-ml/Bonsai-27B-gguf</a> model card, checked 2026-07-16. The card names the gap itself, listing agentic/tool-calling as "a notable... limitation for this release."</p>
+
+    <p>Tool-calling is specifically the capability most on-device "agentic" chat features lean on — the part of an app that lets a model actually do something (search, calculate, call an API) rather than just talk about it. A 17.5% relative drop there matters more to an app's usefulness than the same drop on a trivia benchmark would.</p>
+    <p>Throughput tells a similar story. The 1-bit model card reports <strong>~11 tokens/sec on an iPhone 17 Pro Max via MLX Swift</strong> — Apple's current top-of-line phone, shipped with 12 GB of RAM specifically to handle workloads like this one (per <a href="https://www.macrumors.com/2025/09/09/iphone-17-pro-iphone-air-ram-amounts/">MacRumors' reporting on the RAM bump</a>). Eleven tokens a second is readable but not brisk — call it "wait a beat between sentences," not "instant." And that's the number for the phone this was built for; there's no published figure for what it does on last year's 8 GB iPhone 16 Pro, which can't run either variant at all under PrismML's own budget math.</p>
+
+    <h2>Real users are hitting the same wall, independently</h2>
+    <p>Bonsai 27B's <a href="https://news.ycombinator.com/item?id=48910545">Hacker News launch thread</a> sits at 680 points as of this writing, and the top comments corroborate the model cards' own numbers without anyone there citing the model cards. One commenter, cross-referencing PrismML's published scores against Gemma 4 12B, wrote that the model "crushes Gemma 4 12b on math and coding, is slightly worse on knowledge and tool calling, and is significantly worse on vision tasks" — the same two weak spots the benchmark table above shows, reached independently. Another described the tool-calling behavior directly: it "gets stuck in reasoning loops" on SQL tasks, enough that they switched back to Gemma 4 12B for that use case. A few reported an outright failure mode on Android — the model emitting strings of repeated exclamation marks mid-response, the kind of degenerate output extreme quantization can produce when a weight update pushes a token's logits somewhere it shouldn't go. Not everyone's experience was negative: one person running the 1-bit build via MLX on an iPhone called it "quite an impressive model" for deep-learning questions specifically, while noting general-knowledge answers felt thinner. The pattern across the thread matches the model card: strong on some things, measurably weaker on tool use and breadth, sized right on the edge of what the hardware can hold.</p>
+
+    <h2>Why the gap exists</h2>
+    <p>None of this is a defect in PrismML's engineering — it's what extreme quantization costs, stated honestly in the documentation and then rounded off in the press release. Going from FP16 to ternary (1.71 bits/weight) already discards the overwhelming majority of a weight's precision; going further to binary (1.125 bits/weight) discards more, and the loss doesn't distribute evenly across everything a model does. Capabilities that depend on precise, compounding numerical reasoning — following a multi-step tool-call schema, reading fine structure out of an image — degrade faster than capabilities that tolerate fuzzier weights, like conversational fluency or broad factual recall. That's a real, useful research result: a 27B model holding 89.5% of its quality at ~1.1 bits per weight is a genuinely impressive compression ratio. It's just not the same claim as "runs on your phone with no tradeoffs," which is closer to what the launch headline implies.</p>
+
+    <h2>The pattern behind the pattern</h2>
+    <p>We've written twice before about gaps between what a model claim says and what the primary documentation actually supports — once about our own app's engine silently missing architectures newer models needed, once about identical "Q4_K_M" quant labels producing measurably different files depending who built them. This is a third version of the same underlying habit, applied to someone else's launch post instead of our own pipeline: the number in the announcement and the number in the model card aren't always the same number, and the announcement is the one people actually read.</p>
+    <p>It's also the exact discipline our own catalog rules already force on us — we verify a candidate's real download size with an HTTP HEAD request against the file itself, not the number in whatever post announced it, specifically because announced sizes and shipped sizes drift. Bonsai 27B is 27B parameters regardless of quantization, well outside the &le;2.5 GB phone-friendly cap that gates our own catalog, so it was never going to be a candidate here — but the gap between its announced size and its model card's own size is exactly the kind of drift that rule exists to catch.</p>
+
+    <h2>What to check before you believe "runs on your phone"</h2>
+    <ul>
+      <li><strong>Read the model card, not just the launch post.</strong> The headline number and the fine-print number came from the same team, in this case, and still didn't match.</li>
+      <li><strong>Ask what the "good" variant costs, not just the "fits" variant.</strong> A launch post showcasing two variants is implicitly asking which one you're actually being sold — check the specs on the one you'd want, not just the one that hits the memory number.</li>
+      <li><strong>Look for a per-category benchmark breakdown, not just an average.</strong> An 89.5% average hid a 17.5% relative drop on tool-calling. If a launch post only gives you one blended number, that's the number most likely to be smoothing over the tradeoff you'd actually notice using it.</li>
+    </ul>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run Bonsai 27B yourself, on an iPhone or otherwise, we'd like to know whether the ~11 tok/s and the tool-calling gap match what you're seeing.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
