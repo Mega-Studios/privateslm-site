@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrismML's "5.9 GB" 27B model downloads at 7.17 GB. No released llama.cpp can open either file. — privateSLM blog</title>
+  <meta name="description" content="Bonsai 27B claims a 27-billion-parameter model fits on an iPhone. We pulled the actual file sizes from Hugging Face's API and read the GitHub discussion about mainline support. The quantization research is real. The 'runs on your phone' claim is two separate claims, and only one of them checks out.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-17-bonsai-27b-ternary-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>PrismML's "5.9 GB" 27B model downloads at 7.17 GB. No released llama.cpp can open either file.</h1>
+    <div class="meta">July 17, 2026 · 10 min read</div>
+
+    <p>PrismML's Bonsai 27B advertises a ternary-quantized tier at 5.9 GB — "a footprint smaller than a full-precision 2B model," squeezed out of 27 billion parameters. The file its own download page tells you to grab, <code>Ternary-Bonsai-27B-Q2_0.gguf</code>, is 7,165,121,600 bytes: 7.17 GB, 21% over the advertised number. And even with the bandwidth to pull it, no released version of llama.cpp — official or, as far as the public record shows, forked — will actually open it today.</p>
+
+    <p>Both of those are checkable facts, not opinions about the project. We checked them by hand: pulled the real file sizes from Hugging Face's API, read the GitHub discussion where PrismML's own engineer asked llama.cpp's maintainers how to get this supported, and confirmed against today's latest llama.cpp release. The underlying research — ternary quantization of a 27B model — is real, Apache-licensed, and has real download traction. The "runs on your phone" framing is where it comes apart.</p>
+
+    <h2>What Bonsai 27B actually is</h2>
+    <p>Bonsai 27B is a low-bit quantization of Qwen3.6-27B, released July 14 by PrismML under Apache 2.0 (<a href="https://prismml.com/news/bonsai-27b">prismml.com/news/bonsai-27b</a>). Two tiers, both derived from the same 27B base:</p>
+    <ul>
+      <li><strong>Ternary</strong> — weights take one of three values, {-1, 0, +1}, with a shared FP16 scale factor per group of 128 weights. Nominal cost: 1.71 bits per weight. PrismML markets this tier for laptops.</li>
+      <li><strong>1-bit</strong> — weights take one of two values, {-1, +1}. Nominal cost: 1.125 bits per weight. PrismML markets this tier explicitly for the iPhone 17 Pro.</li>
+    </ul>
+    <p>Against a 16-bit full-precision baseline, both numbers are real compression math, not marketing: 1.71 bits is roughly a 9.4x reduction, 1.125 bits roughly 14.2x. This isn't a gimmick technique — ternary and binary weight quantization is an active, legitimate research area (BitNet b1.58 from Microsoft Research is the best-known prior example), and llama.cpp itself has supported a version of it since <a href="https://github.com/ggml-org/llama.cpp/pull/8151">PR #8151</a> merged CPU-only ternary types (<code>TQ1_0</code>/<code>TQ2_0</code>) for BitNet- and TriLM-style models back on September 6, 2024. Bonsai's problem isn't that ternary quantization doesn't work. It's that Bonsai doesn't use that path.</p>
+
+    <h2>Checking the file size ourselves</h2>
+    <p>We pulled the exact byte counts directly from Hugging Face's model API rather than trusting either PrismML's landing page or a mirror's rounded number:</p>
+    <table>
+      <tr><th>Variant</th><th>Nominal bits/weight</th><th>PrismML's advertised size</th><th>Actual file (Hugging Face API)</th><th>Gap</th></tr>
+      <tr><td>FP16 baseline</td><td>16</td><td>—</td><td>53.81 GB (<code>Ternary-Bonsai-27B-F16.gguf</code>)</td><td>reference</td></tr>
+      <tr><td>Ternary (Q2_0, group-128)</td><td>1.71</td><td>5.9 GB</td><td><strong>7.17 GB</strong> (7,165,121,600 bytes)</td><td><strong>+21%</strong></td></tr>
+      <tr><td>1-bit (Q1_0)</td><td>1.125</td><td>3.9 GB</td><td>3.80 GB (3,803,452,480 bytes)</td><td>−3% (within rounding)</td></tr>
+    </table>
+    <p class="cite">Source: prismml.com/news/bonsai-27b (advertised sizes); huggingface.co/prism-ml/Ternary-Bonsai-27B-gguf and huggingface.co/prism-ml/Bonsai-27B-gguf, tree API, fetched 2026-07-17 (actual byte counts). The F16 file's size is itself a sanity check — 27 billion parameters at 2 bytes each is 54 billion bytes, and the listed file is 53.81 GB. The numbers are internally consistent; they're just not the numbers on the landing page for the ternary tier specifically.</p>
+    <p>Only one of the two tiers has a real discrepancy. The 1-bit file the "iPhone 17 Pro" claim rests on is honestly sized, even slightly smaller than advertised. The ternary file is the one that's 21% heavier than its own marketing copy says. GGUF quantization overhead — per-group scale factors, higher-precision embedding and output layers, alignment padding — routinely adds something over the raw bits-per-weight arithmetic; a 21-point gap is on the high end of that normal range, and it's the kind of thing you'd only catch by checking the file, not the landing page.</p>
+
+    <h2>The part where file size stops mattering: nothing stock can read it</h2>
+    <p>Bonsai's ternary files use a packing scheme — <code>Q2_0</code> with a group size of 128 — that PrismML proposed to llama.cpp's own maintainers in a public discussion, not something already built into the engine. <a href="https://github.com/ggml-org/llama.cpp/discussions/22019">GitHub Discussion #22019</a>, "Supporting Ternary Bonsai in llama.cpp," opened April 16, 2026 by PrismML's khosravipasha, laid out the format and asked for guidance. Maintainer ggerganov replied five days later:</p>
+    <blockquote>"The Q2_0 with group size of 128 seems suboptimal. A group size of 64 would cost less than 6% extra memory and will be more practical (supports more tensor shapes) and better quality."</blockquote>
+    <p>The next day, khosravipasha agreed:</p>
+    <blockquote>"Make sense, I can make it to be group size 64 for the official Q2_0. Will work on the PRs this upcoming week, we have some implementation with group 128 in our fork in the meantime."</blockquote>
+    <p>That was April 22. It's now July 17 — three months, and one full 27B model launch, later. PrismML did follow through on half of it: a group-64 file, <code>Ternary-Bonsai-27B-Q2_g64.gguf</code>, sits in the same Hugging Face repo at 7,585,330,240 bytes — 5.9% larger than the group-128 file, almost exactly the "less than 6%" ggerganov predicted back in April. The technical conversation was real and it produced a real, correctly-sized file. What it didn't produce is a pull request. Discussion #22019 is still open, still marked unanswered, as of today. We checked against llama.cpp's actual latest release, tag <code>b10054</code>, published 2026-07-17 at 00:29 UTC — 72 releases past the b9982 tag we last cited, none of them touching this. Neither the group-128 nor the group-64 file has a reader in any tagged llama.cpp release.</p>
+
+    <h2>What can open the file, today</h2>
+    <p>PrismML's own model card is direct about this: it instructs users to "clone the PrismML fork of llama.cpp (includes the Q2_0_g128 hybrid-attention kernels)" for CUDA or Metal, or to use one of their separate MLX-format repos (<code>prism-ml/Ternary-Bonsai-27B-mlx-2bit</code>, <code>prism-ml/Bonsai-27B-mlx-1bit</code>) on Apple Silicon. Both routes work, by design — but neither is "download a GGUF and point your existing llama.cpp-based app at it," which is the assumption a "runs on your phone" claim invites. For what it's worth to our own readers: privateSLM's engine only ever fetches whatever ggml-org/llama.cpp calls its official latest release, so this specific file wouldn't load in our app either, independent of whether it fit in RAM.</p>
+
+    <h2>The quality numbers are PrismML's, and only PrismML's</h2>
+    <p>PrismML's announcement claims strong retention against the FP16 baseline across 15 "thinking-mode" benchmarks:</p>
+    <table>
+      <tr><th>Category</th><th>FP16 baseline</th><th>Ternary (claimed)</th><th>1-bit (claimed)</th></tr>
+      <tr><td>Overall (15-bench avg)</td><td>85.07</td><td>80.49 (95%)</td><td>76.1 (90%)</td></tr>
+      <tr><td>Math</td><td>95.3</td><td>93.4</td><td>91.7</td></tr>
+      <tr><td>Coding</td><td>88.7</td><td>86.0</td><td>81.9</td></tr>
+      <tr><td>Tool-calling</td><td>80.0</td><td>74.0</td><td>66.0</td></tr>
+    </table>
+    <p class="cite">Source: prismml.com/news/bonsai-27b. Entirely self-reported — we found no independent reproduction of these numbers, and given that no released inference engine can currently load the files being scored, third-party verification isn't just missing, it's presently hard to obtain even for someone motivated to try.</p>
+    <p>Tool-calling shows the steepest drop of the three categories at both quantization levels — a 6-point gap at ternary, 14 points at 1-bit, versus roughly 2-3 points on math. That's a plausible pattern (tool-calling depends on precise, low-entropy output formatting, which is exactly the kind of thing aggressive quantization tends to degrade first) but it's also exactly the kind of number you'd want a second lab to reproduce before leaning on it, and right now nobody outside PrismML is positioned to.</p>
+
+    <h2>Real traction, real gap</h2>
+    <p>None of this reads as vaporware. The ternary 27B GGUF has 74,007 downloads; the 1-bit variant has 559,267, both counted as of today against repos created July 4 and last updated July 14. That's a lot of pulls for a format most people's local tooling can't open out of the box — the likeliest explanation is Apple Silicon users going through the working MLX release, plus a smaller group running PrismML's own fork. The adoption is real. It's just adoption of the two paths that were actually built (MLX, PrismML's fork), not the third one (stock llama.cpp) the "runs on your phone" pitch implies most people would use.</p>
+
+    <h2>Two checks, not one</h2>
+    <p>"This model runs on your phone at X gigabytes" is really two separate claims stapled together, and Bonsai 27B is a clean case study in checking them independently instead of taking the bundle at face value:</p>
+    <ul>
+      <li><strong>Does the file you're told to download actually weigh what the landing page says?</strong> For Bonsai's ternary tier, no — 21% heavier. For its 1-bit tier, yes, close enough to call accurate.</li>
+      <li><strong>Does an inference engine you can get without cloning a research fork exist to open it?</strong> For both Bonsai tiers, no — not in any tagged llama.cpp release as of today, three months after the format was first proposed for mainline support.</li>
+    </ul>
+    <p>This is a different failure mode from the ones we've written about before on this blog. It's not that our engine vendors an old, unpinned llama.cpp build (that was July's earlier problem, since fixed by the native rewrite) and it's not that "reputable quantizers" produce different bytes under an identical label for an otherwise-supported format (that's a real, separate issue we found in bartowski/Unsloth/AesSedai builds of other models). This is a format with zero mainline reader, full stop, regardless of which llama.cpp build you're running or who quantized the file. The research behind Bonsai 27B is genuine and worth watching — if the group-64 PR that was promised in April ever lands, this becomes a real option. Until then, "fits on your phone" and "you can actually run it on your phone" are two different sentences, and only checking the file size answers the first one.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've gotten Bonsai (or any ternary/1-bit GGUF) running through PrismML's fork or MLX, we'd like to hear real tokens/sec numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — models that actually load, checked before they ship</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
