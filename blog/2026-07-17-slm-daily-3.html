@@ -1,1 +1,59 @@
-FILE_PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>llama.cpp climbed 72 releases since our last edition. Our catalog didn't grow by one model. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #3: b9982 to b10054, all backend/hardware work, zero new architectures. Nothing phone-sized and new showed up anywhere else either — except a 27B model claiming to fit on an iPhone, which today's deep-dive checks by hand.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-17-slm-daily-3.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>llama.cpp climbed 72 releases since our last edition. Our catalog didn't grow by one model.</h1>
+    <div class="meta">July 17, 2026 · 4 min read</div>
+
+    <p>Between our last edition (July 13, tag <code>b9982</code>) and today (July 17, tag <code>b10054</code>), llama.cpp's build counter climbed 72 releases. None of them explain why privateSLM's catalog is exactly the same size it was last week. The reason is upstream of the engine entirely: nothing new and phone-sized showed up anywhere we looked.</p>
+
+    <h2>What we swept</h2>
+    <p>Hugging Face's GGUF listings sorted by both "trending" and "created," bartowski's and Unsloth's recent uploads, lmstudio-community and ggml-org's repos, and vendor pages for Qwen, Gemma, Phi, Mistral, Liquid AI, and Apple. Our bar: chat/instruct, ≤2.5 GB at Q4_K_M, released or newly quantized in the last 14 days, reputable quantizer, a license that permits end-user download. Zero releases cleared all five today. The trending GGUF lists were dominated by finetunes and abliterated merges of models we've already assessed, or MoEs (GLM-5.2 at 754B total, Qwen3.6 at up to 397B) miles outside a phone budget regardless of architecture.</p>
+
+    <h2>What llama.cpp actually shipped in those 72 releases</h2>
+    <p>Backend and hardware work, not new model families: a Hexagon (Qualcomm) L2 cache rework, SYCL fused top-k MoE kernels, KleidiAI SME/SME2 dispatch on Arm, a Vulkan transfer-queue synchronization fix, CUDA graph support for Volta-generation GPUs, and tensor-parallel fixes for Phi-3, BERT and PLaMo. Useful if you're running on one of those specific backends. No new <code>LLM_ARCH_*</code> entries relevant to a phone-sized chat model landed in this window — the architecture gate we've written about before simply didn't come up today, because nothing needed it.</p>
+
+    <h2>One release worth flagging, even though it doesn't qualify</h2>
+    <p>IBM shipped <a href="https://research.ibm.com/blog/granite-4-1-ai-foundation-models">Granite 4.1</a> on April 29: dense 3B, 8B and 30B variants, Apache 2.0, and per IBM's own post the 8B instruct model "consistently matches or outperforms the Granite 4.0 32B Mixture-of-Experts model." That's a real, sourced generational jump over the Granite 3.1 8B already sitting in our catalog. It's 79 days old today, well past our 14-day freshness window for a "new drop," so it isn't today's addition — but it's a plausible deliberate-upgrade candidate worth evaluating for the catalog on its own merits, not smuggled in under a "new this week" label it doesn't earn.</p>
+
+    <h2>The closest thing to model news this week</h2>
+    <p>PrismML released a ternary-quantized build of Qwen3.6-27B on July 14 that claims to squeeze a 27-billion-parameter model into single-digit gigabytes, including a tier marketed explicitly for the iPhone 17 Pro. It's not vaporware — the ternary GGUF alone has over 74,000 downloads — but neither the advertised file size nor the "runs on your phone" framing survives a direct check against the actual download and a stock copy of llama.cpp. We ran that check by hand: what the file actually weighs, and whether anything you can install without cloning a fork can open it. <a href="2026-07-17-bonsai-27b-ternary-gap.html">Today's deep-dive has the numbers</a>.</p>
+
+    <h2>Today's catalog, unchanged</h2>
+    <p>Zero additions, zero removals from this run. The 21-model catalog carries over exactly as it was, plus Apple Intelligence on devices that have it. A quiet week for the catalog is what "nothing cleared the bar" is supposed to look like — not a gap in the check, the check working.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — seen a GGUF download that weighs more than its own landing page says it should? Tell us what you found.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
