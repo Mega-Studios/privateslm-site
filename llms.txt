@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- PrismML's "5.9 GB" 27B model downloads at 7.17 GB. No released llama.cpp can open either file.: https://www.privateslm.dev/blog/2026-07-17-bonsai-27b-ternary-gap.html
+- SLM Daily #3 (catalog digest): https://www.privateslm.dev/blog/2026-07-17-slm-daily-3.html
 - 10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only (video): https://www.privateslm.dev/blog/jetson-top10.html
 - From a $5 chip to an NVIDIA award: 5 robots running AI with zero internet (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics-top5.html
 - This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke. (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics.html
