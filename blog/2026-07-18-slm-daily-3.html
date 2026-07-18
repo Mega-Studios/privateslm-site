@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We finally read the license. It wasn't the problem. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #3: the one open question left from two posts ago — whether LFM2.5-230M's license blocks it — is resolved. It doesn't. The only reason it's still not in the catalog is that it's 23 days old. Zero catalog changes again, and everything else we checked this week.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-18-slm-daily-3.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>We finally read the license. It wasn't the problem.</h1>
+    <div class="meta">July 18, 2026 · 4 min read</div>
+
+    <p>On July 13 we flagged one loose end on a 153 MB model we'd already rejected twice: we hadn't actually read its license, just noted it was "custom" and moved on. Today we read it. LFM2.5-230M's "lfm1.0" license turns out to be Apache-2.0 with one clause bolted on — free commercial use up to $10M in annual revenue, then you contact Liquid AI for a paid license — the same shape as Llama's own community license, which we already treat as acceptable. It was never the blocker we implied it might be.</p>
+
+    <h2>So why is it still not in the catalog?</h2>
+    <p>Because the actual answer was boring the whole time: age. LFM2.5-230M shipped June 25. Today is July 18. That's 23 days, nine past our 14-day freshness window, and freshness doesn't get a waiver for a license turning out fine. The engine gate cleared on July 13 (LFM2 and LFM2MoE are both in mainline llama.cpp, confirmed again today at tag <code>b10066</code>). The license gate clears today. The freshness gate is the only one left, and it's not negotiable — a model doesn't get to re-enter a 14-day window by us taking three weeks to read its paperwork.</p>
+
+    <pre><code>$ curl -s https://api.github.com/repos/ggml-org/llama.cpp/releases/latest | grep tag_name
+"tag_name": "b10066"   # published 2026-07-17 23:13 UTC
+$ grep -oE 'LLM_ARCH_[A-Z0-9_]+' src/llama-arch.cpp | sort -u | wc -l
+137   # was 135 on July 13 (tag b9982)</code></pre>
+
+    <p>Two new architecture tags landed in the four days since our last engine check. Neither maps to anything in this week's model sweep, so it's a number worth logging and nothing more today.</p>
+
+    <h2>What else we checked this week</h2>
+    <p>Nothing else cleared the bar either, for more ordinary reasons. Gemma 4 E2B-it got a fresh GGUF quantization from ggml-org on July 16 — genuinely new upload, well inside our freshness window — but its smallest quant (Q4_0) is 2.84 GB, over our 2.5 GB phone-download cap. Thinking Machines Lab open-sourced Inkling, a 975B mixture-of-experts model, under Apache 2.0 on July 15 — real, well-documented, and roughly 400x too large for a phone regardless of quantization. Poolside's Ornith-1.0 family (9B/35B/397B) and a wave of 27B–284B community merges and roleplay fine-tunes from bartowski and unsloth rounded out the rest of this week's trending GGUF list. All outside our size budget; none evaluated further.</p>
+
+    <h2>The catalog, unchanged</h2>
+    <p>21 models, same as last check. No additions, no removals. Apple Intelligence remains the zero-download, zero-engine-version option on devices that support it.</p>
+
+    <p>One more thing worth a mention rather than a full post: this week's most interesting on-device story isn't a GGUF at all. A three-person research team just shrank a 27B model to 3.9 GB using a compression technique nothing in the llama.cpp ecosystem currently reads. We wrote up why that matters separately, below.</p>
+
+    <p><a href="2026-07-18-bonsai-1bit-apple.html">Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy →</a></p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

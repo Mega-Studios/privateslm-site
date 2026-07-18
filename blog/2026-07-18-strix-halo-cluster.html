@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>He put his home AI cluster and GPT-5.5 behind the same URL, then benchmarked both — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Tim Schupp built a 2-node Kubernetes cluster from AMD Strix Halo mini-PCs — 128GB unified memory each — and routed local and cloud models through the same OpenAI-compatible gateway to compare them honestly. Real benchmark tables, real photos, full credit to the builder.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-18-strix-halo-cluster.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>He put his home AI cluster and GPT-5.5 behind the same URL, then benchmarked both</h1>
+    <div class="meta">July 18, 2026 · 7 min read</div>
+
+    <p>On Tim Schupp's home AI cluster, a 1.5B local model answers its first token in 218 milliseconds. A 32B local reasoning model answers in 630. Both numbers came out of the same benchmark run that also hit GPT-5.5, over the same OpenAI-compatible endpoint, because Schupp built his cluster specifically so he could stop guessing and put local and cloud models behind one URL to compare honestly.</p>
+
+    <p><strong>Edge in the Wild</strong> is our occasional spotlight on real builders running AI on hardware they own. This one: Tim Schupp's private, two-node Kubernetes cluster, first published April 30, 2026. Full writeup and every benchmark below is sourced from <a href="https://blog.t1m.me/blog/building-own-private-kuberntes-ai-cluster" target="_blank" rel="noopener">blog.t1m.me — "Building my own private Kubernetes AI cluster"</a>. All numbers, hardware choices and photos in this post are Tim Schupp's own, summarized and credited, not reproduced wholesale.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/strix-cluster-setup.jpg" alt="Tim Schupp's two-node AMD Strix Halo cluster, annotated hardware photo of the physical KVM and mini-PC setup" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The physical cluster, annotated by the builder. Photo by Tim Schupp, via <a href="https://blog.t1m.me/blog/building-own-private-kuberntes-ai-cluster" target="_blank" rel="noopener">blog.t1m.me</a>.</figcaption>
+    </figure>
+
+    <h2>The hardware: unified memory, not a GPU rack</h2>
+    <p>No discrete GPUs here. The cluster is two Bosgame mini-PCs, each built around an AMD Ryzen AI 395 ("Strix Halo") APU with 128 GB of unified RAM, of which 94 GB is carved out as VRAM through a BIOS setting. That single number is the interesting part: 94 GB of usable model memory, on integrated graphics, in a box small enough to sit on a desk. It's the same architectural bet Apple's unified-memory Macs make — skip the PCIe bottleneck between CPU and GPU memory entirely — just running Linux instead of macOS.</p>
+
+    <h2>The software stack: NixOS, k3s, and one gateway for everything</h2>
+    <p>Both nodes run NixOS, joined into a Kubernetes cluster via k3s, networked over Tailscale (with Flannel handling the in-cluster interface) so the two machines behave as one logical cluster regardless of which physical network they're on. Ollama serves the actual models per node; LiteLLM sits in front as an OpenAI-compatible gateway with usage-based routing, so any client — a chat UI, a script, a benchmark harness — talks to one URL and doesn't need to know which node, or which model, answered. Traefik and cert-manager handle ingress and TLS. It's a genuinely production-shaped stack pointed at a homelab, not a shell script gluing two GPUs together.</p>
+
+    <pre><code>k3s server --cluster-init \
+  --token-file "/etc/secrets/k3s/token" \
+  --node-external-ip "node-a" --tls-san "node-a" \
+  --flannel-iface "tailscale0"</code></pre>
+    <p class="cite">The cluster-init command from the builder's own writeup — Tailscale as the flannel interface is the detail that lets the two nodes cluster across networks without exposing anything to the public internet.</p>
+
+    <h2>The numbers</h2>
+    <p>The builder ran the same benchmark — 5 prompts, 120 max tokens, streaming, temperature 0.2, context re-used across the run — against every local model his cluster hosts, plus GPT-5.4-mini, GPT-5.4-nano and GPT-5.5 routed through the same LiteLLM gateway for a direct comparison:</p>
+
+    <table>
+      <tr><th>Model</th><th>Avg tokens/s</th><th>Avg TTFT</th></tr>
+      <tr><td>deepseek-r1:1.5b (local)</td><td>162.3</td><td>218 ms</td></tr>
+      <tr><td>deepseek-r1:7b (local)</td><td>43.8</td><td>254 ms</td></tr>
+      <tr><td>deepseek-r1:8b (local)</td><td>38.8</td><td>267 ms</td></tr>
+      <tr><td>qwen3.6:35b (local)</td><td>42.7</td><td>518 ms</td></tr>
+      <tr><td>nemotron-cascade-2:30b (local)</td><td>62.5</td><td>482 ms</td></tr>
+      <tr><td>deepseek-r1:32b (local)</td><td>11.2</td><td>630 ms</td></tr>
+      <tr><td>gpt-5.4-mini (cloud)</td><td>146.2</td><td>820 ms</td></tr>
+      <tr><td>gpt-5.4-nano (cloud)</td><td>154.1</td><td>933 ms</td></tr>
+      <tr><td>gpt-5.5 (cloud)</td><td>240.4</td><td>2,532 ms</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://blog.t1m.me/blog/building-own-private-kuberntes-ai-cluster" target="_blank" rel="noopener">Tim Schupp, "Building my own private Kubernetes AI cluster"</a> — context re-use benchmark run.</p>
+
+    <p>Read this table for what it actually shows, not more: the cloud models generate faster once they start (GPT-5.5's 240 tok/s beats everything local here), but every local model — including the largest, a 32B reasoning model — starts answering in under a second, while GPT-5.5's own first token in this run took 2.5 seconds. Tim Schupp's own note on this: enabling flash attention with an f16 KV cache and a 32K context length shaved TTFT further across the board on a re-run, without hurting throughput. Nobody's claiming a homelab beats a frontier model's raw output rate — it doesn't. What it demonstrates is that "local is slow" isn't a fixed law; it's a tuning problem, and this builder tuned it.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/strix-cluster-k9s.jpg" alt="k9s terminal dashboard showing the Kubernetes cluster's running pods across both nodes" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The cluster's live pod view in k9s. Screenshot by Tim Schupp, via <a href="https://blog.t1m.me/blog/building-own-private-kuberntes-ai-cluster" target="_blank" rel="noopener">blog.t1m.me</a>.</figcaption>
+    </figure>
+
+    <h2>Why this belongs next to a phone app</h2>
+    <p>privateSLM runs one model, on one device, with no network path at all — the opposite end of the spectrum from a two-node cluster serving fourteen models behind a gateway. But the underlying bet is identical: the model should run where your data already is, not the other way around. Tim Schupp's cluster makes that case at a scale a phone can't — a 32B reasoning model, self-hosted, reachable only over Tailscale, with cloud models available through the exact same interface purely as an honest yardstick, not a dependency. That's the whole thesis of "the model comes to your data," just built with a k3s cluster instead of a 4 GB download.</p>
+
+    <p><strong>Source / credit:</strong> All hardware specs, software configuration, and benchmark data in this post are from Tim Schupp's own writeup, <a href="https://blog.t1m.me/blog/building-own-private-kuberntes-ai-cluster" target="_blank" rel="noopener">"Building my own private Kubernetes AI cluster"</a> (blog.t1m.me, published April 30, 2026). Photos are the builder's own.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — running your own local-AI homelab? Tell us what you built.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
