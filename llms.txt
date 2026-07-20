@@ -10,6 +10,9 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model: https://www.privateslm.dev/blog/2026-07-20-energy-cost-of-open-models.html
+- One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster: https://www.privateslm.dev/blog/2026-07-20-strix-halo-home-lab.html
+- SLM Daily #3 (catalog digest): https://www.privateslm.dev/blog/2026-07-20-slm-daily-3.html
 - 10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only (video): https://www.privateslm.dev/blog/jetson-top10.html
 - From a $5 chip to an NVIDIA award: 5 robots running AI with zero internet (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics-top5.html
 - This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke. (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics.html

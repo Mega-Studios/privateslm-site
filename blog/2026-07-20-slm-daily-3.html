@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemma 4 got a same-day rewrite this week. Google didn't change the version number. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #3: Google refreshed Gemma 4 E2B/E4B's weights, attention kernel and chat template on July 15 under the same name and no version bump. Plus: Tencent's Hy3 architecture landed in llama.cpp, and why zero models made the catalog this week.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-20-slm-daily-3.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Gemma 4 got a same-day rewrite this week. Google didn't change the version number.</h1>
+    <div class="meta">July 20, 2026 · 5 min read</div>
+
+    <p>On July 15, Google pushed new weights, a new attention kernel, and chat-template fixes into every size of the open Gemma 4 family on Hugging Face — E2B, E4B, and the 31B variants — under the exact same repo names, with no version bump anywhere. Six days later, zero models cleared our own catalog bar. Both of those are this week's real story, and only one of them is about a model actually shipping.</p>
+
+    <h2>What actually changed in Gemma 4</h2>
+    <p>The update adds Flash Attention 4 support tuned for Hopper-class GPUs (Google's own figures: +25% to +70% prefill throughput, workload-dependent — not something that helps a phone, since nothing in privateSLM's device fleet is an H100), plus tool-calling reliability fixes. The clearest number: Gemma 4 E4B's Tau2 Airline and Telecom tool-use scores moved by up to 8 percentage points on the same benchmark, same model name, same day. Independent coverage from <a href="https://www.techtimes.com/articles/320775/20260716/gemma-4-gets-stealth-update-h100-speed-gains-tool-calling-fixes-no-version-bump.htm" target="_blank" rel="noopener">Tech Times</a> and <a href="https://the-decoder.com/gemma-4-gets-a-stealth-update-that-fixes-tool-calling-bugs-and-truncated-responses-under-the-same-name/" target="_blank" rel="noopener">The Decoder</a> both flag the same detail we'd flag: no version bump, so there is no clean way to say "I'm running the July 10 build" versus "I'm running the July 16 build" from the model name alone.</p>
+
+    <p>To be precise about what we did and didn't verify: we confirmed the safetensors/weights refresh across Google's own Gemma 4 Hugging Face repos. We did not get a confirmed timestamp showing the GGUF quant files themselves (the ones an app like ours would actually download) were re-uploaded this specific week — Hugging Face's UI doesn't surface that history to a page fetch. What we can say with a source: this is the same GGUF repo family whose own model card already carries an April 11 notice reading "re-download for Google's latest chat template and llama.cpp fixes" — meaning silent re-uploads under an unchanged filename are a proven, recurring pattern for this exact model, not a hypothetical. If you downloaded a Gemma 4 GGUF before this week, it's worth checking the repo's own update notes rather than assuming the file you have matches the file being described in this week's benchmarks.</p>
+
+    <h2>The one architecture that did land</h2>
+    <p>llama.cpp merged native support for Tencent's Hy3 (<code>hy_v3</code>) architecture on July 14 (<a href="https://github.com/ggml-org/llama.cpp/pull/25395" target="_blank" rel="noopener">PR #25395</a>, shipped in release <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b9993" target="_blank" rel="noopener">b9993</a>) — the first new <code>LLM_ARCH_*</code> tag since our last check. It doesn't touch our catalog either way: Hy3 is a 295B-total-parameter MoE, and even the 1-bit dynamic quant Tencent shipped alongside it is built for a single data-center GPU, not a phone. The engine's latest tag as of today is <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10068" target="_blank" rel="noopener">b10068</a> (July 18) — a K/V-cache rotation fix for speculative decoding (DFlash), not new model support.</p>
+
+    <h2>Why the catalog didn't grow</h2>
+    <p>We swept Hugging Face's trending and newest GGUF listings, bartowski's and unsloth's recent uploads, and this week's vendor announcements against our four hard gates: released or requantized in the last 14 days, ≤2.5 GB Q4_K_M, a reputable quantizer, a license that actually permits end-user use. Three models were the right size and license but the wrong age — IBM's Granite 4.1 3B (Apache-2.0, 2.17 GB Q4_K_M, would clear every other gate) shipped April 29; OpenBMB's MiniCPM5-1B (688 MB, Apache-2.0) shipped May 19; Qwen3.5-0.8B/2B shipped March 2. All three are well past our 14-day freshness window — good models, just not this week's news. Thinking Machines' new "Inkling" release (Apache-2.0, announced July 15) is genuinely fresh but genuinely enormous: 975B parameters, ~226 GB even at a 1-bit dynamic quant. Its architecture isn't in mainline llama.cpp yet either — a PR adding it was still in draft, unmerged, as of July 19.</p>
+
+    <p>Net result: no catalog change this cycle. The catalog stays at 21 models across 9 categories, plus Apple Intelligence at zero download on devices that support it.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've hit a mismatch between a model's published benchmarks and the file you actually downloaded, we want to hear about it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
