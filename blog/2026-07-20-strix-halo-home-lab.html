@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: a home-lab builder benchmarked a single Beelink GTR9 Pro (AMD Ryzen AI Max+ 395, 128GB unified memory) against 32 concurrent llama.cpp chat sessions — 236 tok/s aggregate, sustained for 30 minutes, with real numbers on where it breaks.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-20-strix-halo-home-lab.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster</h1>
+    <div class="meta">July 20, 2026 · 8 min read</div>
+
+    <p>No discrete GPU, no rack, no cluster — one $2,000 mini PC under a desk held 226 tokens/second, averaged over a full 30-minute run, while serving 32 simultaneous chat sessions through Gemma 4. A home-lab builder who goes by <strong>AGmind</strong> (LLMOps/AI platform engineer by trade, GitHub handle <a href="https://github.com/botAGI" target="_blank" rel="noopener">botAGI</a>) spent a week finding out exactly where that same box breaks, and published every number — including the ones that made it look bad.</p>
+
+    <p><strong>Edge in the Wild</strong> is our spotlight on real builders running real models on real edge hardware — credited, sourced, no invented numbers. This one's a single home-lab box, not a robot, but it makes the same bet privateSLM makes on your phone: the model should come to you, not the other way around. Source, in full, with credit: <a href="https://habr.com/ru/articles/1060520/" target="_blank" rel="noopener">"Мини-ПК на Strix Halo под параллельной нагрузкой," Habr, July 18, 2026</a> (originally published in Russian; translated and summarized here with attribution, not reproduced).</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/strix-halo-benchmark.png" alt="AGmind's own benchmark chart from the Habr article, showing llama.cpp throughput across concurrency levels for Gemma 4 and Qwen 3.6 on the Beelink GTR9 Pro" loading="lazy" style="width:100%;max-width:780px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The builder's own benchmark chart, by AGmind, via <a href="https://habr.com/ru/articles/1060520/" target="_blank" rel="noopener">Habr</a>.</figcaption>
+    </figure>
+
+    <h2>The hardware: one box, no GPU add-in card</h2>
+    <p>The whole rig is a <a href="https://www.bee-link.com/products/beelink-gtr9-pro-amd-ryzen-ai-max-395" target="_blank" rel="noopener">Beelink GTR9 Pro</a> — AMD's Ryzen AI Max+ 395 "Strix Halo" APU (16-core/32-thread Zen 5, a Radeon 8060S iGPU with 40 RDNA 3.5 compute units) paired with 128 GB of LPDDR5X unified memory the CPU and GPU both draw from directly. No discrete GPU, no PCIe card, no rack — Beelink and other vendors list this configuration around $2,000. AGmind ran Ubuntu (kernel 6.17) with llama.cpp's server binary in Docker, using the Vulkan/RADV graphics stack rather than ROCm.</p>
+
+    <h2>The models: Gemma 4 26B and Qwen 3.6 35B, both MoE, both local</h2>
+    <p>Two chat models did the heavy lifting: Google's Gemma 4 26B-A4B at Unsloth's UD-Q4_K_XL quant (a QAT-aware dynamic quant), and Alibaba's Qwen 3.6 35B-A3B tested across three quants — Q4_K_M, Q4_0, and IQ4_NL. Both are mixture-of-experts models with a much smaller number of active parameters than their total count, which is exactly what makes them viable on a unified-memory box like this one: the full weight set has to fit in RAM, but only a few billion parameters actually compute per token. AGmind also ran bge-m3 and bge-reranker-v2-m3 (both Q8_0) for embeddings and reranking — the retrieval side of a local RAG stack, served from the same box.</p>
+
+    <h2>The number that matters: one box, 32 concurrent conversations</h2>
+    <p>The headline result: with 32 simultaneous llama.cpp request slots open, Gemma 4 26B sustained <strong>236 tokens/second aggregate</strong> across all of them — and held <strong>226.4 tok/s average over a 30-minute endurance run</strong>, meaning it wasn't a burst number that collapsed under real duration. For Qwen 3.6 35B at the same 32-client load, Q4_0 hit 178.1 tok/s and Q4_K_M hit 160.4 tok/s — the smaller-file, more aggressively quantized version actually won on throughput. A single client running Gemma 4 with speculative decoding turned on hit roughly 90 tok/s solo — but AGmind also found and reported that the same speculative-decoding setup <em>cost</em> about 33% of throughput once the box was serving 32 clients at once, because the extra draft-and-verify work competes with real request slots for the same shared compute. That's the kind of finding a builder only surfaces if they're being honest about what didn't work, not just what did.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 200" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">Aggregate tok/s, 32 concurrent llama.cpp request slots — one Beelink GTR9 Pro</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="236" height="28" fill="#5AD46A"></rect>
+        <text x="242" y="49" fill="currentColor">Gemma 4 26B-A4B, UD-Q4_K_XL — 236 tok/s</text>
+        <rect x="0" y="68" width="178" height="28" fill="#3E8E4F"></rect>
+        <text x="184" y="87" fill="currentColor">Qwen 3.6 35B-A3B, Q4_0 — 178.1 tok/s</text>
+        <rect x="0" y="106" width="160" height="28" fill="#6E6E88"></rect>
+        <text x="166" y="125" fill="currentColor">Qwen 3.6 35B-A3B, Q4_K_M — 160.4 tok/s</text>
+      </g>
+      <text x="0" y="160" font-size="11" fill="#888">Source: AGmind, Habr — "Мини-ПК на Strix Halo под параллельной нагрузкой," July 18, 2026</text>
+    </svg>
+    </div>
+
+    <h2>Where it actually breaks</h2>
+    <p>The honest part of this writeup is the failure modes, not just the peak numbers. Three stand out:</p>
+    <p><strong>A throughput "valley" nobody expected.</strong> Across every model tested, concurrency between 8 and 10 simultaneous clients performed worse than either fewer or more clients — a dip in the middle of the curve rather than a smooth ramp. AGmind attributes it to llama.cpp's own request scheduler, not to anything model-specific, since it showed up identically on Gemma 4 and both Qwen quants.</p>
+    <p><strong>Long prompts are the real bottleneck, not decode.</strong> With 3,400-token prompts and 16 concurrent clients, p95 time-to-first-token stretched to 49.3 seconds — because prompt processing (prefill) tops out around 760–810 tokens/second aggregate on this hardware, far below the decode throughput above. For anything RAG-shaped, where every request drags a few thousand tokens of retrieved context along with it, AGmind's own conclusion is that realistic concurrency on this box is closer to 2–4 simultaneous RAG clients, not 32 short-chat clients.</p>
+    <p><strong>113 watts, 78°C, no throttling drama.</strong> Under sustained full load the box drew about 113W and ran at 78°C with stable clocks — a genuinely boring, good result for a machine with no active cluster cooling, and a useful contrast to the thermal throttling that shows up in fanless phone-class silicon under similar sustained load.</p>
+    <p>AGmind also caught and documented three of their own measurement errors during testing — a detail worth calling out on its own, because it's the difference between a benchmark you can trust and a benchmark you can't: the methodology section admits where the first numbers were wrong and how they were caught, rather than only publishing the corrected ones.</p>
+
+    <h2>Why this matters for "the model comes to your data"</h2>
+    <p>privateSLM runs one model for one person on one phone. AGmind's box is the scaled-up version of the same bet: instead of routing a household's or small team's AI usage through someone else's API, one $2,000 machine under a desk handles dozens of concurrent local sessions — chat, embeddings, and reranking — with nothing leaving the building. The failure modes matter as much as the peak number: 236 tok/s at 32 clients sounds like a server-room result, but the same writeup is honest that long-context RAG workloads cut real capacity down to single digits of clients. That's the difference between a marketing number and an engineering one, and it's exactly the kind of number we want more of in this space.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you're running a similar unified-memory box as a shared local inference server, we'd like to hear your numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

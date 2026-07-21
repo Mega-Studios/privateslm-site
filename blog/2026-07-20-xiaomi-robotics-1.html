@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU — privateSLM blog</title>
+  <meta name="description" content="Xiaomi just announced Xiaomi-Robotics-1, trained on 100,000+ hours of manipulation data. Its predecessor, the model actually shipping today, is a 4.7B-parameter VLA that runs in 80ms on a single RTX 4090 — smaller than most phone chat models, for a reason that has nothing to do with cost.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-20-xiaomi-robotics-1.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU</h1>
+    <div class="meta">July 20, 2026 · 9 min read</div>
+
+    <p>The model actually controlling Xiaomi's robot arms today has 4.7 billion parameters and responds in 80 milliseconds, running on a single NVIDIA RTX 4090 — a card you can buy at retail, not a data-center cluster. That's smaller than several chat models already sitting in privateSLM's own catalog. On July 16, Xiaomi announced a much bigger successor, trained on over 100,000 hours of robot data, without saying whether it kept that discipline or abandoned it.</p>
+
+    <h2>What Xiaomi actually announced on July 16</h2>
+    <p><a href="https://robotics.xiaomi.com/xiaomi-robotics-1.html" target="_blank" rel="noopener">Xiaomi-Robotics-1</a> is a robot foundation model — not a physical robot, a manipulation "brain" meant to control one. Xiaomi's own numbers: pre-training on 100,000 hours of embodiment-free trajectories across 1,700 scenarios, followed by post-training on 7,200 hours of real-robot data collected in actual homes. For adapting to a brand-new task, Xiaomi reports a 75% success rate with under 10 hours of demonstrations, rising to 85% with under 40 hours. On simulation benchmarks: 74.5% on RoboCasa, 57.4% on RoboCasa365, 59.1% on VLABench, and 13.93% on RoboDojo — that last number a reminder that "foundation model for robots" still means something far from solved.</p>
+
+    <p>Here's the part worth being upfront about: as of this writing, Xiaomi-Robotics-1's own <a href="https://github.com/XiaomiRobotics/Xiaomi-Robotics-1" target="_blank" rel="noopener">GitHub repository</a> lists the code and weights as "coming soon." No parameter count, no license, no inference hardware, no control frequency — none of it has been published yet. Every number in the paragraph above is real and Xiaomi's own, but there's currently no way to independently verify them, and no way to know what any of it costs to run. We're not going to guess at a parameter count or a GPU requirement Xiaomi hasn't disclosed.</p>
+
+    <h2>What's already real: Xiaomi-Robotics-0</h2>
+    <p>The useful comparison is Xiaomi's actual shipping model, released earlier this year and fully open on <a href="https://github.com/XiaomiRobotics/Xiaomi-Robotics-0" target="_blank" rel="noopener">GitHub</a> (Apache-2.0, 582 stars at time of writing) and as an <a href="https://arxiv.org/abs/2602.12684" target="_blank" rel="noopener">arXiv technical report</a>. Xiaomi-Robotics-0 pairs a Qwen3-VL-4B-Instruct vision-language backbone with a 16-layer diffusion transformer action head, for 4.7B parameters total. On a bimanual robot with two 6-DoF arms and three cameras (two wrist-mounted, one external), it runs inference in 80 milliseconds on one RTX 4090, at a 30Hz control loop. On benchmarks, it reports 98.7% on LIBERO (versus a competing model, EO-1, at 98.2%), an average of 4.80 out of 5 tasks on CALVIN ABCD→D (versus FLOWER's 4.67), 85.5% on SimplerEnv's Google Robot visual-matching split (versus EO-1's 76.5%), and 79.2% on SimplerEnv WidowX (versus π0's 69.2%).</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Benchmark</th><th style="padding:6px 10px;">Xiaomi-Robotics-0</th><th style="padding:6px 0;">Best competing result cited</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LIBERO</td><td style="padding:6px 10px;">98.7%</td><td style="padding:6px 0;">EO-1 — 98.2%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">CALVIN ABCD→D</td><td style="padding:6px 10px;">4.80 / 5 tasks</td><td style="padding:6px 0;">FLOWER — 4.67 / 5</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">SimplerEnv, Google Robot</td><td style="padding:6px 10px;">85.5%</td><td style="padding:6px 0;">EO-1 — 76.5%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">SimplerEnv, WidowX</td><td style="padding:6px 10px;">79.2%</td><td style="padding:6px 0;">π0 — 69.2%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:0.85rem;color:#888;">Source: Xiaomi-Robotics-0 technical report, <a href="https://arxiv.org/abs/2602.12684" target="_blank" rel="noopener">arXiv:2602.12684</a>.</p>
+
+    <h2>Why the robot version of this can't just get bigger in the cloud</h2>
+    <p>A phone chat app can (and often does) get away with sending a prompt to a server and waiting a second or two for a reply. A robot arm closing a gripper around an egg cannot: the 30Hz control loop that Xiaomi-Robotics-0 runs at means a new action decision roughly every 33 milliseconds, and the model's own 80ms inference time is already a meaningful fraction of that budget. Add a network round-trip to a cloud API — even a fast one — and the loop misses its deadline, the motion gets jerky, and "high-performance and seamless real-time execution" (Xiaomi's own description of the model) stops being true. This is the same wedge privateSLM is built on, arrived at from a completely different direction: for some tasks, on-device inference isn't a privacy nice-to-have, it's the only way the thing physically works at all. A humanoid robot with a cloud-dependent nervous system is a robot that flinches every time the WiFi hiccups.</p>
+
+    <p>That's also why Xiaomi-Robotics-0's size is the interesting number, not an incidental one. 4.7B parameters is small enough to sit comfortably in a single consumer GPU's memory with room to spare for the KV cache and diffusion sampling — the same size class as several of the on-device chat models already in privateSLM's own catalog (Phi-4 Mini at 3.8B, Qwen3.5 at 4B). Robot control and phone chat arrived at a similar model-size sweet spot from opposite constraints: one because a bigger model is too slow for the control loop, the other because a bigger model won't fit in a phone's memory or battery budget.</p>
+
+    <h2>What we don't know yet</h2>
+    <p>Xiaomi-Robotics-1 is trained on roughly 14x more real-robot hours than its predecessor's evaluation set implies, and Xiaomi's own new-task adaptation numbers (75-85% success with modest demonstration counts) suggest a genuinely more capable model. Whether it kept Robotics-0's real-time, single-GPU discipline, or traded it for scale the way most foundation-model successors do, is exactly the detail Xiaomi hasn't published yet. We'll take a real look once the weights, parameter count, and license actually ship — "coming soon" isn't a data point.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if Xiaomi-Robotics-1's weights land before we get to it, tell us what the actual parameter count and hardware requirements turn out to be.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
