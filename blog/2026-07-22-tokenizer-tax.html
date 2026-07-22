@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — privateSLM blog</title>
+  <meta name="description" content="Liquid AI's July 21 technical report puts a real number on the on-device 'tokenizer tax': expanding LFM2.5-8B-A1B's vocabulary from 65K to 128K tokens cut Thai token counts by up to 4x, and slowed decoding for every language, including English, by 7 to 10% — forever, on every token.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-22-tokenizer-tax.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — on the same model</h1>
+    <div class="meta">July 22, 2026 · 9 min read</div>
+
+    <p>Liquid AI shipped a technical report on July 21 that puts an actual number on something every on-device model card quietly avoids: the cost of supporting your language. Doubling LFM2.5-8B-A1B's tokenizer vocabulary from 65,000 to 128,000 tokens cut Thai text to roughly a quarter of its previous token count. It also made <em>every</em> token, in every language — Thai, Hindi, English, code, all of it — 7 to 10% slower to decode. Not once. On every single token, on every device, forever, for as long as that checkpoint exists.</p>
+
+    <p>That's not a hidden cost someone dug up. Liquid published it themselves, with the ablations, in the open. Almost nobody else publishing an on-device benchmark shows this side of the ledger at all.</p>
+
+    <h2>Why your on-device model has a favorite language</h2>
+    <p>A tokenizer is frozen at the start of pre-training, and it carves up vocabulary in proportion to whatever the training corpus looked like at that moment. Languages that were underrepresented get sliced into far more tokens per word than the ones the tokenizer was tuned for. On a cloud model that barely matters — the embedding and output matrices are a rounding error against a trillion-parameter body. On a small on-device model, they're not.</p>
+
+    <p>Liquid's own framing is the clean version of why: at batch size 1, which is what "on-device" almost always means, decoding is bound by memory bandwidth, and the output (LM-head) layer reads the entire vocabulary matrix on every single step. Make the vocabulary bigger and you make that matrix bigger — more bytes to stream off RAM, once per token, no matter what the token turns out to be. That's the actual, physical reason edge models ship compact vocabularies and quietly under-serve everyone outside their priority languages: it isn't an oversight, it's a tradeoff nobody wanted to spend the RAM bandwidth on.</p>
+
+    <h2>The fix, and the receipts</h2>
+    <p>LFM2.5-8B-A1B's original 65K byte-level BPE tokenizer was tuned for English, code, and a fixed language set — Hindi, Vietnamese, Bengali, and Thai all got fragmented into far more tokens per word than they needed. Liquid's recipe doesn't retrain the tokenizer from scratch (that throws away the whole pre-training run); it extends it. Seed the new 128K vocabulary with the original 65K BPE merge table, freeze those merges, and keep training on a multilingual corpus. Every carried-over token keeps its exact embedding row; every new token starts as the mean of the sub-tokens it decomposes into — nothing initialized randomly, no cross-tokenizer alignment problem to solve.</p>
+
+    <p>Adaptation runs in two stages before the model re-enters Liquid's normal training pipeline: Stage 1 trains only the new embedding rows, 600B tokens, rest of the model frozen. Stage 2 unfreezes everything for 400B more tokens of balanced multilingual pre-training. The result, measured as source-tokens-per-expanded-token on the same text:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 190" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">Token-count reduction, expanded 128K tokenizer vs. original 65K — same text, per language</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="240" height="26" fill="#6E6E88"></rect>
+        <text x="246" y="48" fill="currentColor">Hindi — 2.4x fewer tokens</text>
+        <rect x="0" y="64" width="260" height="26" fill="#7C7C9A"></rect>
+        <text x="266" y="82" fill="currentColor">Vietnamese — 2.6x fewer tokens</text>
+        <rect x="0" y="98" width="340" height="26" fill="#8E8EAE"></rect>
+        <text x="346" y="116" fill="currentColor">Bengali — 3.4x fewer tokens</text>
+        <rect x="0" y="132" width="400" height="26" fill="#3E8E4F"></rect>
+        <text x="406" y="150" fill="currentColor">Thai — 4.0x fewer tokens</text>
+      </g>
+      <text x="0" y="178" font-size="11" fill="#888">Source: Liquid AI, "Tokenizer Expansion" blog + arXiv:2607.15232, corpus-level averages, 2026-07-21</text>
+    </svg>
+    </div>
+
+    <p>Fewer tokens per word only matters if the savings beat the cost of a heavier per-step matrix. Liquid tested that directly on an M4 Max (CPU and GPU) and a Snapdragon 8 Elite Gen 5 — real phone-and-laptop-tier silicon, not a data-center card — and reports the larger vocabulary alone slows per-token decode by 7 to 10% on those reference devices, independent of language, because the bigger LM-head is read on every step regardless of which token it produces. Net that against the compression, measured as speed per <em>character</em> of output rather than per token, and the trade lands where you'd hope: Liquid estimates 2.2 to 3.7x faster wall-clock decoding for the under-served languages, against roughly a 9% regression, at the high end, for languages the original tokenizer already handled well.</p>
+
+    <h2>The wall they stopped at</h2>
+    <p>128K wasn't an arbitrary number. Liquid says pushing the vocabulary to 256K would buy more compression for even more languages — and cost up to 37% of throughput on the Snapdragon, versus the 7-10% they shipped at 128K. That's the actual shape of the tradeoff curve: the first doubling of vocabulary is a manageable tax; the next one gets expensive fast, because the LM-head matrix scales with vocabulary size and phone memory bandwidth doesn't care how good your reasons are.</p>
+
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;margin:1rem 0;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Vocabulary</th><th style="padding:6px 10px;">Per-token decode cost</th><th style="padding:6px 0;">Status</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">65K (original)</td><td style="padding:6px 10px;">baseline</td><td style="padding:6px 0;">superseded</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">128K (shipped)</td><td style="padding:6px 10px;">7–10% slower</td><td style="padding:6px 0;">LFM2.5-8B-A1B, released</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">256K (rejected)</td><td style="padding:6px 10px;">up to 37% slower (Snapdragon)</td><td style="padding:6px 0;">not shipped</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Quality didn't get a free pass either</h2>
+    <p>Swapping a model's tokenizer mid-lifecycle risks wrecking everything it already learned, so Liquid tracked an eight-benchmark aggregate across four checkpoints: the source model, a naive zero-shot vocabulary swap, after Stage 1, and after Stage 2. The zero-shot swap alone costs 5.8 aggregate points — that's the "just drop in a bigger vocabulary" number, and it's bad, which is presumably why nobody does it that way. Stage 1's embedding-only training recovers 4.8 of those 5.8 points by itself, with the rest of the model still frozen. Stage 2's full continued pre-training closes the remainder and lands slightly above the source model — a surplus Liquid attributes to the extra 400B training tokens rather than the tokenizer change itself, which is the kind of caveat that's easy to skip and shouldn't be.</p>
+
+    <p>The more interesting number is per-language, on Global-MMLU: languages the model already handled well hold steady after the swap, and the under-tokenized languages gain — the expansion doesn't just make Hindi and Thai faster, it measurably improves what the model actually knows in those languages, likely because more of each training example now fits inside the same context budget.</p>
+
+    <h2>Who's actually paying this tax</h2>
+    <p>privateSLM's whole pitch is that the model comes to your data instead of your data going to a model — but a tokenizer built around English and code quietly decides, before a single word of your conversation happens, which of your languages that promise runs at full speed. And the population most likely to want an on-device, no-cloud assistant in the first place — people in regions with less trust in what happens to their data once it leaves the device, or worse connectivity, or both — often overlaps heavily with the population a 65K English-first vocabulary serves worst. No model card we've seen discloses a per-language decode-speed number. Every benchmark leaderboard we cited in earlier posts on this blog is implicitly an English-and-code leaderboard, MMLU and IFEval included, and that's true industry-wide, not a dig at any one vendor.</p>
+
+    <p>For what it's worth, LFM2.5-8B-A1B's <code>lfm2_moe</code> architecture is one we already know privateSLM's engine can load — we verified <code>LLM_ARCH_LFM2</code> and <code>LLM_ARCH_LFM2MOE</code> are both present in llama.cpp's current architecture table while researching this piece, so the compatibility gate we've written about before isn't what keeps this particular checkpoint out of our catalog. Size is: its safetensors weights alone run 16.9 GB in full precision, with 32 experts at a 2048 hidden size across 24 layers — even quantized to Q4, that's multiple gigabytes past privateSLM's 2.5 GB phone budget. The tokenizer-expansion recipe itself, though, is architecture-agnostic. It's a lesson for on-device tooling generally, not a pitch for one model we can't ship anyway.</p>
+
+    <h2>Check a model's own tax yourself</h2>
+    <p>You don't need Liquid's benchmark rig to see the shape of this on any tokenizer with a public <code>tokenizer.json</code> — including ones you're already running locally. Compare characters-per-token for the same idea in two languages:</p>
+
+    <pre><code>from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("LiquidAI/LFM2.5-8B-A1B")
+
+samples = {
+    "English": "Hello, I'd like to know what tomorrow's weather will be like.",
+    "Thai":    "สวัสดีครับ ผมอยากทราบว่าพรุ่งนี้อากาศจะเป็นอย่างไร",
+}
+
+for lang, text in samples.items():
+    n = len(tok.encode(text))
+    print(f"{lang}: {len(text)} chars -> {n} tokens ({len(text)/n:.2f} chars/token)")</code></pre>
+
+    <p>A lower chars-per-token ratio for a given language means more decoder steps — and on a memory-bandwidth-bound on-device model, more decoder steps means more wall-clock time and more battery, independent of anything the benchmark leaderboard told you about that model's quality. Run it against whatever tokenizer backs a model you're actually using, in whatever language you actually speak, before you trust its tok/s number as your number.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've measured chars-per-token for a language Liquid didn't test, we want that data point.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — Apple Intelligence when it's there, open models when you want them</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
