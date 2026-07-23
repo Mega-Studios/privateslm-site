@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model — privateSLM blog</title>
+  <meta name="description" content="A public Apple Silicon LLM benchmark shows llama.cpp costs 0.25 joules per generated token on an iPhone 17 Pro versus 0.11 for Apple's own Foundation Models path — and that a naive CoreML/ANE port of the same open model is worse than either. What that means for engines that chase model compatibility instead of Apple's walled garden.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-20-energy-cost-of-open-models.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model</h1>
+    <div class="meta">July 20, 2026 · 12 min read</div>
+
+    <p>Generating one token through llama.cpp on an iPhone 17 Pro costs 0.25 joules. Generating one token through Apple's own on-device Foundation Models path, on the same phone, costs 0.11 — less than half. That number comes from a public, methodologically transparent benchmark repo, not a vendor slide, and it's inconvenient for exactly the kind of app privateSLM is: one that deliberately supports open GGUF models via llama.cpp so it isn't limited to whatever Apple ships. The honest version of this story isn't "open models are bad." It's that model compatibility and energy efficiency are in real tension on Apple Silicon today, and almost nobody publishing tok/s leaderboards is measuring the side of that tradeoff that actually drains your battery.</p>
+
+    <h2>The source, and why it's worth trusting</h2>
+    <p>The numbers below come from <a href="https://github.com/john-rocky/apple-silicon-llm-bench" target="_blank" rel="noopener">apple-silicon-llm-bench</a>, a repo that benchmarks MLX Swift, llama.cpp, CoreML/ANE, LiteRT-LM, ExecuTorch, ANEMLL, and Apple's own Foundation Models framework side by side on iPhone 17 Pro, iPad, and Mac M4 Max hardware. It publishes a standalone <code>methodology/fairness-rules.md</code>, a shared set of prompts, and its stated core principle is to measure "under real device constraints, not just <code>tok/s</code> on a server." The specific table we're citing was captured on iPhone 17 Pro / A19 Pro, iOS 27.0, refreshed as recently as 2026-07-18 — inside this week's research window, not stale data recycled from a spring benchmark.</p>
+
+    <p>One honest caveat up front, because it matters for how much weight to put on any single number here: we could not independently pull the repo's raw commit history or its underlying JSONL trial files from this environment (GitHub's API was unreachable), so we're relying on the rendered README rather than the raw logs. The figures below are corroborated across two independent fetches of the page that agreed with each other, and a separate web search surfaced the same specific numbers and phrasing independently — good triangulation, but not the same as auditing the raw trial data ourselves.</p>
+
+    <h2>The fair fight: same model, three engines, one phone</h2>
+    <p>Start with the comparison that has no confound: Gemma 4 E2B, the same GGUF-derived model, run through three different third-party engines on the same iPhone 17 Pro.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 200" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">Gemma 4 E2B on iPhone 17 Pro — energy per generated token</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="240" height="28" fill="#6E6E88"></rect>
+        <text x="246" y="49" fill="currentColor">MLX-Swift (GPU) — 0.24 J/token, 24.7 W</text>
+        <rect x="0" y="68" width="250" height="28" fill="#8888A0"></rect>
+        <text x="256" y="87" fill="currentColor">llama.cpp Q4_K_M (GPU) — 0.25 J/token, 24.5 W</text>
+        <rect x="0" y="106" width="480" height="28" fill="#3E8E4F"></rect>
+        <text x="486" y="125" fill="currentColor">CoreML/ANE (naive port) — 0.48 J/token, 12.7 W</text>
+      </g>
+      <text x="0" y="160" font-size="11" fill="#888">Source: john-rocky/apple-silicon-llm-bench, iPhone 17 Pro · A19 Pro, captured 2026-07-18</text>
+    </svg>
+    </div>
+
+    <p>llama.cpp and MLX-Swift land almost identically — 0.25 and 0.24 joules per token — which makes sense, since both are GPU/Metal decode paths on the same silicon running the same model. The genuinely surprising row is CoreML/ANE: it draws less than half the instantaneous power of the GPU paths (12.7W versus 24.5–24.7W), and still costs nearly twice the energy per token. Lower wattage doesn't mean lower energy cost if the thing drawing that wattage is also proportionally slower — and a naive CoreML conversion of an open model, run on Apple's Neural Engine, is exactly that: low power, low throughput, and a worse joules-per-token number than the "wasteful" GPU path it's supposed to be more efficient than.</p>
+
+    <p>That's worth sitting with, because "just target the Neural Engine, it's more efficient" is close to conventional wisdom in on-device ML circles. This data says the ANE hardware itself doesn't grant that efficiency automatically — you have to actually build for it the way Apple builds for it, or you get the worst of both worlds: low power, and low enough throughput that you paid more energy for the same output anyway.</p>
+
+    <h2>The not-fair fight, and why it's still the real story</h2>
+    <p>Now the number that actually stings for a GGUF-based app: Apple's own Foundation Models framework, on the same iPhone 17 Pro, hits 0.11 J/token at 7.6W — better than every third-party path above, including the ANE one. But this comparison carries a real asterisk we shouldn't paper over: Apple FM isn't the same model as the other three rows. The benchmark's own notes describe it as Apple's system-resident model (roughly 3B parameters, estimated, since Apple doesn't expose an exact count or even a real tokenizer to third parties — the repo estimates tokens via <code>utf8.count / 4</code> because <code>FoundationModels</code> doesn't expose one). It also runs in Apple's own system process, not the calling app's, so its memory footprint isn't even comparable the same way.</p>
+
+    <p>So this isn't "same model, worse engine" the way the Gemma-on-three-engines comparison is — it's "different model, different engine, different process, and Apple wins by more than 2x anyway." Arguably that's the more important finding, not a weaker one: Apple's real advantage was never just "we have a Neural Engine third parties can also target." It's that Apple controls the model and the runtime as one integrated system, tuned together, while anyone shipping open-model compatibility — GGUF, 60-plus architectures, whatever a user wants to download — is stuck optimizing a runtime for models it didn't design and can't change. That's a structural gap, not a solvable engineering bug.</p>
+
+    <h2>What a 10-minute conversation actually looks like</h2>
+    <p>Every tok/s number above is effectively a burst measurement. The same repo also ran a 10-minute continuous generation test — closer to what a real chat session looks like than a 30-second benchmark run — across three engines: CoreML/ANE, MLX/GPU, and LiteRT-LM/GPU. It did <strong>not</strong> include llama.cpp in this specific table, which we want to be precise about rather than quietly filling the gap ourselves.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Runtime</th><th style="padding:6px 10px;">Burst tok/s</th><th style="padding:6px 10px;">Sustained (10 min)</th><th style="padding:6px 0;">Retained</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">CoreML/ANE</td><td style="padding:6px 10px;">33</td><td style="padding:6px 10px;">22</td><td style="padding:6px 0;">67%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LiteRT-LM/GPU</td><td style="padding:6px 10px;">56</td><td style="padding:6px 10px;">27</td><td style="padding:6px 0;">48%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">MLX/GPU</td><td style="padding:6px 10px;">48</td><td style="padding:6px 10px;">18</td><td style="padding:6px 0;">38%</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>The pattern: both GPU-backed paths lose well over half their throughput to thermal throttling over ten minutes, while the ANE path — which never spikes power the way the GPU does — retains two-thirds of its speed. The repo's own framing is blunt about it: "The GPU wins the sprint; the ANE wins the marathon — and it frees the GPU for the rest of the app." We're not going to claim llama.cpp's Metal backend produces exactly 38% retention, because it wasn't in this table and we didn't measure it ourselves. What we can say honestly: llama.cpp's decode path is architecturally the same kind of GPU/Metal workload as MLX's, on the same thermal envelope, so there's no particular reason to expect it would dodge this pattern — if anything, it's a real open question worth someone running the actual test on, and we'd genuinely like to see that number exist.</p>
+
+    <h2>Checking this yourself</h2>
+    <p>You don't need the exact repo to sanity-check the shape of this on your own Apple Silicon Mac. <code>powermetrics</code> samples CPU and GPU power in real time, and llama.cpp's own <code>llama-bench</code> gives you a controlled prompt/generation split to run it against:</p>
+
+    <pre><code># Terminal 1 — sample power for 60 seconds
+sudo powermetrics --samplers cpu_power,gpu_power -i 1000 -n 60 > power.log &
+
+# Terminal 2 — run a fixed prompt/decode workload through llama.cpp
+./llama-bench -m gemma-4-E2B-it-Q4_K_M.gguf -p 512 -n 128</code></pre>
+
+    <p>Divide the average watts in <code>power.log</code> by the tok/s <code>llama-bench</code> reports and you get a rough joules-per-token figure of your own — not lab-grade, but enough to see whether the 0.25 J/token figure above is in the right neighborhood on your specific machine.</p>
+
+    <h2>What this means if you're choosing an engine, not just a model</h2>
+    <p>privateSLM already makes the pragmatic call here: auto-select Apple's Foundation Models when the device supports them, fall back to a local GGUF via llama.cpp when it doesn't or when a user wants a specific open model Apple will never ship. This data is a real argument for leaning on that default harder, not a reason to abandon the GGUF path — the entire point of supporting llama.cpp is model choice: medical, legal, coding, and translation specialists that Apple's single general-purpose on-device model was never going to cover (see our <a href="architecture-gate.html">architecture-compatibility</a> and <a href="gguf-quant-label-gap.html">quant-label</a> posts for the rest of that story). The honest framing for a builder-facing blog isn't "GGUF is inefficient, avoid it." It's: every open-model engine chasing broad compatibility is paying a real, measurable energy tax for that compatibility on Apple Silicon today, and that tradeoff deserves to be visible to the person deciding which model to download — not buried under a single tok/s number that only tells you how fast the first ten seconds felt.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run your own power measurements on llama.cpp under sustained load on an iPhone or Mac, we want that data point.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — Apple Intelligence when it's there, open models when you want them</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

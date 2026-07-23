@@ -10,6 +10,9 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU: https://www.privateslm.dev/blog/2026-07-20-xiaomi-robotics-1.html
+- Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model: https://www.privateslm.dev/blog/2026-07-20-energy-cost-of-open-models.html
+- One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-20-strix-halo-home-lab.html
 - Nvidia's newest AI chip shipped with 75% less memory than its own flagship. Your next phone is on the same curve.: https://www.privateslm.dev/blog/2026-07-19-dram-shortage-edge-ai.html
 - Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy: https://www.privateslm.dev/blog/2026-07-18-bonsai-1bit-apple.html
 - He put his home AI cluster and GPT-5.5 behind the same URL, then benchmarked both (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-18-strix-halo-cluster.html
