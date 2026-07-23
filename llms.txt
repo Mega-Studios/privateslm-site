@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- One skipped code path made small models 3.6x slower to decode on every CUDA GPU: https://www.privateslm.dev/blog/2026-07-23-cuda-embedding-tax.html
+- One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-23-rkllm-docker.html
 - Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — on the same model: https://www.privateslm.dev/blog/2026-07-22-tokenizer-tax.html
 - Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU: https://www.privateslm.dev/blog/2026-07-20-xiaomi-robotics-1.html
 - Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model: https://www.privateslm.dev/blog/2026-07-20-energy-cost-of-open-models.html

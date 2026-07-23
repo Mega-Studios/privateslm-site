@@ -27,6 +27,16 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-07-23-cuda-embedding-tax.html">
+          <div class="meta">July 23, 2026 · 8 min read</div>
+          <h3>One skipped code path made small models 3.6x slower to decode on every CUDA GPU</h3>
+          <p>llama.cpp release b10089 closed a gap that had been there since k-quants shipped: CUDA couldn't run GET_ROWS on quantized embedding tables, so it silently fell back to a CPU round-trip on every token. Fixing it took Qwen3-1.7B from 6.18 to 1.72 ms/token — 3.6x faster. Metal, Vulkan, CPU and SYCL never had the bug.</p>
+        </a>
+        <a class="post-card" href="2026-07-23-rkllm-docker.html">
+          <div class="meta">July 23, 2026 · 7 min read</div>
+          <h3>One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server</h3>
+          <p>Edge in the Wild: Hanzo Huang's rkllm-docker packages five chat models for Rockchip's RK3576/RK3588 NPU boards behind a single docker run — Qwen2.5-1.5B hits 19.55 tok/s at 1.6GB RAM, and the smaller W4A16 quant beats W8A8 on both speed and memory, every time.</p>
+        </a>
         <a class="post-card" href="2026-07-22-tokenizer-tax.html">
           <div class="meta">July 22, 2026 · 9 min read</div>
           <h3>Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — on the same model</h3>

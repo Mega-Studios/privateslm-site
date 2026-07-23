@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Hanzo Huang's rkllm-docker packages five chat models for Rockchip's RK3576/RK3588 NPU boards behind a single docker run — Qwen2.5-1.5B hits 19.55 tok/s at 1.6GB RAM, no discrete GPU, and the smaller W4A16 quant beats the larger W8A8 on both speed and memory across every model tested.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-23-rkllm-docker.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server</h1>
+    <div class="meta">July 23, 2026 · 7 min read</div>
+
+    <p>On July 21, Shenzhen-based edge-AI engineer <strong>Hanzo Huang</strong> (<a href="https://github.com/Hanzo-Huang" target="_blank" rel="noopener">Hanzo-Huang</a> on GitHub, "AI Sensing Application Engineer" at Seeed Studio) published a Docker image that turns a Rockchip RK3576 or RK3588 board into an OpenAI/Ollama-compatible chat server with one command — no manual RKLLM toolchain setup. His own benchmark table: <strong>Qwen2.5-1.5B-Instruct at 19.55 tokens per second, using 1.6 GB of RAM</strong>, on a board whose entire acceleration budget is a neural processing unit, not a GPU.</p>
+
+    <p><strong>Edge in the Wild</strong> is our spotlight on real builders running real models on real edge hardware — credited, sourced, no invented numbers. Source, in full, with credit: <a href="https://github.com/Hanzo-Huang/rkllm-docker" target="_blank" rel="noopener">Hanzo Huang, rkllm-docker</a> (GitHub), also written up on <a href="https://www.hackster.io/h1300923175/run-an-llm-on-rk3576-rk3588-with-one-command-6f4f77" target="_blank" rel="noopener">Hackster.io</a>. The repo's own README describes it plainly as "a personal Docker test bed... not a stable release or complete RKLLM platform" — an honest label from the builder, and one we're keeping intact rather than dressing it up.</p>
+
+    <h2>What it actually packages</h2>
+    <p>Rockchip's RK3576 and RK3588 SoCs ship with a dedicated NPU, and Rockchip provides <code>rkllm</code> — a separate runtime and conversion toolchain from llama.cpp entirely, built specifically for that NPU rather than for CPU or a general GPU compute API. Getting a model running on it normally means hand-converting weights with Rockchip's own toolkit, matching driver versions to a specific board, and wiring up your own serving layer. Huang's project collapses that into pre-built container images — pick a tag matching your board and quant (e.g. <code>w4a16-rk3576</code>), <code>docker run</code> it, and a FastAPI server exposes a chat completions endpoint immediately, with Prometheus metrics included.</p>
+
+    <h2>Five models, two quant schemes, one board</h2>
+    <p>The README lists five chat models validated on RK3576, each in two quantization schemes — W4A16 (4-bit weights, 16-bit activations) and W8A8 (8-bit weights, 8-bit activations): Qwen2.5-1.5B-Instruct, Qwen2.5-3B-Instruct, Qwen3-1.7B, Qwen3-4B, and Gemma 3 4B IT. Every one of them is a model already familiar to anyone following this blog's own catalog — the interesting part isn't the model selection, it's what a purpose-built NPU runtime does with models this shape that a general CPU/GPU engine doesn't.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 220" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">RK3576 NPU, W4A16 quant — output speed by model (tok/s)</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="391" height="26" fill="#5AD46A"></rect>
+        <text x="397" y="48" fill="currentColor">Qwen2.5-1.5B-Instruct — 19.55 tok/s, 1.6 GB</text>
+        <rect x="0" y="64" width="266" height="26" fill="#3E8E4F"></rect>
+        <text x="272" y="82" fill="currentColor">Qwen3-1.7B — 13.31 tok/s, 2.0 GB</text>
+        <rect x="0" y="98" width="229" height="26" fill="#6E6E88"></rect>
+        <text x="235" y="116" fill="currentColor">Qwen2.5-3B-Instruct — 11.45 tok/s, 2.5 GB</text>
+        <rect x="0" y="132" width="166" height="26" fill="#7C7C9A"></rect>
+        <text x="172" y="150" fill="currentColor">Qwen3-4B — 8.30 tok/s, 3.4 GB</text>
+        <rect x="0" y="166" width="168" height="26" fill="#8E8EAE"></rect>
+        <text x="174" y="184" fill="currentColor">Gemma 3 4B IT — 8.40 tok/s, 4.0 GB</text>
+      </g>
+      <text x="0" y="210" font-size="11" fill="#888">Source: Hanzo Huang, rkllm-docker README (benchmarks/rk3576.csv), 2026-07-21</text>
+    </svg>
+    </div>
+
+    <h2>The quirk worth noticing: the smaller quant wins on both axes</h2>
+    <p>Normally a lower-bit quant trades some quality for speed and memory, and an 8-bit quant is the "safer, slightly slower" option. That's not what Huang's own numbers show. On every single model tested, W4A16 beats W8A8 on <em>both</em> tokens-per-second and RAM at the same time — Qwen2.5-1.5B-Instruct runs 40% faster (19.55 vs 13.99 tok/s) <em>and</em> uses 27% less memory (1.6 GB vs 2.2 GB) at W4A16 than at W8A8. Gemma 3 4B IT shows the same pattern: 8.40 vs 5.33 tok/s, 4.0 GB vs 5.5 GB. There's no free-lunch story where the bigger quant buys you something back — on this specific NPU runtime, for these models, W4A16 is not a tradeoff, it's just better, on every axis this benchmark measured. The README doesn't explain why the NPU's compiler favors that path over W8A8 specifically; we're reporting the empirical result Huang measured, not inventing a mechanism for it.</p>
+
+    <h2>Why an NPU-first spotlight, not another GPU rig</h2>
+    <p>Every "Edge in the Wild" build we've covered so far has been CPU, GPU, or unified-memory APU hardware running llama.cpp or a llama.cpp-adjacent stack. Rockchip's NPU path is a genuinely different bet: dedicated silicon that only does one kind of math, in exchange for running a real chat model at usable speed on hardware with no discrete GPU line item at all, and a RAM footprint (1.6–4.0 GB across five real chat models) that fits inside what a phone already carries. That's the same trade privateSLM makes by routing to Apple's on-device Foundation Models framework before falling back to a general GGUF engine: purpose-built acceleration paths on the same silicon almost always beat a general-purpose one, when someone bothers to wire them up. Huang did that wiring for Rockchip's NPU and published the receipts; nobody had to trust a spec sheet number over an actual measured tok/s figure.</p>
+
+    <p>The project is explicit about what it isn't — a "personal testing project," four stars, one fork, no claimed production hardening. That's the right amount of confidence for what's actually being shown: real hardware, real models, a real benchmark CSV in the repo, and a Docker tag anyone can pull and reproduce today.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run an NPU-accelerated chat model on Rockchip, Qualcomm's Hexagon, or another dedicated accelerator, we want your numbers next to Huang's.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — Apple's on-device Neural Engine first, open models when you want them</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
