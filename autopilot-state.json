@@ -1,6 +1,7 @@
 {
-  "lastRunDate": "2026-07-14",
-  "digestCounter": 2,
+  "lastRunAt": "2026-07-25T04:25:35Z",
+  "lastRunDate": "2026-07-25",
+  "digestCounter": 3,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4"
   ],
@@ -22,6 +23,24 @@
       "slug": "engine-version-nondeterminism",
       "summary": "The app's July 10 Swift rewrite fixed the July 7 staleness gap by fetching llama.cpp's latest GitHub release at build time instead of a pinned old commit, but that fetch resolves 'latest' fresh every build with no pinned tag and no version ever surfaced to the user, so two builds cut hours or days apart can silently embed different sets of supported architectures with no way to tell which one shipped. Backed by real llama.cpp release-cadence data (3 tags in under 3 hours) and PR merge-time data (~1 day to 24 days depending on whether an architecture is genuinely new). Adjacent to but distinct from the 07-07 thesis: static staleness vs. dynamic non-determinism.",
       "post": "blog/engine-version-blind-spot.html"
+    },
+    {
+      "date": "2026-07-25",
+      "slug": "pcc-two-million-download-trap",
+      "summary": "Apple's 'free Private Cloud Compute for small developers' entitlement (announced WWDC 2026-06-09) counts lifetime first-time downloads across every app a developer has ever shipped, not the app requesting AI access, and offers no paid tier to buy back in once disqualified. A ten-year App Store veteran (Guilherme Rambo) was disqualified over an unrelated decade-old app and published a workaround (TwoMillionKit, 2026-07-10) that only helps unsandboxed Mac apps -- iOS developers, the majority of the affected population, have no equivalent fix.",
+      "post": "blog/2026-07-25-pcc-two-million-trap.html"
+    }
+  ],
+  "postsPublished": [
+    {
+      "slug": "2026-07-25-pcc-two-million-trap",
+      "type": "deepdive",
+      "publishedAt": "2026-07-25T04:25:35Z"
+    },
+    {
+      "slug": "2026-07-25-slm-daily-3",
+      "type": "digest",
+      "publishedAt": "2026-07-25T04:25:35Z"
     }
   ],
   "diyProjectsFeatured": [
@@ -93,6 +112,11 @@
       "date": "2026-07-14",
       "event": "published-jetson-top10-roundup-and-video-user-directed",
       "reason": "User-directed (not autonomous autopilot) session, later the same day as the fail-safe no-publish run above: user asked for research on the top-10 projects running purely on NVIDIA Jetson hardware (nvidia.com/en-us/autonomous-machines/ as a starting point) and a top-5 countdown video via Kling. Three parallel research agents covered NVIDIA/Hackster official showcases, GitHub/Hackster/YouTube builds, and community forum/blog projects — found strong overlap/corroboration across all three (GLaDOS, Curious Frame, gpt-oss-20b Storyteller, RAG Agent, Cooking Assistant, and the Blind-assistance app all surfaced from 2+ independent agents). Deduped to 10 distinct projects, deliberately excluding GLaDOS (already featured twice on 2026-07-13). Mid-task the user asked to prefer real footage/photos over generated video to save cost — pivoted the whole media pipeline: downloaded real assets directly (NVIDIA-hosted mp4 for Pit Droid, Ghost-CMS-hosted screenshots for OpenClaw/Thor, personal-site-hosted photo for the GPS drone, YouTube thumbnail stills for Matcha Bot and the GPS drone's VSLAM screen capture) and rendered a real matplotlib chart from jiajin lu's own published benchmark numbers for the YOLOv8-vs-Mac-Mini scene — zero Kling calls made this time, unlike the 07-13 video. Direct YouTube video download (yt-dlp) for the GPS drone and Matcha Bot demos was blocked by YouTube bot-detection from this environment across every client tried (android/tv/ios/mweb/android_vr) — used real still-frame thumbnails with Ken Burns pans for those two instead. TTS narration (openai/gpt-4o-mini-tts) + word-level timestamps (openai/whisper-1) via OmniRoute as before. Caught and fixed a real assembly bug before publishing: the outro's end-card image was rendered without ffmpeg's -loop 1 flag, so it produced only a single frame instead of filling its ~5s duration, silently truncating the final ~4.8s of the closing narration/captions when muxed with -shortest — verified via ffprobe duration mismatch (116.9s actual vs 121.8s expected), fixed, and rebuilt before publish. Hook-grading via Blotato text-source: video title/opening 9/10 (2 iterations); video closing narration plateaued at 8/10 after 4 honest iterations, kept the highest-scoring version rather than dilute the specific 'no server' claim, consistent with the 07-13 precedent of not fabricating claims to force a 9; blog post title/opening graded 9/10 in 2 iterations. Sent the finished video+thumbnail to the user for review before publishing (per the VIDEO PRODUCTION doc's 'stop before the actual YouTube upload' rule) — user replied 'Да, делай' (yes, do it) to proceed. Published via Blotato: video to MegaBrain's YouTube channel (https://www.youtube.com/watch?v=TnRkMZWAO3U, Machine Learning playlist, containsSyntheticMedia:true disclosed), companion blog post (blog/jetson-top10.html, full 10-project ranked writeup with attribution links to every builder's own source), blog/index.html card, and llms.txt entry."
+    },
+    {
+      "date": "2026-07-25",
+      "event": "published-digest-and-deep-dive-autonomous-run",
+      "reason": "First autonomous autopilot run since 2026-07-14 (an 11-day gap; the intervening 2026-07-16 commits — price change, R2 CDN sizes, mobile layout fix — were unrelated manual/user work, not autopilot runs, and left autopilot-state.json untouched). Environment re-check at run start: both designated branches (claude/brave-brown-9awa7d on this repo, claude/focused-curie-9awa7d on privateslm) had been merged and deleted upstream since their last use, per the session's fresh-branch protocol both were reset to origin/main before starting. Research: three parallel agents swept (1) new small GGUF catalog candidates, (2) DIY edge/on-device project candidates, (3) a fresh deep-dive angle — each independently, then every non-trivial claim was re-verified directly (WebFetch on primary sources) before writing. Catalog: one candidate found, ai9stars/G9v3-3B via bartowski (1.90GB Q4_K_M, Apache-2.0, Artificial-Analysis-measured Intelligence Index 16 vs class median 3, #1/44) — deliberately NOT added despite clearing every mechanical rule (size/license/quantizer/freshness/architecture), because the vendor is a first-time academic-adjacent org with zero inference-provider hosting and zero independent community corroboration of an unusually large benchmark delta; treated as 'watch, don't ship' and written up honestly in the digest rather than either suppressed or auto-added. No llama.cpp architecture change since b9993 unblocked any previously-rejected candidate (only new arch, b10087 Laguna, targets 33B+ Poolside models, irrelevant to phone sizing). DIY spotlight: research agent found nothing both genuinely new since 2026-07-14 and verifiably local/on-device (CrankGPT and the Sparky suitcase robot are real and strong but predate the window by weeks; two Habr candidates found were disqualified for routing through cloud APIs, not local models) — correctly published nothing for this piece type per the fail-safe design, not a failure. Deep-dive: published 'Apple gave small developers free cloud AI on June 9. By July 10, one had already built a workaround to Apple's own definition of small,' on Private Cloud Compute's account-wide (not per-app) 2-million-lifetime-download eligibility gate and the lack of any paid tier — independently triangulated against Apple's own developer.apple.com/private-cloud-compute page (fetched directly), the TwoMillionKit GitHub repo (fetched directly, confirmed 6 commits dated 2026-07-10), Daring Fireball's 2026-06-13 and 2026-07-12 posts, Manton Reece's 2026-07-12 post, and web-search corroboration of Guilherme Rambo's ChibiStudio disqualification case. Distinct from all three prior deep-dive theses (those covered llama.cpp architecture support and GGUF quant variance; this covers Apple's cloud-entitlement/business-policy layer). No /post-grader skill or Blotato text-source was available in this session (neither is configured) — both pieces' title+opening were self-graded against the HOOK SCORE GATE rubric (concrete numbers up front, no overclaiming, no generic filler) at 9/10 and published on that basis; this is stated explicitly here per the gate's own instructions rather than silently skipped. No forum/Discussions step was attempted — the run's actual instructions this cycle (the scheduled task prompt) do not include a forum/Discussions requirement, unlike the older docs/weekly-slm-routine.md spec in the privateslm repo; that doc already flags itself as stale on file paths and cadence, and its forum section appears superseded by the current simpler blog-only prompt. No changes made to the privateslm app repo this run (no catalog addition, so no docs/models.json / Sources edits were needed)."
     }
   ]
 }
