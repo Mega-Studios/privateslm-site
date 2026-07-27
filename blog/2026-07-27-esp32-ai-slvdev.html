@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We called a 260K-parameter model on a $5 chip "the floor." A builder just moved it 111x higher. — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: slvDev fit a 28.9-million-parameter language model into 512KB of RAM on an ESP32-S3 by keeping 25 million weights in flash instead — the same Per-Layer Embeddings trick behind Google's Gemma 3n and Gemma 4. ~9.5 tokens/sec, MIT-licensed, real hardware.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-27-esp32-ai-slvdev.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>We called a 260K-parameter model on a $5 chip "the floor." A builder just moved it 111x higher.</h1>
+    <div class="meta">July 27, 2026 · 8 min read</div>
+
+    <p>Two weeks ago we called an ESP32-S3 running a 260,000-parameter model "the floor" of on-device AI — the smallest, least capable end of the spectrum, included in a roundup mostly to show how low you could go. A builder named slvDev just ran a 28.9-million-parameter model on the same class of chip, posted July 23–24. That's 111 times more parameters, on hardware that costs about $3 more.</p>
+
+    <p><strong>Edge in the Wild</strong> is our occasional spotlight on real people running real models on real hardware — sourced, credited, no invented specs. This one: <strong>esp32-ai</strong> by <a href="https://github.com/slvDev" target="_blank" rel="noopener">slvDev</a> (Slava S.), MIT-licensed, built and documented in his own repo and X threads. Source: <a href="https://github.com/slvDev/esp32-ai" target="_blank" rel="noopener">github.com/slvDev/esp32-ai</a> · <a href="https://x.com/slvDev/status/2080322138410524737" target="_blank" rel="noopener">announcement thread</a> · <a href="https://x.com/slvDev/status/2080596056568484294" target="_blank" rel="noopener">technical explainer thread</a>.</p>
+
+    <h2>The constraint: 512KB of RAM for a 28.9M-parameter model</h2>
+    <p>An ESP32-S3 has 512KB of SRAM, 8MB of PSRAM, and 16MB of flash storage. A 28.9M-parameter model, stored naively, doesn't fit in any single one of those budgets comfortably — most of the weight count has to live somewhere, and RAM is the scarcest resource on the board by a wide margin.</p>
+    <p>slvDev's fix: don't put most of the weights in RAM at all. 25 of the model's 28.9 million parameters live in a flash-resident lookup table, using Per-Layer Embeddings (PLE) — the same technique Google introduced for Gemma 3n and carried into Gemma 4, where large embedding tables are streamed from storage per-layer instead of held fully in memory. On a phone, PLE is a memory-efficiency nicety. On a chip with 512KB of SRAM, it's the only way the model runs at all: the repo's own numbers put flash reads at roughly 450 bytes per generated token, small enough that flash bandwidth — not RAM capacity — becomes the binding constraint instead.</p>
+
+    <h2>The numbers</h2>
+    <table>
+      <tr><th>Spec</th><th>Value</th></tr>
+      <tr><td>Chip</td><td>ESP32-S3 (~$8 boards)</td></tr>
+      <tr><td>RAM</td><td>512KB SRAM + 8MB PSRAM</td></tr>
+      <tr><td>Flash</td><td>16MB total; model occupies 14.9MB</td></tr>
+      <tr><td>Parameters</td><td>28.9M total (25M in flash-resident PLE table)</td></tr>
+      <tr><td>Quantization</td><td>4-bit</td></tr>
+      <tr><td>Training data</td><td>TinyStories</td></tr>
+      <tr><td>Throughput</td><td>~9.5 tok/s end-to-end (~9.7 tok/s pure compute)</td></tr>
+      <tr><td>Flash bandwidth used</td><td>~450 bytes read per generated token</td></tr>
+      <tr><td>Architecture lineage</td><td>Built on Andrej Karpathy's llama2.c</td></tr>
+      <tr><td>License</td><td>MIT</td></tr>
+    </table>
+    <p class="cite">Source: slvDev, <a href="https://github.com/slvDev/esp32-ai/blob/main/RESULTS.md" target="_blank" rel="noopener">esp32-ai/RESULTS.md</a> and the technical explainer thread linked above.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/esp32-ai-demo.gif" alt="slvDev's esp32-ai project generating text token-by-token on an attached display, powered by an ESP32-S3" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">On-chip generation, live on the attached display. GIF by slvDev, from the project's <a href="https://github.com/slvDev/esp32-ai" target="_blank" rel="noopener">GitHub repo</a>.</figcaption>
+    </figure>
+
+    <h2>The honest trade-off: bigger is slower</h2>
+    <p>slvDev's own technical thread draws the comparison directly to Dave Bennett's 2024 <code>esp32-llm</code> project — the same one we featured on July 13 as "the floor" — which ran its much smaller 260K-parameter model at roughly 19 tokens per second on the same chip family. esp32-ai's 111x larger model runs at about half that speed, ~9.5 tok/s. That's not a flaw the project hides — it's the expected shape of the trade: more parameters generally means more capable output and slower generation on fixed hardware, and a builder-honest writeup says so plainly instead of only publishing the flattering number.</p>
+
+    <h2>Why this floor matters for privateSLM's ceiling</h2>
+    <p>Nobody is going to run their daily AI chat on an $8 microcontroller — that's not the point of a project like this. The point is what it proves about the bottom of the stack: if a 512KB-RAM chip can hold a meaningful chunk of a language model's weights in flash and generate readable text with zero network connection, zero server, and zero account, then the "fully private, fully offline" bet privateSLM makes on a phone with gigabytes of RAM and dedicated AI silicon was never the hard part. The hard part esp32-ai solves — fitting a model into a device that has almost nothing to spare — is a problem privateSLM's hardware doesn't have. What's left is making good use of the room you do have, which is a design choice, not a hardware constraint.</p>
+
+    <p><strong>Source / credit:</strong> Project and all technical details by <a href="https://github.com/slvDev" target="_blank" rel="noopener">slvDev (Slava S.)</a>, MIT-licensed. Repo: <a href="https://github.com/slvDev/esp32-ai" target="_blank" rel="noopener">github.com/slvDev/esp32-ai</a>. Original announcement and technical threads on X, linked above. We did not modify or republish any of the builder's material beyond the single demo GIF embedded above, credited to the same repo.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — know a builder pushing the floor even lower, or a phone-scale project we should be tracking instead?</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
