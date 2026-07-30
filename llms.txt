@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- A 3B model just beat a 12B model by 31 points. It can't run in llama.cpp, Ollama, or LM Studio.: https://www.privateslm.dev/blog/nanbeige-looped-transformer-gate.html
+- SLM Daily #3 (catalog digest): https://www.privateslm.dev/blog/slm-daily-3.html
 - 10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only (video): https://www.privateslm.dev/blog/jetson-top10.html
 - From a $5 chip to an NVIDIA award: 5 robots running AI with zero internet (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics-top5.html
 - This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke. (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics.html
