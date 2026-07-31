@@ -61,16 +61,15 @@
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf"
     },
     {
-      "id": "qwen3.5-4b-q4",
-      "name": "Qwen3.5 4B",
+      "id": "g9v3-3b-q4",
+      "name": "G9v3 3B",
       "category": "Generalists",
-      "description": "Newest generation, very long context. For 8 GB+ phones.",
-      "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
-      "hfRepoUrl": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF",
-      "fileName": "Qwen3.5-4B-Q4_K_M.gguf",
-      "sizeBytes": 2740937888,
-      "minRamMb": 6144,
-      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Qwen3.5-4B-Q4_K_M.gguf"
+      "description": "Long-context (131K) general assistant with a Think/No-Think toggle. Tops Artificial Analysis's Intelligence Index for open-weight models ≤4B params (score 16 vs. a class median of 3) — but AI9Stars, the team behind it, has no track record. Verify before trusting it with anything sensitive.",
+      "url": "https://huggingface.co/bartowski/ai9stars_G9v3-3B-GGUF/resolve/main/ai9stars_G9v3-3B-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/ai9stars/G9v3-3B",
+      "fileName": "ai9stars_G9v3-3B-Q4_K_M.gguf",
+      "sizeBytes": 1902590528,
+      "minRamMb": 3072
     },
     {
       "id": "qwen2.5-coder-3b-q4",
@@ -95,18 +94,6 @@
       "sizeBytes": 4683073536,
       "minRamMb": 8192,
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-    },
-    {
-      "id": "granite-3.1-8b-instruct-q4",
-      "name": "IBM Granite 3.1 8B",
-      "category": "Coding & SQL",
-      "description": "Enterprise model, strong at SQL & backend scripting. 8 GB+.",
-      "url": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF/resolve/main/granite-3.1-8b-instruct-Q4_K_M.gguf",
-      "hfRepoUrl": "https://huggingface.co/bartowski/granite-3.1-8b-instruct-GGUF",
-      "fileName": "granite-3.1-8b-instruct-Q4_K_M.gguf",
-      "sizeBytes": 4942858720,
-      "minRamMb": 8192,
-      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/granite-3.1-8b-instruct-Q4_K_M.gguf"
     },
     {
       "id": "qwen2.5-math-7b-q4",
