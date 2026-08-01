@@ -73,6 +73,17 @@
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Qwen3.5-4B-Q4_K_M.gguf"
     },
     {
+      "id": "nanbeige4.2-3b-q4",
+      "name": "Nanbeige4.2 3B",
+      "category": "Generalists",
+      "description": "New looped-transformer architecture, chat + reasoning + tool-use template. IQ4_XS (not Q4_K_M — the default quant misses our size cap by 184 MB, this one doesn't).",
+      "url": "https://huggingface.co/bartowski/Nanbeige_Nanbeige4.2-3B-GGUF/resolve/main/Nanbeige_Nanbeige4.2-3B-IQ4_XS.gguf",
+      "hfRepoUrl": "https://huggingface.co/bartowski/Nanbeige_Nanbeige4.2-3B-GGUF",
+      "fileName": "Nanbeige_Nanbeige4.2-3B-IQ4_XS.gguf",
+      "sizeBytes": 2441753760,
+      "minRamMb": 4096
+    },
+    {
       "id": "qwen2.5-coder-3b-q4",
       "name": "Qwen2.5 Coder 3B",
       "category": "Coding & SQL",

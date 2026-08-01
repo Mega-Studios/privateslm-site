@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Same file. Same bytes. Nearly 6x the RAM. — privateSLM blog</title>
+  <meta name="description" content="A byte-identical 355 MB GGUF costs 56 MB of RAM on an iPhone 13 Mini and 330 MB on a Galaxy A56 — through the exact same inference engine. On-device memory budgets aren't a model property. They're an OS property, and the whole industry's sizing rules of thumb miss it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-01-mmap-ram-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Same file. Same bytes. Nearly 6x the RAM.</h1>
+    <div class="meta">August 1, 2026 · 9 min read</div>
+
+    <p>LFM2.5-350M is a single 355 MB GGUF file. Load it on an iPhone 13 Mini and it costs 56 MB of RAM. Load the identical file, through the identical inference engine, on a Samsung Galaxy A56, and it costs 330 MB — nearly 6x more, from bytes that are byte-for-byte the same on disk. Nothing about the model changed. The operating system underneath it did.</p>
+
+    <h2>The numbers, once more slowly</h2>
+    <p>These figures come from Cactus Compute's own March 2026 benchmark of their runtime running LFM2.5-350M across real hardware — the same engine on every device, which matters, because it rules out "different software stack" as the explanation:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 320" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">RAM used to load the identical 355 MB LFM2.5-350M GGUF, same engine, per device (MB)</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="55" height="24" fill="#5AD46A"></rect>
+        <text x="61" y="47" fill="currentColor">iPhone 13 Mini — 56 MB</text>
+        <rect x="0" y="62" width="75" height="24" fill="#5AD46A"></rect>
+        <text x="81" y="79" fill="currentColor">iPhone 17 Pro — 75 MB</text>
+        <rect x="0" y="94" width="85" height="24" fill="#5AD46A"></rect>
+        <text x="91" y="111" fill="currentColor">Apple Vision Pro — 85 MB</text>
+        <rect x="0" y="134" width="300" height="24" fill="#8888A0"></rect>
+        <text x="306" y="151" fill="currentColor">Raspberry Pi 5 — 300 MB</text>
+        <rect x="0" y="166" width="322" height="24" fill="#8888A0"></rect>
+        <text x="328" y="183" fill="currentColor">Galaxy S25 Ultra — 322 MB</text>
+        <rect x="0" y="198" width="328" height="24" fill="#8888A0"></rect>
+        <text x="334" y="215" fill="currentColor">Pixel 6a — 328 MB</text>
+        <rect x="0" y="230" width="330" height="24" fill="#8888A0"></rect>
+        <text x="336" y="247" fill="currentColor">Galaxy A56 — 330 MB</text>
+      </g>
+      <text x="0" y="280" font-size="11" fill="#888">Green = Apple Silicon / visionOS. Grey = Android + one Linux SBC. File size: 355 MB, identical across every bar.</text>
+      <text x="0" y="298" font-size="11" fill="#888">Source: Cactus Compute, "LFM2.5-350M" (cactuscompute.com/blog/lfm2-5-350m), published 2026-03-31</text>
+    </svg>
+    </div>
+
+    <p>Every green bar is Apple hardware. Every grey bar is Android or a Linux single-board computer. There's effectively no overlap: the tightest Android number (Galaxy S25 Ultra, 322 MB) is still nearly 4x the loosest Apple number (Vision Pro, 85 MB), and the gap between the two closest same-family devices — iPhone 13 Mini at 56 MB versus Galaxy A56 at 330 MB — is 5.9x.</p>
+
+    <h2>Why: it's not the model, it's mmap</h2>
+    <p>The mechanism, in Cactus's own words: their format uses <code>mmap()</code> to map the GGUF file directly into virtual address space rather than copying it into heap memory. On Apple Silicon, that mapping does what the POSIX spec says it should — "there's no distinction between CPU memory and file cache" — so pages of the model that aren't actively needed for the current token stay as reclaimable file-backed memory the OS can drop and cheaply re-fault, rather than resident, uncollectable RAM. The reported RSS ends up closer to the model's actual working set than to its file size.</p>
+
+    <p>Android, per Cactus's account, frequently doesn't honor that same contract:</p>
+
+    <blockquote style="border-left:3px solid var(--line, #444);margin:1.2rem 0;padding:0.4rem 0 0.4rem 1rem;color:var(--muted,#aaa);">many Android devices aggressively copy memory-mapped pages into anonymous memory due to SELinux policies and vendor-specific memory management. The result is that <code>mmap()</code> often degrades to something closer to <code>malloc() + read()</code>.</blockquote>
+
+    <p>Once mapped pages become anonymous memory instead of reclaimable file-backed memory, the OS can no longer treat "not currently needed" as "safe to drop" — the whole file effectively becomes resident, and RSS tracks file size almost 1:1. That's consistent with the numbers: Android RAM figures here cluster tightly around 300–330 MB, a hair under the 355 MB file size, exactly what you'd expect if most of the file ends up copied into memory rather than lazily paged.</p>
+
+    <h2>This breaks a rule of thumb the whole industry uses — including ours</h2>
+    <p>Every on-device model catalog we know of, privateSLM's included, sizes a "minimum RAM" number as a fixed multiple of file size. Ours is roughly file size × 1.6, rounded up to a device tier (2, 3, 4, or 6 GB). That's a defensible rule if RAM cost is a property of the bytes on disk. The numbers above say it isn't, at least not uniformly — RAM cost is a property of what the OS's virtual memory system does with those bytes once they're mapped, and that can vary by close to 6x for a file that hasn't changed at all.</p>
+
+    <p>The practical failure mode cuts both ways. A heuristic tuned by watching mostly-Android telemetry will overestimate how much RAM an Apple-platform build actually needs, rating models "too big" for phones that would run them comfortably. A heuristic tuned by watching mostly-Apple telemetry will do the opposite on Android, shipping "comfortable" ratings onto devices where the same file actually eats most of the phone's free memory. Neither error shows up by inspecting the model. Both only show up by measuring real resident memory, per platform, after load — which is a different and more expensive exercise than multiplying a file size by a constant.</p>
+
+    <h2>What this means if you build cross-platform</h2>
+    <p>A few concrete takeaways, all downstream of the same point — file size is not RAM cost:</p>
+    <ul>
+      <li>Don't reuse one <code>minRamMb</code> number across operating systems. Measure actual RSS after model load on each target platform; don't derive it from the GGUF's byte count.</li>
+      <li>On Android specifically, verify your <code>mmap()</code> calls are actually being honored as lazy, evictable file-backed mappings rather than silently upgraded to anonymous memory — <code>/proc/self/status</code>'s <code>VmRSS</code> against the mapped region size is the cheap way to check this per device, not an assumption you can make once and reuse.</li>
+      <li>Treat "supports mmap" in a runtime's feature list as necessary, not sufficient. The runtime calling <code>mmap()</code> doesn't guarantee the kernel underneath treats the mapping the way the runtime author assumed it would.</li>
+    </ul>
+
+    <h2>The honest question this raises for us</h2>
+    <p>privateSLM is iOS/macOS-only, so we don't have to solve the Android side of this. But our own catalog's <code>minRamMb</code> field — in both <code>models.json</code> and the app's <code>ModelInfo</code> struct — is computed with the same generic file-size-times-a-constant heuristic the rest of the industry uses, not measured as real per-model, per-device RSS. Apple's mmap efficiency is probably why our device-fit check's "tight" tier (within 2 GB of the stated minimum, in <code>DeviceInfo.swift</code>) rarely causes real crashes in practice. "Probably" is doing real work in that sentence: we haven't instrumented actual resident memory against our own <code>minRamMb</code> numbers to check whether older, smaller-RAM iPhones are being rated "too big" for models that would in fact run fine. That's a measurement we should run, not a fix we're claiming to have made today.</p>
+
+    <p>Today's digest has a smaller, more literal version of the same memory-tiering idea, at a completely different scale — a 28.9M-parameter model that keeps most of its weights out of fast memory on purpose. Worth reading back to back.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've measured real RSS for the same GGUF across iOS and Android, we'd genuinely like the numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, sized honestly</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

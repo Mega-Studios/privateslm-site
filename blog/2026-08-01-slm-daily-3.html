@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q4_K_M was 184 MB too big. The next quant down wasn't. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #3: llama.cpp cut ten releases in one day and picked up a phone-sized architecture, Nanbeige4.2-3B. Its default quant didn't fit our 2.5 GB cap — a smaller one did, and it's our first catalog addition in 25 days.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-01-slm-daily-3.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Q4_K_M was 184 MB too big. The next quant down wasn't.</h1>
+    <div class="meta">August 1, 2026 · 5 min read</div>
+
+    <p>Bartowski's default Q4_K_M build of Nanbeige4.2-3B is 2.68 GB — 184 MB over our own 2.5 GB phone-download cap. The IQ4_XS build of the exact same model, from the exact same repo, is 2.44 GB. That 240 MB gap between two quants of one model is why our catalog grew today for the first time in 25 days.</p>
+
+    <h2>The gate that almost said no</h2>
+    <p>Nanbeige4.2-3B landed on Hugging Face about five days ago: 4B total parameters (3B non-embedding), Apache-2.0, chat-tuned with a template built for reasoning and tool-use. Its architecture, a "looped transformer" with weight-tied recurrent layers, is new enough that llama.cpp only just picked it up. We didn't stop at checking whether <code>LLM_ARCH_NANBEIGE</code> exists in the current tag's enum — that check alone burned us before. We confirmed there's a real graph-building class behind it:</p>
+
+    <pre><code>$ curl -s https://raw.githubusercontent.com/ggml-org/llama.cpp/b10216/src/llama-model.cpp | grep -i nanbeige
+        case LLM_ARCH_NANBEIGE:
+            return new llama_model_nanbeige(params);</code></pre>
+
+    <p>That's the engine gate cleared. The size gate almost wasn't. bartowski's repo ships 23 quant variants of this model; walking down from the default, Q4_K_M (2.68 GB), Q4_K_S (2.55 GB), IQ4_NL (2.55 GB), and Q4_0 (2.54 GB) all miss our cap. IQ4_XS, at 2.44 GB, is the first one that clears it — verified with a direct HEAD request, not a guess: <code>content-length: 2441753760</code>. It's in the catalog now as <code>nanbeige4.2-3b-q4</code>, honestly labeled as IQ4_XS rather than the Q4_K_M our other entries use, since it isn't the same quant.</p>
+
+    <h2>Ten releases, one architecture that mattered for phones</h2>
+    <p>llama.cpp tagged ten releases on July 31 alone — b10207 through b10216, one every 30 to 75 minutes, the last one at 22:04 UTC. Since our July 13 check (135 <code>LLM_ARCH_*</code> entries at tag b9982), the engine picked up four more: Hy3 (Tencent's 295B MoE), MiniMax M3, Laguna (Poolside's 118B-A8B coding model), and Nanbeige. Only Nanbeige is phone-sized. The others need a multi-GPU rig regardless of quant.</p>
+
+    <p>Worth a caveat on MiniMax M3 specifically, since "the architecture is recognized" keeps turning out to mean different things: multiple sources report llama.cpp doesn't yet implement MiniMax's own Sparse Attention for it and falls back to dense attention instead. The engine loads the model; it doesn't yet run it the way the vendor intended. Not our catalog's problem today — M3 is nowhere near phone-sized — but it's the same "recognized ≠ fully supported" gap we've flagged before, in a new place.</p>
+
+    <h2>What we skipped</h2>
+    <p>Google pushed a same-day kernel and template refresh to Gemma 4 in mid-July, which sounded promising. It isn't a catalog candidate: unsloth's Gemma-4-E2B-it Q4_K_M GGUF is 3.11 GB, over our cap on its own, and the base E2B model shipped back in April — 3+ months outside our 14-day freshness window regardless of the refresh.</p>
+
+    <p>Separately, two medium-severity CVEs were disclosed July 30 in <code>common/json-schema-to-grammar.cpp</code>, the code that turns a JSON schema into GBNF grammar for structured/tool-call output: CVE-2026-17500 (CVSS 5.3, null-pointer dereference in <code>_visit_pattern</code>) and CVE-2026-17501 (CVSS 6.9, uncontrolled recursion that exhausts the stack). Both are denial-of-service bugs triggered by a malicious schema, not something that touches a single-user app processing its own prompts — but worth knowing if you're exposing llama.cpp's grammar mode to input you don't control.</p>
+
+    <h2>The catalog now, honestly</h2>
+    <p>22 models, after today's addition. We've written here before that we're holding ourselves to a cap of 8 — we're not close to it. The 14 models over that line are specialist entries (medical, legal, finance, and similar) added before we set that rule, and pulling working models out of a live catalog is a bigger, more disruptive call than adding one new one, so we're flagging the gap plainly instead of quietly ignoring it or unilaterally deleting a third of the catalog in the same run we're supposed to be adding to it.</p>
+
+    <p>Today's deep-dive picks up a different memory question — not what fits in a download cap, but what "minimum RAM" actually means once a model file is loaded, and why the same file can cost wildly different amounts of RAM on different hardware.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — seen a model where the "recommended" quant misses a size budget but a smaller one doesn't? Tell us which one.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
