@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #4: a model from a lab nobody's heard of just scored 5x its size class's median. We're not shipping it. — privateSLM blog</title>
+  <meta name="description" content="Seven quiet days since SLM Daily #3. One 3B model (G9v3-3B) posted a genuinely independent benchmark score 5x its peer median — and we're holding it back anyway, plus what else we checked and why nothing else made the cut.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-25-slm-daily-4.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #4: a model from a lab nobody's heard of just scored 5x its size class's median. We're not shipping it.</h1>
+    <div class="meta">July 25, 2026 · 6 min read</div>
+
+    <p>Seven days since SLM Daily #3 &#8212; the longest gap between editions so far, and the quietest by model count. One release cleared every mechanical bar we check for. We're still not adding it, and the reason is worth explaining rather than burying.</p>
+
+    <h2>The one candidate: G9v3-3B</h2>
+    <p><code>ai9stars/G9v3-3B</code>, published July 23 by an org called AI9Stars, is a 3B-parameter dense Llama-architecture chat model, Apache-2.0 licensed, with a 131k context window. Bartowski quantized it the same day: Q4_K_M comes to <strong>1.90 GB</strong>, well inside our 2.5 GB phone budget, built against llama.cpp b10087. Every mechanical box is checked &#8212; size, license, quantizer, freshness, architecture (plain LlamaForCausalLM, supported for well over a year).</p>
+    <p>What made it worth a second look is the benchmark line: Artificial Analysis, which runs its Intelligence Index independently rather than taking vendor-reported numbers, scored G9v3-3B at <strong>16</strong>, ranked <strong>#1 of 44</strong> models in its size class, against a class median of <strong>3</strong>. That's more than five times the typical score for a model this size, from an evaluator with no stake in the result.</p>
+    <p class="cite">Sources: <a href="https://huggingface.co/ai9stars/G9v3-3B" target="_blank" rel="noopener">huggingface.co/ai9stars/G9v3-3B</a>, <a href="https://huggingface.co/bartowski/ai9stars_G9v3-3B-GGUF" target="_blank" rel="noopener">bartowski/ai9stars_G9v3-3B-GGUF</a>, <a href="https://artificialanalysis.ai/models/g9v3-3b" target="_blank" rel="noopener">artificialanalysis.ai/models/g9v3-3b</a>, all checked 2026-07-25.</p>
+
+    <h2>Why we're watching instead of shipping</h2>
+    <p>An independently-run benchmark is real data, not vibes, and we're not dismissing it. But a 5x-over-median result from a first-time, academic-adjacent org (AI9Stars appears linked to Tsinghua/ModelBest-circle projects, not an established model vendor) with zero inference providers hosting it yet and no community discussion anywhere we could find is exactly the profile where "genuinely excellent" and "overfit to this specific benchmark suite" look identical from the outside. Our own catalog puts a real download in front of real users on real phones. We'd rather let this one sit for a cycle or two and see whether independent hosting, community testing, or a second benchmark corroborates the score, than ship an unproven lab's first release on the strength of one number, however real that number is. If it holds up, it's an easy add next edition.</p>
+
+    <h2>What else we checked and skipped</h2>
+    <table>
+      <tr><th>Candidate</th><th>Why it didn't make the cut</th></tr>
+      <tr><td>Microsoft Fara1.5-4B (bartowski GGUF, July 22)</td><td>Q4_K_M is 2.88 GB, over budget; it's also a vision-language computer-use agent, not a chat model &#8212; wrong category regardless of size.</td></tr>
+      <tr><td>Gemma 4 E2B/E4B (lmstudio-community QAT)</td><td>"E2B" undersells it &#8212; it's actually 5B params, Q4_0 comes to 3.35 GB. Architecture is fine now (ggml-org shipped reference GGUFs July 16), size isn't.</td></tr>
+      <tr><td>Qwen3.5 0.8B / 2B (bartowski/unsloth/lmstudio-community)</td><td>Fits every rule on paper, but the family shipped March 2, over four months outside our 14-day window. Not new, just newly noticed by us.</td></tr>
+      <tr><td>Poolside Laguna-XS-2.1 / S-2.1</td><td>The actual reason llama.cpp b10087 exists &#8212; genuinely new architecture support, permissive license &#8212; but Laguna-XS-2.1 alone is 33B params, 20.55 GB at Q4_K_M. Nowhere near phone-sized.</td></tr>
+      <tr><td>LFM2.5-230M (Liquid AI)</td><td>Unchanged from our last two reviews: the LFM Open License v1.0 caps free commercial use under $10M revenue, still an unresolved license question for some users.</td></tr>
+    </table>
+
+    <h2>Engine side: no news that reaches a phone-sized model</h2>
+    <p>llama.cpp's build tag climbed from b10066 (July 18, last time we checked) to <strong>b10107</strong> (July 24, 14:01 UTC) &#8212; a jump of 41 in six days, consistent with the roughly 10&#8211;15-builds-a-day pace we've reported before. The one new architecture addition in that stretch, b10087's Laguna support, exists specifically to enable the Poolside models above, which are too large for us regardless. No previously-blocked catalog candidate got newly unblocked this edition.</p>
+
+    <h2>The catalog, unchanged</h2>
+    <p>21 models across 9 categories (Generalists, Coding &amp; SQL, Math &amp; STEM, Medical, Finance, Lawyer, Mental Health, Translation, Cybersecurity), plus Apple Intelligence on-device where your hardware supports it. No additions, no removals this edition.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> &#8212; if you've actually run G9v3-3B and have tokens/sec or quality notes from real use, we'd like to hear them before the next edition.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

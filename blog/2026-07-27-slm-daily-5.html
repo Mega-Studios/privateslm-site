@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranked #1 of 44 open models under 4B. Built by a team with no track record. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #5: G9v3-3B tops Artificial Analysis's Intelligence Index for open-weight models under 4B params — score 16 vs. a class median of 3 — from a team we can't vouch for. We verified it and added it anyway. Plus: llama.cpp's architecture count jumped from 135 to 171, and we caught the same size-cap bug twice.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-27-slm-daily-5.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Ranked #1 of 44 open models under 4B. Built by a team with no track record.</h1>
+    <div class="meta">July 27, 2026 · 6 min read</div>
+
+    <p>G9v3-3B scores 16 on Artificial Analysis's Intelligence Index for open-weight models at or under 4B parameters — the field's median is 3, and it's the #1 model in that 44-model class. The team behind it, AI9Stars, has no benchmark section on its own model card and no other shipped model we could find. We verified the download, the license, and the number ourselves, and added it to today's catalog anyway. Below: why, plus two other things worth knowing — a jump in how many architectures our engine recognizes, and a catalog bug we've now caught twice.</p>
+
+    <h2>The number: 16 vs. a class median of 3</h2>
+    <p>Artificial Analysis benchmarks G9v3-3B against 44 other open-weight models with 4B parameters or fewer. Its Intelligence Index score is 16; the median across that whole class is 3. Nothing else in the tier is close, per the same leaderboard page. That's a real, independently-run benchmark, not a number from the model's own card — <a href="https://artificialanalysis.ai/models/g9v3-3b" target="_blank" rel="noopener">artificialanalysis.ai/models/g9v3-3b</a> is the source, and it's worth checking yourself before taking our word for it.</p>
+
+    <h2>Who actually made it</h2>
+    <p>AI9Stars is a small team with a public GitHub org and a Hugging Face presence — nothing more we could independently confirm. There's no "about us," no prior model releases we found, and the model card itself lists parameters and context length but no benchmark table of its own. That's the exact profile our quantizer-reputability rule doesn't cover: bartowski (a reputable quantizer) built the GGUF, but reputability of the <em>quantizer</em> says nothing about the <em>model author</em>.</p>
+    <p>What tipped this into "add it" rather than "skip it": the architecture is plain <code>LlamaForCausalLM</code> — the oldest, most scrutinized architecture tag llama.cpp has, not some novel custom runtime path a small team could use to hide unusual behavior. The license header on the repo reads <code>apache-2.0</code>, unambiguous. And we HEAD-verified the download ourselves rather than trusting a listed size: <code>bartowski/ai9stars_G9v3-3B-GGUF</code>'s <code>Q4_K_M</code> file returns a real <code>Content-Length</code> of 1,902,590,528 bytes, 1.9 GB, comfortably under our phone-download cap. Small footprint, standard architecture, permissive license, and a real third-party benchmark number — enough to clear the bar even with an unknown team behind it. The description in the catalog says exactly this, so nobody downloads it thinking AI9Stars is a name they should already recognize.</p>
+
+    <h2>The engine keeps moving: 135 architectures to 171</h2>
+    <p>Our July 13 check against llama.cpp tag <code>b9982</code> counted 135 <code>LLM_ARCH_*</code> entries. The same check today, against the current tag <code>b10142</code> (published 2026-07-27), counts 171. New entries since then include <code>LLM_ARCH_LAGUNA</code> (added the same week poolside shipped its Laguna models), <code>LLM_ARCH_SMOLLM3</code>, <code>LLM_ARCH_GEMMA4</code> (plus a <code>gemma4-assistant</code> variant for its drafter model), and separate tags for MiniMax M3, Mistral 3/4, and DeepSeek 4.</p>
+    <p>One specific fix worth flagging: <code>LLM_ARCH_LFM2</code> and <code>LLM_ARCH_LFM2MOE</code> are both now natively supported. Liquid AI's LFM2 family was the specific architecture we cited as unsupported back on July 7 and July 9. That blocker is gone. LFM2.5 models still aren't in the catalog, but now purely because every release we've checked (LFM2.5-230M, LFM2.5-1.2B) is older than our 14-day freshness window, not because the engine can't load them. Worth re-checking the moment Liquid AI ships something new.</p>
+
+    <h2>What we skipped, and why</h2>
+    <ul>
+      <li><strong>Gemma 4 E2B / E4B</strong> — the instruct GGUF (<code>ggml-org/gemma-4-E2B-it-GGUF</code>) is from April 1, outside our window. A fresh July 16 upload exists, but it's the base model, not instruct — fails our chat/instruct requirement on top of a stale-vs-fresh mismatch.</li>
+      <li><strong>Laguna-XS-2.1 (poolside)</strong> — genuinely new, and its own architecture (<code>LLM_ARCH_LAGUNA</code>) shipped the same week. But despite the "XS" name it's a 33B-total/3B-active mixture-of-experts model; its Q4_K_M is 19.1 GB. Nowhere near phone-sized.</li>
+      <li><strong>Fara-1.5-4B (Microsoft) and Agents-A1-4B (InternScience)</strong> — both released this week, both right around 2.69 GB (just over our 2.5 GB cap), and both are screenshot-driven computer-use agents, not chat models.</li>
+    </ul>
+
+    <h2>The bug we caught for the second time</h2>
+    <p>On July 13, an earlier autopilot run pulled two entries — <code>qwen3.5-4b-q4</code> (2.74 GB) and <code>granite-3.1-8b-instruct-q4</code> (4.94 GB) — for exceeding our 2.5 GB phone-download cap. Both were back in the live catalog by the time this run started: a July 16 commit that mirrored models to a Cloudflare R2 CDN re-synced from a copy of the catalog that still had them. Real users could have been offered multi-gigabyte downloads that violate our own size rule, twice. We've removed both again. If you're reading this because you're the one who runs that sync script: the source-of-truth copy still contains these two entries and will reintroduce them a third time on the next sync unless it's fixed there directly, not just in the deployed file.</p>
+
+    <p>The catalog now stands at 20 models. Plus Apple Intelligence, at zero download, on devices that have it.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run G9v3-3B yourself, we'd like to hear whether the benchmark number holds up in practice.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

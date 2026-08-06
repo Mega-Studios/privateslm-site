@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A 3B model just beat a 12B model by 31 points. It can't run in llama.cpp, Ollama, or LM Studio. — privateSLM blog</title>
+  <meta name="description" content="Nanbeige4.2-3B beats Qwen3.5-9B and Gemma4-12B on real benchmarks by looping its own layer stack twice instead of adding parameters. That trick isn't expressible in mainline llama.cpp yet, so the model — and every app built on the mainline engine, including this one — can't load it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/nanbeige-looped-transformer-gate.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>A 3B model just beat a 12B model by 31 points. It can't run in llama.cpp, Ollama, or LM Studio.</h1>
+    <div class="meta">July 30, 2026 · 10 min read</div>
+
+    <p>Nanbeige4.2-3B scores 82.8 on HMMT-Feb-2026, beating Gemma4-12B's 51.5 by 31.3 points and Qwen3.5-9B's 69.6 by 13.2, using a quarter to a third as many parameters. It shipped July 24, 2026. As of this week it does not run in stock llama.cpp, Ollama, LM Studio, or anything built on the mainline engine — including privateSLM — because of a design decision its own benchmark table never mentions.</p>
+
+    <p>We've written twice before about models that fail to load because our engine's architecture list is out of date or unpinned (<a href="architecture-gate.html">July 7</a>, <a href="engine-version-blind-spot.html">July 13</a>). This is a different failure. Those were about a tag missing from a list that would eventually catch up. This one is about a computation the mainline engine can't express yet, gated behind a private fork, a GPU-first build path, and a GitHub issue that's already been closed without a fix.</p>
+
+    <h2>What Nanbeige4.2-3B actually claims</h2>
+    <p>Nanbeige LLM Lab published the model and an accompanying paper (<a href="https://arxiv.org/abs/2607.22083" target="_blank" rel="noopener">arXiv:2607.22083</a>, submitted July 24, revised July 27) under Apache 2.0. It's 4B parameters total, 3B non-embedding, pretrained from scratch on 28 trillion tokens, with a 256K-token context window. We cross-checked its published benchmark table against the model's own Hugging Face card and they agree:</p>
+
+    <table>
+      <tr><th>Benchmark</th><th>Nanbeige4.2-3B</th><th>Qwen3.5-9B</th><th>Gemma4-12B</th></tr>
+      <tr><td>GPQA Diamond</td><td><strong>87.4</strong></td><td>81.7</td><td>78.8</td></tr>
+      <tr><td>HMMT-Feb-2026</td><td><strong>82.8</strong></td><td>69.6</td><td>51.5</td></tr>
+      <tr><td>SWE-Bench Verified</td><td><strong>63.6</strong></td><td>53.1</td><td>44.2</td></tr>
+      <tr><td>Terminal-Bench 2.0</td><td><strong>44.1</strong></td><td>29.2</td><td>21.1</td></tr>
+      <tr><td>GDPval Rubrics</td><td><strong>74.3</strong></td><td>61.9</td><td>68.5</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://arxiv.org/html/2607.22083v1" target="_blank" rel="noopener">arXiv:2607.22083v1</a>, Table 3, cross-checked against <a href="https://huggingface.co/Nanbeige/Nanbeige4.2-3B" target="_blank" rel="noopener">huggingface.co/Nanbeige/Nanbeige4.2-3B</a>. Both list identical figures.</p>
+
+    <p>The paper also compares Nanbeige4.2-3B against its own predecessor, Nanbeige4-3B, same parameter budget, different training and architecture: GSM8K jumps from 85.9 to 92.7, MMLU-Pro from 47.6 to 63.8. Same size class, same lab, one generation apart — most of that gap isn't more data, it's the architecture change we're about to get into.</p>
+
+    <h2>The trick: run the same layers twice</h2>
+    <p>Nanbeige4.2-3B is what the paper calls a Looped Transformer. Instead of stacking more layers to add capacity, it reuses the ones it has: hidden states pass through the full transformer stack bottom to top once, then get fed through the identical stack for a second pass before the model produces an output. Same weights, reused, roughly doubling the compute spent per token without adding a single new parameter to the checkpoint. The paper also notes the KV cache is kept full — not shared — across both passes, which means the usual "3B model, small KV cache" assumption doesn't hold either; you pay a bigger memory cost per token of context than a plain 3B model would, even though the weights on disk are still 3B-sized.</p>
+
+    <p>That's a real, different computational primitive from a normal decoder stack. A standard transformer's forward pass is "run each layer once, in order." This one is "run the whole stack, then run it again." Nothing about that is exotic in principle — recurrent and weight-tied architectures go back decades — but it isn't a graph shape mainline llama.cpp's inference engine currently builds for any of its 135-plus supported architectures.</p>
+
+    <h2>Why it doesn't run anywhere yet</h2>
+    <p>The GGUF files exist. Three independent community members (owao, Andgihat, Abiray) have already uploaded quantizations to Hugging Face. owao's Q4_K_M build runs 2.57 GB, just over our 2.5 GB phone-download cap, but Q4_K_S — one step down — comes in at exactly 2.50 GB. Either way, this is a small enough file to be a real catalog candidate on size and license alone, if it loaded. It doesn't. A GitHub issue opened July 24 by user <a href="https://github.com/ggml-org/llama.cpp/issues/26086" target="_blank" rel="noopener">nikorado, "Feature Request: Add support for the Nanbeige/Nanbeige4.2-3B model"</a> (#26086), asked ggml-org/llama.cpp to add native support so the model wouldn't need "a separate fork." The issue is closed. No merged fix landed.</p>
+
+    <p>The workaround Nanbeige itself ships is a fork: <code>github.com/Nanbeige/llama.cpp</code>, branch <code>nanbeige42</code> — a full copy of the llama.cpp codebase with the looped-transformer graph logic patched in, which we confirmed exists by fetching the branch directly. It's a real, buildable fork with the standard llama.cpp build system underneath (Metal, AVX, CUDA and the rest are all still there), but it is not a release of ggml-org/llama.cpp, and nothing about running it is automatic. Whoever wants to use this model has to know the fork exists, clone the right branch, and build it themselves:</p>
+
+    <pre><code>git clone -b nanbeige42 https://github.com/Nanbeige/llama.cpp.git
+cmake -B build && cmake --build build --config Release -j</code></pre>
+
+    <p>privateSLM's own engine can't do that, structurally, no matter how current it is. Our build script fetches whatever ggml-org/llama.cpp's own GitHub API reports as its <code>/releases/latest</code> — currently tag <code>b10182</code>, published July 29:</p>
+
+    <pre><code># scripts/fetch-llama.sh (privateslm repo)
+URL=$(curl -sL https://api.github.com/repos/ggml-org/llama.cpp/releases/latest \
+  | grep -oE '"browser_download_url": *"[^"]*xcframework[^"]*\.zip"' \
+  | head -1 | sed -E 's/.*"(https[^"]+)".*/\1/')</code></pre>
+
+    <p>That script has no path to Nanbeige's fork, and it shouldn't grow one — pointing a general-purpose app's engine at a third party's patched build to support one model would be a maintenance liability for every other model in the catalog. The honest state of things: the GGUF file downloads fine. It just won't load, in this app or almost any other, until (if) the looped-transformer graph logic lands in mainline.</p>
+
+    <h2>Why this isn't the same gate we already wrote about</h2>
+    <p>The July 7 post was about a stale, pinned engine missing architecture tags that newer models needed — a disclosure problem, fixed by updating the pin. The July 13 post was about the fix for that creating a new problem: an engine that updates silently, with no version ever recorded, so two builds of the same app could support different architectures with no way to tell which shipped. Both of those are about <em>tracking</em> a moving list of supported architectures correctly.</p>
+    <p>This one is upstream of that list entirely. It's not that Nanbeige4.2-3B's architecture tag is missing from a list our engine hasn't caught up to yet — it's that the computation itself, running the same layer stack twice per token, isn't a shape the mainline ggml graph builder currently constructs for any architecture. Pinning correctly or updating faster wouldn't have helped; there's nothing to catch up to until someone upstreams the graph change. Being current and being capable are not the same property, and this is the case that shows the gap between them.</p>
+
+    <h2>What this means for the catalog</h2>
+    <p>Nanbeige4.2-3B does not enter privateSLM's catalog today. Not because of size (a Q4_K_S build clears our 2.5 GB budget) or license (Apache 2.0 is fine) — purely the engine-compatibility gate, and there's no "ships with the next update" promise we can honestly make here, because "the next update" is whatever ggml-org/llama.cpp's own release pipeline ships, and this fix isn't in it. If and when the looped-transformer graph logic lands upstream, this becomes one of the strongest small-model candidates we've evaluated: beating a model four times its size on a real math competition benchmark, from a lab that also ships GGUFs directly. Until then, it's a benchmark table you can read but a model you can't run here.</p>
+
+    <h2>The generalization</h2>
+    <p>"Supported" used to mean roughly one thing for a llama.cpp-based app: is this architecture's tag in the enum. That was already getting harder to track as the list grew past 135 entries and engines stopped pinning versions. Nanbeige4.2-3B is a preview of a harder version of the same question: as labs experiment with computation shapes beyond stack-of-decoder-layers — loops, mixture-of-depths, anything that isn't "run each layer once" — "is it supported" stops being a lookup and starts being a question about whether the inference engine's graph builder can express the idea at all. That's a slower, more structural kind of catching up than adding an enum tag, and it's coming for more than one model.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've built or tried a looped, recurrent, or weight-tied model and hit a similar engine wall, we'd like to hear which inference stack (if any) got you unblocked.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
