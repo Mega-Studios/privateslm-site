@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #8: a 2.6B model with a 128K context window, verified at 1.68 GB — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #8: Liquid AI's LFM2.5-2.6B lands in the catalog five days after its own release. llama.cpp hit tag b10290 this week, all of it multi-token-prediction and MoE work irrelevant to a phone. What we skipped, and why a model announced last month still isn't shipping weights.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-06-slm-daily-8.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #8: a 2.6B model with a 128K context window, verified at 1.68 GB</h1>
+    <div class="meta">August 6, 2026 · 5 min read</div>
+
+    <p>Liquid AI shipped LFM2.5-2.6B on August 4. bartowski's Q4_K_M quant landed the same week at a verified 1.68 GB — comfortably inside our 2.5 GB cap, five days old, and in the catalog as of today. That's the whole catalog news this edition; everything else this week either doesn't fit on a phone or doesn't exist as downloadable weights yet.</p>
+
+    <h2>What shipped: LFM2.5-2.6B</h2>
+    <p>Liquid AI's <a href="https://www.liquid.ai/blog/lfm2-5-2-6b" target="_blank" rel="noopener">announcement</a> and <a href="https://huggingface.co/blog/LiquidAI/lfm2-5-2-6b" target="_blank" rel="noopener">Hugging Face blog post</a> describe LFM2.5-2.6B as a dense hybrid model built for agentic and tool-calling workloads, 128K context, pretrained on roughly 34 trillion tokens. Liquid's own numbers claim around 220 tokens/second on an M5 Max and roughly 30 tokens/second on a phone — we haven't independently reproduced either figure, so treat them as vendor-reported, not verified here.</p>
+    <p>What we did verify ourselves: bartowski's <code>LiquidAI_LFM2.5-2.6B-GGUF</code> Q4_K_M file returns a real HTTP HEAD <code>Content-Length</code> of 1,684,023,584 bytes — 1.68 GB, well under our cap. Architecture tag is <code>lfm2</code>, the same family as the LFM2/LFM2MoE support that landed in mainline llama.cpp back in July (see <a href="2026-07-27-slm-daily-5.html">SLM Daily #5</a>) — already-proven engine compatibility, not a fresh gate to clear. License is the LFM Open License v1.0, the same terms we reviewed and accepted for LFM2.5-230M back on <a href="2026-07-18-slm-daily-3.html">July 18</a>: free commercial use under $10M in annual revenue, a paid license above that. It's in the catalog now as <code>lfm2.5-2.6b-q4</code>.</p>
+    <p class="cite">Sources: <a href="https://www.liquid.ai/blog/lfm2-5-2-6b" target="_blank" rel="noopener">liquid.ai/blog/lfm2-5-2-6b</a>, <a href="https://huggingface.co/LiquidAI/LFM2.5-2.6B" target="_blank" rel="noopener">huggingface.co/LiquidAI/LFM2.5-2.6B</a>, <a href="https://huggingface.co/bartowski/LiquidAI_LFM2.5-2.6B-GGUF" target="_blank" rel="noopener">bartowski/LiquidAI_LFM2.5-2.6B-GGUF</a>, all checked 2026-08-06.</p>
+
+    <h2>What we skipped</h2>
+    <ul>
+      <li><strong>Qwen3.5-0.8B</strong> (bartowski/unsloth/lmstudio-community/mradermacher GGUFs) — shows up in every "new model" search this week because of upload-date metadata, but the underlying release is roughly five months old. Newly noticed by us, not newly released.</li>
+      <li><strong>MiniCPM5-2B</strong> — teased publicly as a sub-4B leaderboard contender, but as of today OpenBMB's own model collection only lists MiniCPM5-1B (May 2026). The weights for the 2B version haven't actually been published. Worth checking again in a few days; nothing to evaluate yet.</li>
+      <li><strong>Thinking Machines' "Inkling Small"</strong> — genuinely interesting (scores within a point of its own 3x-larger sibling on Artificial Analysis's Intelligence Index), but it's a 276B-total/12B-active MoE reasoning model. Not a phone candidate at any quant.</li>
+    </ul>
+
+    <h2>Engine: high cadence, nothing phone-relevant</h2>
+    <p>llama.cpp's latest tag is <strong>b10290</strong> (August 6, ~01:33 UTC). The merged work since our last check was almost entirely multi-token-prediction support for large models — DeepSeek V3.2, DeepSeek V4 Flash/MTP+DSpark, Qwen3-Next, GLM-4.7-Flash — plus MiniMax M3 stability fixes and a breaking change to <code>llama-tts</code> for Qwen3-TTS multimodal support. None of it touches a model small enough for our catalog. Nanbeige4.2-3b-q4's compatibility, confirmed in our <a href="2026-08-01-slm-daily-7.html">last edition</a> and re-verified again during this week's consolidation work, remains the most recent phone-relevant engine change.</p>
+
+    <h2>Also this edition</h2>
+    <p>Today's <strong>Edge in the Wild</strong> spotlight is the most extreme "no OS between the model and the hardware" project we've covered: a UEFI application that boots straight into a chat interface on a real Raspberry Pi 5, with nothing else running on the board at all. <a href="2026-08-06-nightrun-no-os.html">Read it here</a>.</p>
+
+    <h2>The catalog now</h2>
+    <p>22 models, one more than last edition. Same honest caveat as every edition since <a href="2026-08-01-slm-daily-7.html">SLM Daily #7</a>: we're nominally holding ourselves to a cap of 8, and 14 of these are pre-cap specialist entries (medical, legal, finance and similar) we haven't unilaterally pulled from a live catalog. Flagging it again rather than letting it go quiet.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

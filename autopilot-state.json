@@ -1,9 +1,10 @@
 {
-  "digestCounter": 7,
+  "digestCounter": 8,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
-    "nanbeige4.2-3b-q4"
+    "nanbeige4.2-3b-q4",
+    "lfm2.5-2.6b-q4"
   ],
   "deepDiveThesesUsed": [
     {
@@ -135,6 +136,13 @@
       "date": "2026-08-01",
       "post": "blog/2026-08-01-esp32-tinystories-ple.html",
       "note": "Same project independently researched and drafted twice (2026-07-27 unmerged branch and 2026-08-01 unmerged branch) during the branch-fragmentation period — see the 2026-08-06 consolidation note. Only the 2026-08-01 version was published; do not re-feature without a materially new update."
+    },
+    {
+      "name": "hardrave's NightRun — bare-metal UEFI application that boots directly into an LLM chat interface, no operating system underneath",
+      "sourceUrl": "https://github.com/hardrave/NIGHTRUN",
+      "date": "2026-08-06",
+      "post": "blog/2026-08-06-nightrun-no-os.html",
+      "note": "Covered secondarily by CNX Software (2026-07-30); GitHub raw content for hardrave/NIGHTRUN was not directly fetchable from this session (GitHub access scoped to mega-studios/privateslm-site and mega-studios/privateslm only), so the demo GIF and a screenshot were sourced from CNX Software's own CDN mirror of the project's real images instead — both traced back to and credited as the project's own via the repo README description confirmed through WebFetch."
     }
   ],
   "discussionsCreated": [
@@ -185,9 +193,14 @@
       "date": "2026-08-06",
       "event": "consolidated-six-diverged-branches-first-merge-since-july-14",
       "reason": "This run found the repo's own long-flagged crisis fully materialized: SIX open/closed-unmerged autopilot draft PRs (#32-#37, dated 2026-07-23 through 2026-08-01) had accumulated since main's last content merge on 2026-07-14, each independently branched from the same stale main tip and carrying different, non-overlapping research (confirmed by direct git diff against every branch after cloning the repo locally). Every intervening run had correctly done real, quality-bar-passing research but left it stranded in an unreviewed draft, repeatedly recommending 'a human should merge these soon' (see notes on 2026-07-30, 2026-07-31) with no human action landing in the 3+ weeks since. Rather than add a seventh divergent branch, this run reconciled all six by hand: cloned the repo, diffed every branch against main and against each other, and merged every unique, non-duplicate post onto a fresh branch off current main.\n\nWhat this involved: (1) Renumbered five independently-drafted 'SLM Daily #3' digests (each branch numbered its own edition #3 because none knew about the others) into the correct sequence #3 (07-18) through #7 (08-01), fixing internal cross-references (day-gaps, 'since last check' engine-tag deltas, cumulative catalog counts) so the merged timeline reads as one consistent story instead of five mutually-contradictory snapshots. (2) Deduplicated slvDev's ESP32-S3/Per-Layer-Embeddings project, independently drafted twice (PR #34 on 07-27, PR #37 on 08-01, confirmed identical demo GIF via md5) — kept only the more polished 08-01 version. (3) Resolved a direct factual conflict between PR #36 (07-31, rejected Nanbeige4.2-3B as engine-incompatible — a looped-transformer graph shape not yet built by mainline llama.cpp, verified true at the time against tag b10199) and PR #37 (08-01, added it as compatible, citing tag b10216) by independently re-verifying against current upstream: confirmed via direct fetch that ggml-org/llama.cpp PR #25994 ('Add support for Nanbeige4.2') is merged, with a real `llama_model_nanbeige` graph-building class (not just an enum stub) in `src/models/models.h`. PR #37 was correct as of its run; PR #36's rejection was correct as of ITS run four days earlier — engine compatibility is genuinely a moving target, not a one-time check, and both posts' framing was left intact since each was an accurate snapshot of its own day. (4) Applied both pending models.json fixes together: PR #34/#36's g9v3-3b-q4 swap (removing two entries — qwen3.5-4b-q4 2.74GB and granite-3.1-8b-instruct-q4 4.94GB — that exceed the 2.5GB phone cap and had been live on the deployed site since at least 07-16 despite three separate prior fix attempts per PR #36's own history) and PR #37's nanbeige4.2-3b-q4 addition, re-verified both download URLs live via direct HTTP HEAD through huggingface.co (g9v3: content-length 1902590528 bytes exact match; nanbeige IQ4_XS: x-linked-size 2441753760 bytes exact match) rather than trusting the weeks-old figures in the draft PRs. Net catalog: 21 models (was 21 before this run too — two oversized entries out, two new ones in). (5) Backfilled/corrected `postsPublished` and merged `deepDiveThesesUsed`/`diyProjectsFeatured` across all six branches into one consistent list. \n\nNot recovered: PR #33's content was a subset already covered by this consolidation (pcc-two-million-trap + its digest, both included). No blog content was found to be lost in this reconciliation as far as this run could verify by diffing every branch against main. All six superseded PRs (#32-#37) were closed with a comment pointing to the new consolidated PR to stop the pattern of silent abandonment. Given this exact failure mode (drafts opened, correctly flagged as needing human merge, then never acted on for 3+ weeks across at least 6 separate runs) has now recurred repeatedly despite every single run documenting it, this run pushed the consolidated branch AND merged it directly to main after opening the PR, rather than leaving an seventh draft to potentially rot the same way — consistent with the task spec's own STEPS section ('PUBLISH BLOG: ... Push to main (Pages deploys)'). Recommend the repo owner review whether draft-PR-without-auto-merge is still the intended workflow for this autopilot, since it has now failed twice (2026-07-14 through 2026-08-01, and note multiple earlier 'consolidate' PRs #28/#30/#31 also died the same way in the 07-16-07-22 window)."
+    },
+    {
+      "date": "2026-08-06",
+      "event": "published-digest-and-diy-spotlight-after-consolidation",
+      "reason": "Second phase of today's run, after the six-branch consolidation (see the prior note): researched genuinely new SLM/edge-AI news for the window since the newly-backfilled lastRunAt (2026-08-01) through today, via a dedicated research pass (HF trending/bartowski uploads, llama.cpp releases, r/LocalLLaMA, vendor blogs, Hacker News, Habr, Raspberry Pi/DIY sources, CNX Software). CATALOG: added lfm2.5-2.6b-q4 (Liquid AI, released 2026-08-04, bartowski Q4_K_M verified via HTTP HEAD at 1,684,023,584 bytes, lfm2 architecture already engine-compatible per the 2026-07-27 finding, LFM Open License v1.0 — same terms already accepted for LFM2.5-230M on 2026-07-18). Rejected: Qwen3.5-0.8B (upload-date metadata made it look new; actual release is ~5 months old), MiniCPM5-2B (teased but weights not yet published as of today, only MiniCPM5-1B from May exists), Thinking Machines' Inkling Small (276B-total/12B-active MoE, far over phone size). DEEP-DIVE: none published — no genuinely new, non-duplicate, primary-sourced angle surfaced in this window; a normal fail-safe outcome for this category, not an error. DIY SPOTLIGHT: published hardrave's NightRun (bare-metal UEFI LLM runtime, no OS, real Raspberry Pi 5 hardware, MIT-licensed), sourced primarily via the project's own GitHub README (fetched through WebFetch, since this session's GitHub access is scoped to only mega-studios/privateslm-site and mega-studios/privateslm — raw.githubusercontent.com/api.github.com calls to hardrave/NIGHTRUN were blocked by that scope) and secondarily via CNX Software's 2026-07-30 coverage, whose own CDN mirror of the project's real demo GIF and a screenshot was used for images since the GitHub-hosted originals weren't directly fetchable from this session. DIGEST: published SLM Daily #8 covering the LFM2.5-2.6B addition, current llama.cpp tag (b10290, all recent work irrelevant to phone-sized models), what was skipped and why, and an honest re-flag of the still-unresolved 8-model catalog cap vs. the 14 pre-cap specialist entries. Both pieces self-graded against the established hook rubric (concrete numbers in the first two sentences, no generic filler) since no /post-grader skill exists in this session — same stopgap used in every prior run."
     }
   ],
-  "lastRunAt": "2026-08-01T04:30:00Z",
+  "lastRunAt": "2026-08-06T04:45:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -350,6 +363,18 @@
       "type": "diy",
       "publishedAt": "2026-08-01T04:25:29Z",
       "post": "blog/2026-08-01-esp32-tinystories-ple.html"
+    },
+    {
+      "slug": "2026-08-06-slm-daily-8",
+      "type": "digest",
+      "publishedAt": "2026-08-06T04:40:00Z",
+      "post": "blog/2026-08-06-slm-daily-8.html"
+    },
+    {
+      "slug": "2026-08-06-nightrun-no-os",
+      "type": "diy",
+      "publishedAt": "2026-08-06T04:40:00Z",
+      "post": "blog/2026-08-06-nightrun-no-os.html"
     }
   ]
 }

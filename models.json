@@ -83,6 +83,17 @@
       "minRamMb": 4096
     },
     {
+      "id": "lfm2.5-2.6b-q4",
+      "name": "LFM2.5 2.6B",
+      "category": "Generalists",
+      "description": "Liquid AI's agentic/tool-calling generalist, 128K context. LFM Open License v1.0 (free commercial use under $10M revenue — same terms as our other LFM2 entries).",
+      "url": "https://huggingface.co/bartowski/LiquidAI_LFM2.5-2.6B-GGUF/resolve/main/LiquidAI_LFM2.5-2.6B-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/LiquidAI/LFM2.5-2.6B",
+      "fileName": "LiquidAI_LFM2.5-2.6B-Q4_K_M.gguf",
+      "sizeBytes": 1684023584,
+      "minRamMb": 3072
+    },
+    {
       "id": "qwen2.5-coder-3b-q4",
       "name": "Qwen2.5 Coder 3B",
       "category": "Coding & SQL",
