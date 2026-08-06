@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your phone's AI chip is doing up to 10x less than it could — and it's not the chip's fault — privateSLM blog</title>
+  <meta name="description" content="Two independent 2026 papers find that on-device LLM inference wastes up to 10x of a phone NPU's throughput and up to 65% of its achievable energy efficiency — not from weak silicon, but from thread scheduling, sleep-latency handling, and polling intervals in the software layer on top of it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-27-npu-scheduling-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Your phone's AI chip is doing up to 10x less than it could — and it's not the chip's fault</h1>
+    <div class="meta">July 27, 2026 · 10 min read</div>
+
+    <p>A phone's NPU can lose up to 10x its usable throughput to the software scheduling sitting on top of it, according to a paper published this month — not because the silicon is underpowered, but because of thread configuration, uncoordinated sleep latencies, and polling intervals in the framework layer. A second, independent paper found that fixing just the frequency scheduling, no hardware change at all, recovers up to 65% of the energy a phone wastes running local AI. Neither number is about the chip in your pocket. Both are about a few hundred lines of scheduling code standing between it and the model you're actually running.</p>
+
+    <p>This matters specifically for the app category privateSLM is in. Every "runs AI on your phone" pitch — ours included — leans on the phone's NPU spec sheet: some number of TOPS, marketed like a benchmark result. These two papers are the first place we've found that spec sheet checked against what local-AI software actually extracts from it. The gap is the story.</p>
+
+    <h2>What a TOPS number actually promises</h2>
+    <p>Every phone with a dedicated AI accelerator ships a headline number — trillions of operations per second, the same unit chipmakers use to sell GPUs. It's a ceiling: the most the silicon can physically do under ideal conditions. Nothing about that number says what share of it a given app, on a given day, running a given model, actually reaches. Until this year, almost nobody outside chip vendors' own labs had published a direct measurement of that gap for local LLM inference specifically. Two papers did, independently, within two weeks of each other.</p>
+
+    <h2>Up to 10x — and it's not the silicon</h2>
+    <p>"Is Your NPU Ready for LLMs? Dissecting the Hidden Efficiency Bottlenecks in Mobile LLM Inference" (Cai, Tian, Yang, Ren, Yuan, Li, Wang; submitted July 6, 2026) measured framework-to-framework throughput on identical phone hardware running identical models. Its central finding: <strong>"framework-induced performance gaps are substantially amplified on NPUs, reaching up to 10x using custom operators."</strong> Same chip, same model — the only variable across that 10x range is which software stack is doing the scheduling.</p>
+
+    <p>That's the part worth sitting with. A 10x gap from switching frameworks, with the hardware held constant, means the NPU spec on the box was never really in question. What's in question is whether the app between you and that spec is using it.</p>
+
+    <h2>Where the other 40–55% goes</h2>
+    <p>The same paper breaks the waste down into causes, not just a headline ratio:</p>
+
+    <table>
+      <tr><th>Source of waste</th><th>Measured effect</th></tr>
+      <tr><td>Suboptimal thread configuration, uncoordinated NPU sleep latencies, CPU polling intervals</td><td>Up to 40% energy wasted</td></tr>
+      <tr><td>Correcting that configuration (same hardware, same model)</td><td>Up to 54.8% NPU-backend energy recovered, across three datasets</td></tr>
+    </table>
+    <p class="cite">Source: arXiv:2607.05475, "Is Your NPU Ready for LLMs?" (submitted 2026-07-06)</p>
+
+    <p>None of these three causes — thread config, sleep-latency handling, polling loops — is a model problem or a silicon problem. They're scheduler problems: decisions a framework makes about how often to check for work, how aggressively to let a chip idle down, and how many threads to hand a task, made once by whoever wrote the inference engine and then inherited by every app built on it.</p>
+
+    <h2>A second team, a different device class, the same story</h2>
+    <p>"EnerInfer: Energy-Aware On-Device LLM Inference" (Zou, Liu, Sun, Mascherin, Roy, Liu, Peng, Jia, Chen; submitted 2026-06-22, revised 2026-06-24) arrived at a compatible conclusion from a different angle: instead of comparing frameworks, it tunes NPU and memory clock frequencies dynamically per inference request, and measures the energy saved with no accuracy or latency penalty ("without QoE violation," in the paper's terms).</p>
+
+    <table>
+      <tr><th>Device class</th><th>Energy efficiency gain, frequency scheduling only</th></tr>
+      <tr><td>Phone</td><td>Up to 65%</td></tr>
+      <tr><td>Laptop</td><td>Up to 12%</td></tr>
+      <tr><td>Development board</td><td>Up to 24%</td></tr>
+    </table>
+    <p class="cite">Source: arXiv:2606.23001, "EnerInfer: Energy-Aware On-Device LLM Inference"</p>
+
+    <p>Two teams, two weeks apart, two different methodologies (framework-comparison vs. dynamic frequency scheduling), and neither cites the other. Both land on the same underlying claim: on a phone specifically, the software layer between the model and the NPU is the dominant lever on both speed and battery life, bigger than anything you'd get from a faster chip.</p>
+
+    <h2>This isn't hypothetical — it's playing out in llama.cpp's own repo</h2>
+    <p>llama.cpp, the inference engine privateSLM's local-GGUF fallback (and Ollama's, and LM Studio's, and most other local-AI apps') is built on, only shipped a mainline backend for Qualcomm's Hexagon NPU in build <code>b8755</code> (April 11, 2026). Before that release, llama.cpp builds on Snapdragon phones ran on CPU and general-purpose GPU compute paths — Metal, CUDA, Vulkan — never touching the phone's dedicated NPU silicon at all, regardless of what the phone's spec sheet claimed. Most local AI apps that haven't shipped a rebuild since April are almost certainly still in that position today.</p>
+
+    <p>Even after the NPU backend landed, the scheduling gap the two papers describe is visible in real time inside that same project. A community fork of llama.cpp's Hexagon backend (<a href="https://github.com/zhouwg/ggml-hexagon" target="_blank" rel="noopener">zhouwg/ggml-hexagon</a>) states in its own README that its prefill and decode performance on a Snapdragon 8 Elite phone "surpasses Qualcomm's official ggml-hexagon since 07/21/2026" — six days before this post. Read that plainly: a community reimplementation, running on the exact chip Qualcomm designed and the exact SDK Qualcomm shipped for it, is currently outperforming Qualcomm's own reference software. If the chip vendor's own stack isn't the ceiling, "the NPU is slow" was never a safe conclusion to draw from a slow local AI app.</p>
+
+    <h2>What this means if you're picking a local AI app</h2>
+    <p>Two honest implications, not one convenient one:</p>
+    <ul>
+      <li><strong>A TOPS number in an app's marketing describes the chip, not the app.</strong> Neither paper found a way to infer software efficiency from hardware specs — you'd need a direct benchmark of that specific app, on that specific phone, which almost nobody publishes.</li>
+      <li><strong>A vendor-maintained NPU stack has a structural advantage a community backend has to fight for.</strong> Apple's Foundation Models framework — the engine privateSLM uses first when your device supports Apple Intelligence — is written and tuned by the same company that designs the Neural Engine it runs on, with none of the framework-hopping the "up to 10x" figure above describes. A third-party llama.cpp build reaching for a phone's NPU through a community-maintained backend is, per this month's evidence, fighting exactly the scheduling battle these two papers measured — sometimes winning it, as the July 21 result above shows, but starting from behind by default.</li>
+    </ul>
+
+    <h2>Where we actually stand</h2>
+    <p>We haven't benchmarked privateSLM's own llama.cpp fallback against its NPU ceiling on any specific phone — that's a real gap in what we can tell you today, not a reassurance we're going to manufacture. What we can say honestly: our engine-selection logic already prefers Apple's system model when it's available, for reasons that were about capability and zero-download convenience, not NPU efficiency specifically. This month's research is a reason to also care about NPU efficiency, and a concrete thing to go measure rather than assume.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've profiled a local LLM app's actual NPU utilization on your own phone, we want the numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two new architectures landed in our engine this week. Both are over 100B parameters. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #6: llama.cpp added GLM-5.2 and Laguna-S-2.1 support this week — 754B and 118B parameter models, neither phone-sized. The one genuinely exciting small model of the week, Nanbeige4.2-3B, can't run in the engine at all yet. Zero catalog changes.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-30-slm-daily-6.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Two new architectures landed in our engine this week. Both are over 100B parameters.</h1>
+    <div class="meta">July 30, 2026 · 5 min read</div>
+
+    <p>llama.cpp shipped two new architecture tags in the last two days — GLM_DSA for Zhipu's GLM-5.2 (tag b10174, July 29) and one for Poolside's Laguna-S-2.1 (tag b10173, July 28). Both are real, both are open-weight, and both are useless to a phone: GLM-5.2 is roughly 754B total parameters with about 40B active per token (MoE), and Laguna-S-2.1 is 118B total with 8B active. Nothing about "active parameters" shrinks the download — the full expert set still has to live somewhere. Zero catalog changes today, for the same size reason as most weeks.</p>
+
+    <h2>What actually shipped</h2>
+    <table>
+      <tr><th>Model</th><th>Vendor</th><th>Params (total / active)</th><th>License</th><th>Engine support</th></tr>
+      <tr><td>GLM-5.2</td><td>Zhipu (Z.ai)</td><td>~754B / ~40B</td><td>Open weight</td><td>llama.cpp b10174, Jul 29</td></tr>
+      <tr><td>Laguna-S-2.1</td><td>Poolside</td><td>118B / 8B</td><td>OpenMDW-1.1</td><td>llama.cpp b10173, Jul 28</td></tr>
+    </table>
+    <p class="cite">Sources: <a href="https://github.com/ggml-org/llama.cpp/releases" target="_blank" rel="noopener">ggml-org/llama.cpp releases</a>; <a href="https://poolside.ai/blog/introducing-laguna-s-2-1" target="_blank" rel="noopener">poolside.ai/blog/introducing-laguna-s-2-1</a>.</p>
+
+    <p>Laguna-S-2.1 is the more interesting of the two on paper — Poolside ships official GGUF and MLX builds and pitches it as runnable on a single NVIDIA DGX Spark, which is a real local-deployment story. It's also 118B parameters, which is a DGX-Spark-and-256GB-of-unified-memory story, not a phone story. Both models land squarely in what the engine can now load, not what our 2.5 GB, phone-download catalog can use. That gap — "the engine caught up" and "the catalog grew" being two completely different sentences — has been true for months and stays true this week.</p>
+
+    <h2>The one model worth actually reading about this week doesn't load at all</h2>
+    <p>Nanbeige4.2-3B, published July 24, is a 3B-parameter model that beats Qwen3.5-9B and Gemma4-12B — three to four times its size — on GPQA Diamond, SWE-Bench Verified, and a math benchmark (HMMT-Feb-2026) by as much as 31 points. It does it by looping its own transformer layers twice per forward pass instead of adding parameters. It's Apache 2.0, a Q4_K_S build just clears our 2.5 GB budget, and it currently runs in exactly zero apps built on mainline llama.cpp, Ollama, or LM Studio — including this one — because that looping computation isn't a graph shape the mainline engine builds yet. We wrote the full story, with the benchmark table and the closed GitHub issue asking for support, <a href="nanbeige-looped-transformer-gate.html">here</a>.</p>
+
+    <h2>Catalog: unchanged</h2>
+    <p>20 models, same 9 categories as SLM Daily #5. Nothing added, nothing removed today. G9v3-3B (added July 27) and that edition's catalog fix &#8212; removing the oversized Qwen3.5 4B and IBM Granite 3.1 8B entries &#8212; both stay as they were. If Nanbeige4.2-3B's architecture lands in a mainline llama.cpp release, it goes to the top of the list for next time.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

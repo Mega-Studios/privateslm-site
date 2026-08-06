@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>28.9 million parameters. 512 KB of RAM. Zero bytes sent anywhere. — privateSLM blog</title>
+  <meta name="description" content="Independent builder slvDev got a 28.9-million-parameter language model generating text on an ESP32-S3 microcontroller — about 100x the size of the previous record on hardware like this — by keeping 25 million of those parameters in flash instead of RAM.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-01-esp32-tinystories-ple.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>28.9 million parameters. 512 KB of RAM. Zero bytes sent anywhere.</h1>
+    <div class="meta">August 1, 2026 · 7 min read</div>
+
+    <p>An independent builder's language model has 28.9 million parameters. It generates text on an $8 microcontroller with 512 KB of fast memory — roughly a sixteen-thousandth of the RAM in a base iPhone — at about 9.5 tokens a second, with nothing ever sent to a server. The previous record for a model this size on hardware like this was 260,000 parameters. This one is about a hundred times bigger, on a tighter memory budget.</p>
+
+    <p><strong>Source &amp; credit:</strong> this entire project — the model, the firmware, the writeup, the honesty about its own early mistakes — is the independent work of a builder going by <strong>slvDev</strong> (<a href="https://x.com/slvDev" target="_blank" rel="noopener">X</a> · <a href="https://www.linkedin.com/in/slvdev/" target="_blank" rel="noopener">LinkedIn</a>). Everything below is our summary and framing of their work; go read the original repo, it's genuinely worth your time: <a href="https://github.com/slvDev/esp32-ai" target="_blank" rel="noopener">github.com/slvDev/esp32-ai</a> (MIT license).</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/esp32-ple-demo.gif" alt="Animated demo: text generating live on a small screen wired to an ESP32-S3, one token at a time" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The builder's own demo footage — live, on-device generation, unedited. Via <a href="https://github.com/slvDev/esp32-ai" target="_blank" rel="noopener">slvDev/esp32-ai</a> on GitHub.</figcaption>
+    </figure>
+
+    <h2>The trick: most of a language model doesn't need fast memory</h2>
+    <p>An ESP32-S3 gives you 512 KB of SRAM. That's normally the whole budget a model has to fit in, which is why the field had been stuck around a quarter-million parameters on chips like this. slvDev's approach starts from a specific observation: most of a language model's parameters live in its embedding table, which the model only ever <em>reads</em> from — it doesn't compute on most of that table for a given token, it looks up a handful of rows. That means the table doesn't need to sit in fast memory at all. It can sit in the chip's much larger, much slower 16 MB of flash, with only the few rows a given token needs — about 450 bytes — pulled out per step. The small part of the model that actually does the reasoning work stays resident in SRAM, where it's needed on every token regardless.</p>
+
+    <pre><code>  SRAM  (fast, 512 KB)   the "thinking" core — used on every token
+  PSRAM (medium, 8 MB)   the output head — streamed sequentially
+  FLASH (slow, 16 MB)    the 25M-param embedding table — ~450 bytes read per token</code></pre>
+
+    <p>The idea itself, Per-Layer Embeddings, is Google's — it's how Gemma 3n and Gemma 4 fit larger effective vocabularies into phone-class memory. slvDev's contribution is applying it to a memory hierarchy roughly a thousand times smaller than a phone's, where it hadn't been tried before.</p>
+
+    <h2>The numbers, and the honesty around them</h2>
+    <p>28.9 million is a stored-parameter count, not a compute count, and the repo is explicit about the difference: 559K parameters form the dense SRAM-resident core, 3.1M form the PSRAM-streamed output head, and 25M form the flash-resident lookup table. Total file size at 4-bit: 14.9 MB. Measured speed: 9.5 tokens/sec end-to-end (what you'd actually see on the display, including serial output overhead) — 9.72 tokens/sec of pure model compute, or 102.9 ms per step.</p>
+
+    <p>The comparison the builder draws to the previous small-chip benchmark, DaveBben's <a href="https://github.com/DaveBben/esp32-llm" target="_blank" rel="noopener">esp32-llm</a> (260K params, also on an ESP32-S3) — a project we've referenced on this blog before — isn't just "bigger." It's about 110x the stored parameter count on a comparably tight or tighter fast-memory footprint, because almost all of the added size lives somewhere that was never counted against the SRAM budget in the first place.</p>
+
+    <p>What makes this a stronger claim than the usual DIY-demo writeup is the controlled comparison behind it. The repo's <code>RESULTS.md</code> reports a same-core, SRAM-fitting baseline model (no flash table at all) scoring 12.58 perplexity on held-out TinyStories text; the Per-Layer Embeddings version, with the exact same compute core plus the flash-resident table, scores 11.41 — a 9.3% perplexity reduction, reproduced across two random seeds with the gain (0.098 nats) about 16x the seed-to-seed noise (±0.006). A control arm that keeps the table but removes the per-layer routing scores worse than the baseline at low vocabulary size, which is the builder's own evidence that the table itself is doing the work, not some incidental side effect of the extra plumbing around it. The writeup also leaves in a mistake: an early parameter-accounting bug that inflated a previous number, corrected and documented in the commit history rather than quietly fixed. That's the kind of detail that makes the rest of the numbers more credible, not less.</p>
+
+    <h2>What it can't do — and why that's the point</h2>
+    <p>The model was trained purely on TinyStories, a synthetic children's-story dataset built specifically so small models can learn to write coherently. It writes short, simple stories. It cannot answer questions, follow instructions, write code, or state facts — and the builder is upfront that the memory-tiering trick doesn't change that, because those limits come from the tiny 559K-parameter compute core, not from how much table sits in flash. Their own guidance: quote the 28.9M number as "parameters resident via a memory-hierarchy split," not as a capability claim. This is a proof that an architecture fits in a place it previously couldn't, not a claim that a $8 chip now writes like a much bigger model.</p>
+
+    <h2>Why this matters beyond one microcontroller</h2>
+    <p>The underlying idea — keep most of a model's weights out of the memory that's actually expensive, and pull them from somewhere slower only when a specific token needs them — is the same shape of trade-off today's deep-dive on this blog runs into at phone scale, where an identical GGUF file's real RAM cost turns out to depend on how the operating system handles memory-mapped pages, not on the file's byte count. slvDev applied that idea by hand, in C, on a chip with no operating system at all. It's a smaller, more literal version of a trade-off every on-device inference engine is already making, whether or not it's explicit about it.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — seen another from-scratch model running on hardware this constrained? Point us at the repo.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple gave small developers free cloud AI on June 9. By July 10, one had already built a workaround. — privateSLM blog</title>
+  <meta name="description" content="Private Cloud Compute's 'free for small developers' entitlement counts lifetime downloads across every app you've ever shipped, not the app asking for AI. One ten-year App Store veteran got locked out over an unrelated app — and there's no paid tier to buy back in.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-25-pcc-two-million-trap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Apple gave small developers free cloud AI on June 9. By July 10, one had already built a workaround to Apple's own definition of "small."</h1>
+    <div class="meta">July 25, 2026 · 9 min read</div>
+
+    <p>On June 9, at WWDC, Apple announced that developers could get free access to Apple Foundation Models running on Private Cloud Compute (PCC) &#8212; Apple's server-side model tier for requests too heavy for the Neural Engine &#8212; with no infrastructure bill attached. One number stood between any developer and that entitlement: fewer than 2 million first-time App Store downloads. Not 2 million downloads of the app asking for AI access. Two million downloads across <em>every app that developer has ever shipped</em>, counted from the day each app first went live.</p>
+
+    <p>Guilherme Rambo, an App Store developer of over ten years, found out his account had already crossed that line &#8212; because of ChibiStudio, an app with nothing to do with AI. On July 10, instead of writing a blog post about it, he shipped a workaround.</p>
+
+    <h2>What the eligibility page actually says</h2>
+    <p>Apple's own developer page spells the requirement out in three bullets, and none of them scope the download count to the app requesting the entitlement:</p>
+
+    <blockquote>
+      "Access to PCC is available to developers who meet the following criteria: Are enrolled in the App Store Small Business Program. Have fewer than 2 million first-time app downloads from any of their apps on the App Store. Have the Private Cloud Compute entitlement assigned to their account."
+    </blockquote>
+    <p class="cite">Source: <a href="https://developer.apple.com/private-cloud-compute/" target="_blank" rel="noopener">developer.apple.com/private-cloud-compute</a>, verified directly 2026-07-25.</p>
+
+    <p>"Any of their apps" is doing all the work in that sentence. The Small Business Program itself is scoped the way you'd expect &#8212; enrollment requires under $1M in prior-year proceeds, a per-developer-account figure, which is a reasonable proxy for "small." But the PCC download count isn't a revenue figure and isn't scoped per app. It's a lifetime, cumulative, account-wide tally that keeps counting on apps that have nothing to do with the AI feature a developer is trying to ship, and never resets.</p>
+
+    <p>The same page states the consequence just as plainly:</p>
+    <blockquote>"If any app subsequently exceeds the 2 million first-time downloads threshold, or the developer is no longer enrolled in the App Store Small Business Program, the developer will be notified and must migrate to an alternative solution within 6 months."</blockquote>
+    <p>There's no mechanism described for checking your own standing proactively &#8212; you find out when Apple tells you, after the fact, with a six-month clock already running.</p>
+
+    <h2>Ten years, one unrelated app, disqualified</h2>
+    <p>Rambo's case is the one that surfaced publicly, because he's a well-known Apple developer (he blogs and posts as "insidegui"). His disqualifying app is ChibiStudio, which has been on the App Store for roughly a decade and has nothing to do with on-device AI &#8212; it simply sold enough copies over ten years to push his account's lifetime first-time-download count past 2 million. He posted about the disqualification on Mastodon, and the reaction from two of the more widely-read independent Apple commentators was immediate: John Gruber linked it on Daring Fireball, and Manton Reece wrote that reading about it was what reminded him why he'd applied to the Small Business Program in the first place.</p>
+    <p class="cite">Sources: Gui Rambo, <a href="https://mastodon.social/@_inside/116742529849306484" target="_blank" rel="noopener">mastodon.social/@_inside</a>; <a href="https://daringfireball.net/linked/2026/07/12/twomillionkit" target="_blank" rel="noopener">Daring Fireball, July 12, 2026</a>; <a href="https://www.manton.org/2026/07/12/twomillionkit-is-a-clever-solution.html" target="_blank" rel="noopener">manton.org, July 12, 2026</a>.</p>
+
+    <p>The unfairness here isn't hypothetical or a matter of interpretation. A developer who has spent ten years building a following, exactly the kind of track record that should make a developer <em>more</em> trustworthy to hand cloud compute to, gets treated identically to whether they'd shipped nothing at all: locked out, because the entitlement doesn't measure trust, engagement, or even current app performance. It measures a single cumulative counter that only ever goes up.</p>
+
+    <h2>No paid tier. No stated alternative.</h2>
+    <p>The obvious question is what a disqualified developer is supposed to do instead. Apple's own page says only "migrate to an alternative solution" &#8212; it doesn't say what that is. John Gruber's analysis of the policy, published a month before the TwoMillionKit episode, is direct about both the gap and what PCC access is actually for:</p>
+    <blockquote>"there's no way (yet?) to buy your way out of these limits. There are no paid API tiers for larger developers." … "for the OS 27 cycle at least — PCC is primarily a feature for Apple itself to use in Siri AI."</blockquote>
+    <p class="cite">Source: <a href="https://daringfireball.net/linked/2026/06/13/pcc-severely-limited-third-party-developers" target="_blank" rel="noopener">Daring Fireball, June 13, 2026</a>.</p>
+
+    <p>Put those two facts together and the "free tier for small developers" pitch reads differently. Third-party access to PCC isn't the product; it's spare capacity on infrastructure Apple built to run its own Siri features, handed out under a rule that happens to exclude paying for more of it. There's no amount of money a disqualified developer can offer Apple to keep using it &#8212; the only paths out are staying under a counter you don't control, or building around the entitlement entirely.</p>
+
+    <h2>The workaround: six commits, one narrow escape hatch</h2>
+    <p>Rambo's answer is <a href="https://github.com/insidegui/TwoMillionKit" target="_blank" rel="noopener">TwoMillionKit</a>, a Swift package published July 10, 2026 (six commits, all the same day). Its approach doesn't fight the entitlement check &#8212; it routes around the framework path that enforces it entirely. macOS 27 ships <code>fm</code>, a system command-line tool that talks to the same on-device/PCC-backed language model, and that CLI tool doesn't perform the same download-count gate the Swift framework API does. TwoMillionKit implements Apple's own <code>LanguageModel</code> protocol as a thin wrapper that shells out to <code>fm</code> and streams its output back through the normal Swift API surface &#8212; so from the calling app's point of view, it's a drop-in replacement for the entitled path, minus the entitlement.</p>
+
+    <p>It comes with a real, structural limitation that the README states outright: it only works for unsandboxed Mac apps. Any app distributed through the Mac App Store is sandboxed, and sandboxed processes can't shell out to arbitrary system binaries, so App Store Mac apps can't use it. iOS and iPadOS apps are sandboxed unconditionally &#8212; there's no unsandboxed distribution path on those platforms at all. That means the fix that exists today covers exactly one narrow slice of the affected population: Mac developers willing to distribute outside the Mac App Store. Every iOS developer in Rambo's position, almost certainly the majority of the developers this entitlement was pitched to, has no equivalent workaround. Rambo's own README calls it something to use "sparingly and at your own risk" &#8212; a stopgap, not a fix, and one Apple could close with a single framework update.</p>
+
+    <h2>Where this leaves privateSLM's own engine choice</h2>
+    <p>We build privateSLM around exactly this fork in the road, so it's worth being precise about which side of it we're on. Our on-device engine, <code>FoundationEngine</code>, talks to Apple's <em>on-device</em> system model directly:</p>
+
+    <pre><code>// Sources/FoundationEngine.swift
+if #available(iOS 26.0, macOS 26.0, *) {
+    sessionBox = instructions.isEmpty
+        ? LanguageModelSession()
+        : LanguageModelSession(instructions: instructions)
+}
+...
+let stream = session.streamResponse(to: prompt)</code></pre>
+
+    <p><code>LanguageModelSession</code> here runs against <code>SystemLanguageModel.default</code> on the Neural Engine, on the device, with no network call and no PCC entitlement involved at all &#8212; it's the same path Rambo's <em>own</em> apps can use freely regardless of ChibiStudio's download count, since the on-device tier was never gated by the 2-million-download rule to begin with. When a device or request needs more than the on-device model can do, we don't have a PCC fallback to lose access to &#8212; we fall back to a downloaded open-weight GGUF model through llama.cpp instead. That path doesn't have a lifetime download counter, a Small Business Program requirement, or a six-month migration clock attached to it, because no single company's account-wide standing decides whether it keeps working.</p>
+
+    <p>That's not a knock on Apple's on-device model, which is genuinely free, genuinely private, and genuinely not part of this story. It's specifically the <em>cloud</em> tier, the part of "Apple Intelligence" that leaves the device, that carries a disqualification risk no developer can fully see coming until Apple's notification arrives. Any product decision that leans on PCC as a permanent, free foundation is making a bet on a counter it doesn't control and can't check in real time. An open, downloadable engine doesn't carry that particular risk &#8212; it carries different ones (storage, download time, quantization quality), which is its own trade-off, but not this one.</p>
+
+    <h2>What would actually fix it</h2>
+    <p>None of the plausible fixes here are exotic. Scope the download count to the specific app requesting the entitlement, the way the feature is pitched, instead of the whole account. Offer literally any paid tier, so "no" doesn't have to mean "no path forward at any price." Or, short of either, expose the counter itself &#8212; an API a developer can query before shipping, instead of a notification that arrives after the fact with a clock already running. As of this writing, six weeks after the June 9 announcement and two weeks after TwoMillionKit went public, Apple has changed none of the three.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> &#8212; if you're a small developer who's hit (or is worried about hitting) the 2-million-download account-wide count, we'd like to hear how you're planning around it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI that isn't waiting on anyone's download counter</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

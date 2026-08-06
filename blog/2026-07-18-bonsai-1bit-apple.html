@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy — privateSLM blog</title>
+  <meta name="description" content="PrismML's Bonsai 27B shrinks a 54GB model to 3.9GB at 89.5% of full-precision quality — and reports say Apple is in talks to acquire the three-person team that built it. What 1.125-bit weights actually are, and why the model that might save Siri's on-device story can't run in privateSLM's engine either.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-18-bonsai-1bit-apple.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy</h1>
+    <div class="meta">July 18, 2026 · 9 min read</div>
+
+    <p>PrismML's Bonsai 27B takes a 54 GB model and ships it at 3.9 GB — a 14.2x reduction — while keeping 89.5% of its full-precision benchmark score. It was released July 14. Within 24 hours, three separate outlets reported that Apple, the company whose entire on-device AI pitch rests on "your model runs on your phone," is in talks to acquire the three-person team that built it.</p>
+
+    <p>Nobody has confirmed a deal. But the story underneath the acquisition rumor is the one worth sitting with: the sharpest compression result in on-device AI this year didn't come out of Cupertino, Mountain View, or Menlo Park. It came out of a Caltech spinout small enough to fit around one table, and the company that markets private, on-device intelligence harder than anyone in the industry apparently can't do this itself.</p>
+
+    <h2>What 1.125 bits per weight actually means</h2>
+    <p>Bonsai 27B is a re-encoding of Alibaba's Qwen3.6-27B — same 64-block hybrid-attention architecture (75% linear attention, 25% full attention), same SwiGLU MLP, same RoPE and RMSNorm — but every weight is stored as a single sign bit, +1 or −1, with 128 weights sharing one FP16 group-wise scale factor. That's "binary g128" in PrismML's own terminology, and it works out to 1.125 effective bits per weight once you account for the shared scales. For comparison, the GGUF quantizations privateSLM ships run Q4_K_M — roughly 4.5 bits per weight, already considered aggressive by mainstream standards. Bonsai is exactly four times smaller than that, per weight, on paper.</p>
+
+    <p>The important distinction, and the one that makes this different from every quant-label story we've written before: PrismML says this is <strong>not</strong> a full-precision model quantized down after the fact. It's trained end-to-end at low bit-width — "native binary language weights," per PrismML's own announcement — rather than the more familiar approach (train big, then round the weights down to fit a smaller box, the thing bartowski, unsloth and every other GGUF quantizer does to existing checkpoints). Post-hoc quantization below 2 bits usually wrecks a model. Native low-bit training is a different bet entirely, and the benchmark numbers are the evidence for whether that bet paid off.</p>
+
+    <h2>The numbers, from PrismML's own model card</h2>
+    <table>
+      <tr><th>Variant</th><th>Bits/weight</th><th>Size</th><th>Thinking avg.</th><th>vs. FP16</th></tr>
+      <tr><td>Qwen3.6-27B FP16 (baseline)</td><td>16.0</td><td>54 GB</td><td>85.07</td><td>100%</td></tr>
+      <tr><td>Bonsai 27B, 1-bit</td><td>1.125</td><td>3.9 GB</td><td>76.11</td><td>89.5%</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://huggingface.co/prism-ml/Bonsai-27B-mlx-1bit" target="_blank" rel="noopener">huggingface.co/prism-ml/Bonsai-27B-mlx-1bit</a>, model card benchmark table.</p>
+
+    <p>Broken out by category, the pattern holds roughly steady: math scores 91.66 versus 95.33 for FP16, coding scores 81.88 versus 88.74. Nothing collapses to zero, which is the failure mode you'd expect from 1-bit weights done carelessly. PrismML's own announcement page states the ternary variant (a slightly larger, 5.9 GB, {-1, 0, +1} encoding) keeps "more than 95%" of full-precision performance, with the 1-bit build at "more than 90%" — close enough to the model card's 89.5% that we're not treating the small gap as a discrepancy worth chasing, just two slightly different rounding conventions from the same team.</p>
+
+    <p>On throughput, PrismML reports 11 tokens/second on an iPhone 17 Pro and 87 tokens/second on an M5 Max laptop for the 1-bit build. A separate pass at the Hugging Face model card lists 44.2 tok/s on an "M5 Pro" and 104.8 tok/s on an H100 — different hardware tiers, not a contradiction, just two different benchmark runs published in two different places. Either way: a 27-billion-parameter model, complete with 262K-token context (using 4-bit KV-cache quantization), generating text on a phone at a usable clip, in under 4 GB.</p>
+
+    <h2>The Apple story</h2>
+    <p>MLQ News reported on July 15 that Apple is in "exploratory talks" with PrismML, quoting PrismML CEO Babak Hassibi as saying "things are progressing nicely" while declining to characterize where the discussions would lead. 9to5Mac's coverage the same day confirmed Apple "had held talks with PrismML, whose technology can shrink large AI models to run directly on iPhones, without servers" — while explicitly noting no deal or valuation has been disclosed, and the nature of any arrangement (acquisition, licensing, or something else) "remains unclear."</p>
+
+    <p>The motive both outlets point to is the same one privacy-first users already assume Apple has solved: reducing Siri's dependence on cloud-hosted models — reportedly Google's Gemini — for on-device requests. If that's the actual driver, it's a notable admission by implication. Apple's own third-generation Foundation Models, announced at WWDC 2026 (AFM 3 Core Advanced, a 20B-parameter sparse model with 1–4B active parameters), are real, but Apple hasn't shipped anything close to Bonsai's compression ratio on a 27B-class dense model, and the framework that would let third parties even touch AFM 3 directly is <a href="https://machinelearning.apple.com/research/introducing-third-generation-of-apple-foundation-models" target="_blank" rel="noopener">still described as opening "later this summer"</a> rather than already open.</p>
+
+    <p>PrismML itself, for context, isn't a garage operation exactly — the announcement credits founding support from Khosla Ventures, Cerberus, and Google, with continuing backing from Samsung, and training was done on Google's own v5 TPUs. But the team is a handful of Caltech researchers, and the company only opened its 1-bit weights under Apache 2.0 on the same day the acquisition rumor broke. Worth holding two facts at once here without resolving the tension between them: Apple, a company with one of the largest AI research budgets on Earth, going outside for a specific compression technique it apparently doesn't have in-house.</p>
+
+    <h2>The irony privateSLM can't ignore: it's the wrong format</h2>
+    <p>Here's the part that matters most for anyone actually trying to run this today, including us. Bonsai 27B ships as an MLX model — Apple's own on-device ML framework, built for its own Silicon — not as a GGUF. privateSLM's engine, like every llama.cpp-based app, reads GGUF files through a fixed set of recognized architecture tags. MLX weights, no matter how architecturally similar to something llama.cpp already supports, aren't a format llama.cpp loads at all. There's no conversion path we're aware of for a native-1-bit binary encoding like this one; it isn't a matter of requantizing, the way a HF safetensors checkpoint gets requantized into a GGUF.</p>
+
+    <p>We've written before about architecture-tag fragmentation inside the GGUF ecosystem — models that fail to load because a specific <code>LLM_ARCH_*</code> tag isn't in a given llama.cpp build. This is a level up from that: an entirely separate inference-format split, MLX versus GGUF, with genuinely different techniques (native low-bit training versus post-hoc quantization) landing on opposite sides of it. If Apple does end up owning this technology, the likeliest outcome for most third-party apps isn't "GGUF gets a Bonsai-compatible loader" — it's "this ships inside Apple's own Foundation Models stack, quietly, the way AFM already does," available to apps like privateSLM only through whatever API surface Apple exposes, on Apple's schedule.</p>
+
+    <h2>What this actually changes</h2>
+    <p>Nothing ships in privateSLM's catalog today because of this post — there's no GGUF to add, no download URL to verify. What it does change is the baseline for what "efficient on-device model" means going into the second half of 2026. A 27B model at 3.9 GB, running at double-digit tokens per second on a phone, sets a bar that the Q4_K_M GGUFs in our own catalog — 1.5 to 8 GB for models a fraction of Bonsai's parameter count — don't come close to matching on a bits-per-parameter basis. Whether that pressure shows up as a GGUF-native answer to native low-bit training, or as Apple absorbing PrismML's technique into a closed framework, is the thing worth watching. Either way, the fact that it's a three-person team forcing the question is the story.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've found an MLX-to-GGUF conversion path for binary-weight models, we want to hear about it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

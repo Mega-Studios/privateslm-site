@@ -10,6 +10,25 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- 28.9 million parameters. 512 KB of RAM. Zero bytes sent anywhere. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-01-esp32-tinystories-ple.html
+- Same file. Same bytes. Nearly 6x the RAM.: https://www.privateslm.dev/blog/2026-08-01-mmap-ram-gap.html
+- SLM Daily #7 (catalog digest): https://www.privateslm.dev/blog/2026-08-01-slm-daily-7.html
+- A 3B model just beat a 12B model by 31 points. It can't run in llama.cpp, Ollama, or LM Studio.: https://www.privateslm.dev/blog/nanbeige-looped-transformer-gate.html
+- SLM Daily #6 (catalog digest): https://www.privateslm.dev/blog/2026-07-30-slm-daily-6.html
+- Your phone's AI chip is doing up to 10x less than it could — and it's not the chip's fault: https://www.privateslm.dev/blog/2026-07-27-npu-scheduling-gap.html
+- SLM Daily #5 (catalog digest): https://www.privateslm.dev/blog/2026-07-27-slm-daily-5.html
+- Apple gave small developers free cloud AI on June 9. By July 10, one had already built a workaround to Apple's own definition of "small.": https://www.privateslm.dev/blog/2026-07-25-pcc-two-million-trap.html
+- SLM Daily #4 (catalog digest): https://www.privateslm.dev/blog/2026-07-25-slm-daily-4.html
+- One skipped code path made small models 3.6x slower to decode on every CUDA GPU: https://www.privateslm.dev/blog/2026-07-23-cuda-embedding-tax.html
+- One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-23-rkllm-docker.html
+- Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — on the same model: https://www.privateslm.dev/blog/2026-07-22-tokenizer-tax.html
+- Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU: https://www.privateslm.dev/blog/2026-07-20-xiaomi-robotics-1.html
+- Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model: https://www.privateslm.dev/blog/2026-07-20-energy-cost-of-open-models.html
+- One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-20-strix-halo-home-lab.html
+- Nvidia's newest AI chip shipped with 75% less memory than its own flagship. Your next phone is on the same curve.: https://www.privateslm.dev/blog/2026-07-19-dram-shortage-edge-ai.html
+- Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy: https://www.privateslm.dev/blog/2026-07-18-bonsai-1bit-apple.html
+- He put his home AI cluster and GPT-5.5 behind the same URL, then benchmarked both (Edge in the Wild): https://www.privateslm.dev/blog/2026-07-18-strix-halo-cluster.html
+- SLM Daily #3 (catalog digest): https://www.privateslm.dev/blog/2026-07-18-slm-daily-3.html
 - 10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only (video): https://www.privateslm.dev/blog/jetson-top10.html
 - From a $5 chip to an NVIDIA award: 5 robots running AI with zero internet (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics-top5.html
 - This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke. (video, w/ MegaBrain): https://www.privateslm.dev/blog/slm-diy-robotics.html

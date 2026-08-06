@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One skipped code path made small models 3.6x slower to decode on every CUDA GPU — privateSLM blog</title>
+  <meta name="description" content="llama.cpp release b10089 (July 22, 2026) closed a years-old gap: CUDA couldn't run GET_ROWS on k-quantized embedding tables, so it silently fell back to copying the whole embedding matrix to the CPU every token. Fixing it took Qwen3-1.7B from 6.18 to 1.72 ms/token — 3.6x faster. Metal, Vulkan, CPU and SYCL never had the bug.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-07-23-cuda-embedding-tax.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>One skipped code path made small models 3.6x slower to decode on every CUDA GPU</h1>
+    <div class="meta">July 23, 2026 · 8 min read</div>
+
+    <p>At 19:45 UTC on July 22, llama.cpp shipped release <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10089" target="_blank" rel="noopener">b10089</a>, and one contributor's own benchmark number tells you everything: decoding Qwen3-1.7B on CUDA went from <strong>6.18 milliseconds a token to 1.72</strong> — 3.6x faster, on identical hardware, with no change to the model. The bug wasn't in the model. It was a single missing code path in llama.cpp's CUDA backend, and Metal, Vulkan, CPU and SYCL never had it.</p>
+
+    <p>That's the part worth sitting with. This wasn't a new optimization or a clever kernel trick — it was llama.cpp's <em>other three backends</em> already doing the right thing, for who knows how long, while CUDA quietly took the slow path on every single decode step.</p>
+
+    <h2>What GET_ROWS actually does</h2>
+    <p>Every token you generate starts with a lookup: take the token's ID, pull its row out of the embedding matrix. That operation is called <code>GET_ROWS</code> in GGML's compute graph, and on a quantized GGUF — the Q4_K_M-style files this blog writes about constantly — that embedding matrix (<code>token_embd</code>) is itself stored in a quantized format, commonly q6_K for a Q4_K_M checkpoint. To read a row out of a q6_K tensor, the backend needs a dequantizing kernel that understands the q6_K layout.</p>
+
+    <p>CUDA didn't have one — not for q6_K, not for any of the other k-quants (q2_K through q6_K), not for the nine i-quant variants, not for mxfp4. When GGML's scheduler hit a <code>GET_ROWS</code> op it couldn't run on a quantized type, it didn't error out — it fell back, copying the entire embedding matrix to host memory and doing the lookup on the CPU instead, then shipping the result back to the GPU. Every token. On every CUDA card. The PR's own description puts it plainly: these lookups got "kicked out of the graph," forcing a slower host round-trip than even Vulkan managed on the identical hardware.</p>
+
+    <p>K-quants aren't new. Contributor ikawrakow introduced the whole q2_K–q6_K family in <a href="https://github.com/ggml-org/llama.cpp/pull/1684" target="_blank" rel="noopener">PR #1684</a>, merged June 5, 2023, and that original PR already shipped CUDA kernels for them — the author's own numbers in that thread benchmark Q2_K and Q3_K token prediction directly on an RTX 4080. CUDA has had fast matmul kernels for k-quants since the format existed, three years before this fix. What it didn't have — for how long exactly, the b10089 release notes don't say — was the much narrower <code>GET_ROWS</code> op used specifically for embedding-table lookups. The PR's own description only establishes that the gap was old enough to have a name and a standing workaround: skip the test on CUDA and move on.</p>
+
+    <h2>The fix, and the receipts</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/25962" target="_blank" rel="noopener">PR #25962</a>, authored by contributor <strong>@pwilkin</strong>, factored the existing super-block dequantizer functions out of <code>convert.cu</code> into shared device-side helpers, then wired them into a new <code>k_get_rows_kq</code> kernel with quant-specific thread layouts (32 threads for q4_K, 64 for the others). No new tests were written for the fix — the existing <code>test-backend-ops</code> suite already covered <code>GET_ROWS</code> across every quant type; those cases simply flipped from "skipped on CUDA" to "passing against the CPU reference," which is its own quiet confirmation of how long this specific gap had a name and a known workaround (skip the test) rather than a fix.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <svg viewBox="0 0 640 150" width="100%" style="max-width:640px;font-family:inherit;">
+      <text x="0" y="16" font-size="12" fill="#888">Qwen3-1.7B decode time per token, CUDA — before/after PR #25962</text>
+      <g font-size="13">
+        <rect x="0" y="30" width="400" height="30" fill="#8E8EAE"></rect>
+        <text x="406" y="50" fill="currentColor">Before (b10088 and earlier) — 6.18 ms/token</text>
+        <rect x="0" y="70" width="111" height="30" fill="#5AD46A"></rect>
+        <text x="117" y="90" fill="currentColor">After (b10089) — 1.72 ms/token</text>
+      </g>
+      <text x="0" y="130" font-size="11" fill="#888">3.6x faster decode. Same GPU, same model, same quant file.</text>
+      <text x="0" y="145" font-size="11" fill="#888">Source: llama.cpp PR #25962 (author's own benchmark), merged into release b10089, 2026-07-22</text>
+    </svg>
+    </div>
+
+    <h2>Why small models paid the biggest tax</h2>
+    <p>Here's the part that matters for exactly the size of model this blog covers. The cost of that CPU round-trip — copy an entire embedding matrix, do the lookup, copy the result back — is roughly <em>fixed</em> per token, regardless of how big the model is. A 70B model's actual per-token matmul work dwarfs that fixed overhead, so the bug was close to a rounding error for it. A 1-4B phone-and-edge-class model does far less real compute per token in absolute terms — which means the same fixed overhead ate a much bigger slice of its total decode time. The bug didn't just slow CUDA down uniformly. It slowed CUDA down worst for the exact class of model people run because they want it to be fast: small ones.</p>
+
+    <p>That's also precisely backwards from the usual small-model pitch. The whole argument for a 1-4B model over a 70B one is that less compute per token should mean more speed. A silent scheduler fallback like this one quietly claws part of that advantage back — not because the small model got slower in any way its own benchmark card would show, but because the engine running it was taking a detour nobody could see from the outside. A tok/s number on a llama-bench run captures the net effect, but nothing in a typical benchmark table would have told you a chunk of that number was CPU-copy overhead rather than GPU compute.</p>
+
+    <h2>The backend that never had the problem</h2>
+    <p>The part of the release notes easy to skim past: this fix brings CUDA to "complete parity with CPU, Metal, Vulkan, and SYCL backends" on <code>GET_ROWS</code> type coverage. Read that the other way around — CPU, Metal, Vulkan and SYCL were already there. If you've been running a GGUF chat model through llama.cpp's Metal backend on a Mac or an iPhone, this specific detour was never yours to pay. It's a genuinely CUDA-specific gap, which is a useful, narrow claim — not an argument that Nvidia hardware is slower in general, just that this one code path was incomplete on this one backend until yesterday.</p>
+
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;margin:1rem 0;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Backend</th><th style="padding:6px 10px;">GET_ROWS on k-quants/i-quants/mxfp4, before b10089</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">CPU</td><td style="padding:6px 10px;">Full support</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Metal</td><td style="padding:6px 10px;">Full support</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Vulkan</td><td style="padding:6px 10px;">Full support</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">SYCL</td><td style="padding:6px 10px;">Full support</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">CUDA</td><td style="padding:6px 10px;">Host fallback on every token — fixed in b10089</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What this means if you're running a rig, not a phone</h2>
+    <p>privateSLM's engine runs on Apple Silicon — CPU and Metal, never CUDA — so this specific bug was never in our own users' path. But a big share of this blog's audience isn't reading on an iPhone: it's the same crowd we've written about running <a href="2026-07-20-strix-halo-home-lab.html">a Beelink mini-PC serving 32 concurrent chat sessions</a> or <a href="2026-07-18-strix-halo-cluster.html">a two-node home-lab cluster</a>, plus anyone on r/LocalLLaMA with an Nvidia card doing the same thing this blog's whole thesis is about — keeping inference local instead of routing it through someone else's API. If that's your box, the fix is a one-line ask: update to llama.cpp b10089 or newer, and re-run whatever benchmark you last trusted. If you built your capacity-planning numbers on a pre-b10089 CUDA build — how many concurrent chat clients your home server can hold, what tok/s you quoted a friend — those numbers were measuring the bug as much as the hardware.</p>
+
+    <pre><code># Check what you're actually running
+./llama-cli --version
+
+# Reproduce the before/after yourself on your own GPU + model
+./llama-bench -m your-model-Q4_K_M.gguf -p 0 -n 128 -r 5</code></pre>
+
+    <p>If <code>llama-cli --version</code> reports a build older than b10089 and you're on CUDA, that single number is the gap between the benchmark you have and the one you'd get after a rebuild.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've re-run llama-bench before and after b10089 on your own card, we want that number.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat, no server to benchmark</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
