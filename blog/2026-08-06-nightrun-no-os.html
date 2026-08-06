@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Raspberry Pi boots straight into a chat prompt. There's no operating system underneath it. — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: NightRun is a UEFI application that IS the machine's first and only program — no Linux kernel, no scheduler, no network stack — loading a quantized LLM straight into RAM and serving a chat interface on the bare framebuffer. Runs on a real Raspberry Pi 5 and x86_64 PCs, MIT-licensed, built by a single developer.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-06-nightrun-no-os.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>A Raspberry Pi boots straight into a chat prompt. There's no operating system underneath it.</h1>
+    <div class="meta">August 6, 2026 · 7 min read</div>
+
+    <p>Every on-device AI app we've written about here, including our own, still needs an operating system to run: a kernel, a scheduler, a filesystem, a network stack sitting between the model and the metal. A developer going by <strong>hardrave</strong> deleted that whole layer. <a href="https://github.com/hardrave/NIGHTRUN" target="_blank" rel="noopener">NightRun</a> is a single UEFI application — the first and only thing that runs after firmware handoff — that loads a quantized model straight into RAM and puts a chat interface directly on the screen's framebuffer. No Linux. No init system. Nothing between the model and the hardware but the code hardrave wrote.</p>
+
+    <p><strong>Edge in the Wild</strong> is our occasional spotlight on real builders running AI on hardware they own. This one: NightRun, MIT-licensed, on GitHub at <a href="https://github.com/hardrave/NIGHTRUN" target="_blank" rel="noopener">github.com/hardrave/NIGHTRUN</a>, covered by <a href="https://www.cnx-software.com/2026/07/30/nightrun-uefi-application-boots-a-local-llm-on-raspberry-pi-5-and-x86-pcs-without-an-os/" target="_blank" rel="noopener">CNX Software on July 30, 2026</a>. Screenshots and demo footage below are the project's own, via its GitHub repo and CNX Software's coverage.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/nightrun-demo.gif" alt="Animated demo of NightRun's framebuffer chat interface generating a response with no operating system running underneath it" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">NightRun's chat interface, running directly on the framebuffer — this is the entire software stack. Demo GIF from the <a href="https://github.com/hardrave/NIGHTRUN" target="_blank" rel="noopener">project's own repo</a>, via CNX Software.</figcaption>
+    </figure>
+
+    <h2>What "no operating system" actually means here</h2>
+    <p>NightRun is a UEFI application, the same class of program as your motherboard's boot menu or a Windows installer's early loader — code the firmware runs directly, before anything resembling an OS exists. Written in Rust, it targets two real, different platforms: any 64-bit UEFI x86_64 machine (tested in QEMU/OVMF, Secure Boot disabled) and a genuine Raspberry Pi 5, validated on real D0-stepping 8GB boards, not just emulated. There's no process table, no memory protection between "the app" and "the system" because there is no system — NightRun's inference loop, its model weights, and its framebuffer output all share one flat address space it manages itself.</p>
+
+    <p>That's a real constraint, not a gimmick: normal LLM runtimes lean on an OS for memory-mapped file loading, thread scheduling across cores, and a display server to draw a UI. NightRun's README describes doing all of that itself — reading the model file directly off boot media into RAM, running inference synchronously, and drawing character glyphs directly into the UEFI graphics output protocol's frame buffer. Every layer a typical llama.cpp deployment gets from Linux for free, this project had to write by hand or do without.</p>
+
+    <h2>What actually runs, and how fast</h2>
+    <p>The README lists four supported quantized chat models, chosen specifically to fit inside boards with no swap, no page cache, and RAM measured in single-digit gigabytes:</p>
+
+    <table>
+      <tr><th>Model</th><th>Quant</th><th>Min RAM</th></tr>
+      <tr><td>Llama 3.2 1B</td><td>Q8_0</td><td>4 GB</td></tr>
+      <tr><td>Llama 3.2 3B</td><td>Q4_K_M</td><td>6 GB</td></tr>
+      <tr><td>Granite 4.1 3B</td><td>Q4_K_M</td><td>6 GB</td></tr>
+      <tr><td>Qwen3 4B</td><td>Q4_K_M</td><td>8 GB</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://github.com/hardrave/NIGHTRUN" target="_blank" rel="noopener">github.com/hardrave/NIGHTRUN</a> README, cross-checked against <a href="https://www.cnx-software.com/2026/07/30/nightrun-uefi-application-boots-a-local-llm-on-raspberry-pi-5-and-x86-pcs-without-an-os/" target="_blank" rel="noopener">CNX Software's coverage</a>.</p>
+
+    <p>Per CNX Software's hands-on numbers: Llama 3.2 1B at Q8_0 decodes at roughly 20 tokens/second under QEMU on x86_64 — a virtualized environment, so treat that one as a ballpark, not a hardware-floor number. The real-hardware figure is the one that matters more for an edge-AI audience: Granite 4.1 3B at Q4_K_M generates about <strong>3.0 tokens/second</strong> on an actual Raspberry Pi 5, direct from firmware, with nothing else running on the board at all — not a background service, not a compositor, not a single other process competing for the same four Cortex-A76 cores.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/nightrun-granite-chat.png" alt="Screenshot of NightRun generating a response with the Granite 4.1 3B model in its built-in framebuffer chat interface, with live inference statistics in the status bar" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">Granite 4.1 3B generating a response directly on the framebuffer, live inference stats in the status bar. Screenshot via <a href="https://www.cnx-software.com/2026/07/30/nightrun-uefi-application-boots-a-local-llm-on-raspberry-pi-5-and-x86-pcs-without-an-os/" target="_blank" rel="noopener">CNX Software</a>, originally from the project's own repo.</figcaption>
+    </figure>
+
+    <h2>The detail that made us look twice</h2>
+    <p>CNX Software's writeup includes a line worth sitting with: "the majority of the code for the NightRun project was written using Claude Code with the Fable 5 model." A project whose entire point is removing every layer of software between a model and the hardware it runs on was itself substantially written by a different AI model. That's not a contradiction — an LLM writing Rust that boots bare metal and an LLM answering chat prompts on that same bare metal are different jobs — but it's a genuinely of-the-moment detail for a piece about on-device AI, and honest enough that neither the builder nor CNX Software buried it.</p>
+
+    <h2>Why this is the extreme end of the same bet</h2>
+    <p>privateSLM still needs iOS or macOS underneath it — Apple's Foundation Models framework and our llama.cpp fallback both assume a real operating system, a real process, real memory protection. NightRun is what "the model comes to your data" looks like with every layer between the two removed on principle: no OS to patch, no background telemetry process that could phone home even by accident, no scheduler deciding your inference thread waits its turn. You lose a lot doing that — no filesystem beyond what's needed to read one model file, no networking stack at all, one model loaded at a time with no way to switch without rebooting. But it's proof that "on-device" has a floor most of us never go anywhere near, and that floor runs a real 3B model, on real Raspberry Pi hardware, at a real, if modest, 3 tokens a second.</p>
+
+    <p><strong>Source / credit:</strong> NightRun is the independent work of GitHub user <a href="https://github.com/hardrave" target="_blank" rel="noopener">hardrave</a>, MIT-licensed, at <a href="https://github.com/hardrave/NIGHTRUN" target="_blank" rel="noopener">github.com/hardrave/NIGHTRUN</a>. Technical details and benchmark figures cross-checked against <a href="https://www.cnx-software.com/2026/07/30/nightrun-uefi-application-boots-a-local-llm-on-raspberry-pi-5-and-x86-pcs-without-an-os/" target="_blank" rel="noopener">CNX Software's July 30, 2026 coverage</a>. Screenshots and demo GIF are the project's own.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — ever stripped a project down past the point where "obviously" you need an OS? We'd like to hear about it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
