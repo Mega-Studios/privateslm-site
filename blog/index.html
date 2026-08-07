@@ -1,1 +1,211 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — privateSLM · Small language models &amp; on-device AI</title>
+  <meta name="description" content="Articles about small language models (SLMs), on-device AI, Apple Intelligence and private machine learning.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="wrap">
+      <div class="kicker">Field notes</div>
+      <h1 class="page-title">The on-device AI blog</h1>
+      <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
+
+      <div class="post-list">
+        <a class="post-card" href="2026-08-07-taalas-model-silicon.html">
+          <div class="meta">August 7, 2026 · 8 min read</div>
+          <h3>73x faster than an Nvidia H200, at a tenth of the power — because the model isn't loaded. It's the chip.</h3>
+          <p>AMD just paid an undisclosed sum for Taalas, whose test chip serves Llama 3.1 8B by casting the model's weights directly into silicon instead of loading them from memory. What that means for engines — like ours — built to run whichever model you actually download.</p>
+        </a>
+        <a class="post-card" href="2026-08-06-nightrun-no-os.html">
+          <div class="meta">August 6, 2026 · 7 min read</div>
+          <h3>A Raspberry Pi boots straight into a chat prompt. There's no operating system underneath it.</h3>
+          <p>Edge in the Wild: NightRun is a UEFI application that IS the machine's first and only program — no Linux, no scheduler, no network stack — loading a quantized model straight into RAM and serving chat on the bare framebuffer. Real Raspberry Pi 5 hardware, MIT-licensed.</p>
+        </a>
+        <a class="post-card" href="2026-08-06-slm-daily-8.html">
+          <div class="meta">August 6, 2026 · 5 min read</div>
+          <h3>SLM Daily #8: a 2.6B model with a 128K context window, verified at 1.68 GB</h3>
+          <p>Liquid AI's LFM2.5-2.6B lands in the catalog five days after its own release. llama.cpp hit tag b10290 this week, all of it multi-token-prediction and MoE work irrelevant to a phone.</p>
+        </a>
+        <a class="post-card" href="2026-08-01-esp32-tinystories-ple.html">
+          <div class="meta">August 1, 2026 · 7 min read</div>
+          <h3>28.9 million parameters. 512 KB of RAM. Zero bytes sent anywhere.</h3>
+          <p>Independent builder slvDev got a 28.9M-parameter language model running on an $8 ESP32-S3 microcontroller — about 100x the previous record on hardware like this — by keeping 25 million of those parameters in flash instead of RAM.</p>
+        </a>
+        <a class="post-card" href="2026-08-01-mmap-ram-gap.html">
+          <div class="meta">August 1, 2026 · 9 min read</div>
+          <h3>Same file. Same bytes. Nearly 6x the RAM.</h3>
+          <p>A byte-identical 355 MB GGUF costs 56 MB of RAM on an iPhone 13 Mini and 330 MB on a Galaxy A56, through the exact same inference engine. On-device memory budgets aren't a model property — they're an OS property.</p>
+        </a>
+        <a class="post-card" href="2026-08-01-slm-daily-7.html">
+          <div class="meta">August 1, 2026 · 5 min read</div>
+          <h3>Q4_K_M was 184 MB too big. The next quant down wasn't.</h3>
+          <p>SLM Daily #7: llama.cpp cut ten releases in one day and picked up a phone-sized architecture. Its default quant missed our size cap — a smaller one didn't, and it's our first catalog addition since July 27.</p>
+        </a>
+        <a class="post-card" href="nanbeige-looped-transformer-gate.html">
+          <div class="meta">July 30, 2026 · 10 min read</div>
+          <h3>A 3B model just beat a 12B model by 31 points. It can't run in llama.cpp, Ollama, or LM Studio.</h3>
+          <p>Nanbeige4.2-3B beats models three to four times its size by looping its own transformer layers twice instead of adding parameters — a computation mainline llama.cpp can't build yet, gated behind a private fork and a closed GitHub issue.</p>
+        </a>
+        <a class="post-card" href="2026-07-30-slm-daily-6.html">
+          <div class="meta">July 30, 2026 · 5 min read</div>
+          <h3>Two new architectures landed in our engine this week. Both are over 100B parameters.</h3>
+          <p>SLM Daily #6: GLM-5.2 and Laguna-S-2.1 support landed in llama.cpp this week — 754B and 118B parameters, neither phone-sized. Zero catalog changes.</p>
+        </a>
+        <a class="post-card" href="2026-07-27-npu-scheduling-gap.html">
+          <div class="meta">July 27, 2026 · 10 min read</div>
+          <h3>Your phone's AI chip is doing up to 10x less than it could — and it's not the chip's fault</h3>
+          <p>Two independent 2026 papers find phone NPUs losing up to 10x their usable throughput and up to 65% of their achievable energy efficiency to scheduling code, not weak silicon — and it's playing out in llama.cpp's own repo right now.</p>
+        </a>
+        <a class="post-card" href="2026-07-27-slm-daily-5.html">
+          <div class="meta">July 27, 2026 · 6 min read</div>
+          <h3>Ranked #1 of 44 open models under 4B. Built by a team with no track record.</h3>
+          <p>SLM Daily #5: G9v3-3B tops Artificial Analysis's Intelligence Index for open-weight models under 4B params — we verified it and added it anyway. Plus llama.cpp's architecture count jumped from 135 to 171, and a size-cap bug we've now caught twice.</p>
+        </a>
+        <a class="post-card" href="2026-07-25-pcc-two-million-trap.html">
+          <div class="meta">July 25, 2026 · 9 min read</div>
+          <h3>Apple gave small developers free cloud AI on June 9. By July 10, one had already built a workaround to Apple's own definition of "small."</h3>
+          <p>Private Cloud Compute's free tier counts lifetime downloads across every app you've ever shipped, not the one asking for AI. A ten-year App Store veteran got locked out over an unrelated app — and there's no paid tier to buy back in.</p>
+        </a>
+        <a class="post-card" href="2026-07-25-slm-daily-4.html">
+          <div class="meta">July 25, 2026 · 6 min read</div>
+          <h3>SLM Daily #4: a model from a lab nobody's heard of just scored 5x its size class's median. We're not shipping it.</h3>
+          <p>G9v3-3B cleared every mechanical bar we check for and posted a genuinely independent benchmark score 5x its peer median — plus what else we checked this edition and why nothing else made the cut.</p>
+        </a>
+        <a class="post-card" href="2026-07-23-cuda-embedding-tax.html">
+          <div class="meta">July 23, 2026 · 8 min read</div>
+          <h3>One skipped code path made small models 3.6x slower to decode on every CUDA GPU</h3>
+          <p>llama.cpp release b10089 closed a gap that had been there since k-quants shipped: CUDA couldn't run GET_ROWS on quantized embedding tables, so it silently fell back to a CPU round-trip on every token. Fixing it took Qwen3-1.7B from 6.18 to 1.72 ms/token — 3.6x faster. Metal, Vulkan, CPU and SYCL never had the bug.</p>
+        </a>
+        <a class="post-card" href="2026-07-23-rkllm-docker.html">
+          <div class="meta">July 23, 2026 · 7 min read</div>
+          <h3>One Docker command turns a Rockchip NPU board into a 19.55 tok/s chat server</h3>
+          <p>Edge in the Wild: Hanzo Huang's rkllm-docker packages five chat models for Rockchip's RK3576/RK3588 NPU boards behind a single docker run — Qwen2.5-1.5B hits 19.55 tok/s at 1.6GB RAM, and the smaller W4A16 quant beats W8A8 on both speed and memory, every time.</p>
+        </a>
+        <a class="post-card" href="2026-07-22-tokenizer-tax.html">
+          <div class="meta">July 22, 2026 · 9 min read</div>
+          <h3>Doubling a tokenizer's vocabulary made Thai 4x cheaper and English 9% slower — on the same model</h3>
+          <p>Liquid AI's July 21 technical report puts a real number on the "tokenizer tax": expanding LFM2.5-8B-A1B's vocabulary from 65K to 128K tokens cut Thai token counts by up to 4x — and slowed decoding for every language, including English, by 7 to 10%, forever, on every token.</p>
+        </a>
+        <a class="post-card" href="2026-07-20-xiaomi-robotics-1.html">
+          <div class="meta">July 20, 2026 · 9 min read</div>
+          <h3>Xiaomi's robot brain is 4.7B parameters and answers in 80 milliseconds on one gaming GPU</h3>
+          <p>Xiaomi just announced Xiaomi-Robotics-1, trained on 100,000+ hours of manipulation data. Its predecessor, the model actually shipping today, is a 4.7B-parameter VLA that runs in 80ms on a single RTX 4090 — smaller than most phone chat models, for a reason that has nothing to do with cost.</p>
+        </a>
+        <a class="post-card" href="2026-07-20-energy-cost-of-open-models.html">
+          <div class="meta">July 20, 2026 · 12 min read</div>
+          <h3>Same iPhone, same model family, 2.3x the energy per word — the real cost of an open model</h3>
+          <p>A public Apple Silicon benchmark shows llama.cpp costs 0.25 joules per generated token on an iPhone 17 Pro versus 0.11 for Apple's own Foundation Models path — and a naive CoreML/ANE port of the same open model is worse than either. What that means for engines that chase model compatibility instead of Apple's walled garden.</p>
+        </a>
+        <a class="post-card" href="2026-07-20-strix-halo-home-lab.html">
+          <div class="meta">July 20, 2026 · 8 min read</div>
+          <h3>One $2,000 mini PC just served 32 people talking to Gemma 4 at once — no cloud, no cluster</h3>
+          <p>Edge in the Wild: home-lab builder AGmind benchmarked a single Beelink GTR9 Pro (AMD Ryzen AI Max+ 395, 128GB unified memory) against 32 concurrent llama.cpp chat sessions — 236 tok/s aggregate, sustained for 30 minutes, with the numbers that made it look bad too.</p>
+        </a>
+        <a class="post-card" href="2026-07-19-dram-shortage-edge-ai.html">
+          <div class="meta">July 19, 2026 · 9 min read</div>
+          <h3>Nvidia's newest AI chip shipped with 75% less memory than its own flagship. Your next phone is on the same curve.</h3>
+          <p>Nvidia's July 15 Jetson Thor T2000/T3000 launch cut memory on purpose to dodge a DRAM price spike — and IDC now says the same squeeze is making sub-$100 phones "permanently uneconomical." What that means for every on-device AI app's RAM roadmap.</p>
+        </a>
+        <a class="post-card" href="2026-07-18-bonsai-1bit-apple.html">
+          <div class="meta">July 18, 2026 · 9 min read</div>
+          <h3>Apple's on-device AI moat, exposed by a 3-person Caltech lab it's now trying to buy</h3>
+          <p>PrismML's Bonsai 27B shrinks a 54GB model to 3.9GB at 89.5% of full-precision quality — and reports say Apple is in talks to acquire the team that built it. Why the model that might save Siri's on-device story can't run in our engine either.</p>
+        </a>
+        <a class="post-card" href="2026-07-18-strix-halo-cluster.html">
+          <div class="meta">July 18, 2026 · 7 min read</div>
+          <h3>He put his home AI cluster and GPT-5.5 behind the same URL, then benchmarked both</h3>
+          <p>Edge in the Wild: Tim Schupp's 2-node Kubernetes cluster on AMD Strix Halo mini-PCs — 218ms to first token on a local 32B model, real hardware photos, full credit to the builder.</p>
+        </a>
+        <a class="post-card" href="2026-07-18-slm-daily-3.html">
+          <div class="meta">July 18, 2026 · 4 min read</div>
+          <h3>We finally read the license. It wasn't the problem.</h3>
+          <p>SLM Daily #3: the license question we left open two posts ago is resolved — it was never the blocker. The only thing keeping a 153 MB model out of the catalog is that it's 23 days old. Zero catalog changes again.</p>
+        </a>
+        <a class="post-card" href="jetson-top10.html">
+          <div class="meta">July 14, 2026 · 9 min read · video</div>
+          <h3>10 real robots running AI on NVIDIA Jetson — no cloud, verified sources only</h3>
+          <p>A $249 Jetson Orin Nano out-detected a Mac Mini in a builder's own benchmark. Ten verified, individually-credited Jetson projects, ranked — with a top-5 countdown video built almost entirely from the builders' real photos and footage.</p>
+        </a>
+        <a class="post-card" href="slm-diy-robotics-top5.html">
+          <div class="meta">July 13, 2026 · 4 min read · video</div>
+          <h3>From a $5 chip to an NVIDIA award: 5 robots running AI with zero internet</h3>
+          <p>A countdown of five DIY robotics builds running small language models fully on-device — companion video made with MegaBrain, rendered with Kling 3.0.</p>
+        </a>
+        <a class="post-card" href="slm-diy-robotics.html">
+          <div class="meta">July 13, 2026 · 9 min read · video</div>
+          <h3>This $5 chip runs its own AI. We found 25 robots that prove it's not a fluke.</h3>
+          <p>25 verified DIY robotics builds running small language models on-device, sorted into 10 categories — from a $5 microcontroller to an NVIDIA-award-winning animatronic robot. With a companion video, made with MegaBrain.</p>
+        </a>
+        <a class="post-card" href="engine-version-blind-spot.html">
+          <div class="meta">July 13, 2026 · 8 min read</div>
+          <h3>llama.cpp shipped three releases in under three hours. Our app has no idea which one it's running.</h3>
+          <p>Our build script fetches whatever ggml-org/llama.cpp calls "latest" at compile time and never records the tag. Real release-cadence and PR-merge data show why that's a subtler problem than the pinned-old-engine gap we wrote about a week ago.</p>
+        </a>
+        <a class="post-card" href="slm-daily-2.html">
+          <div class="meta">July 13, 2026 · 5 min read</div>
+          <h3>Our engine went from recognizing 3 architectures to 135. We still added zero models today.</h3>
+          <p>SLM Daily #2: the engine now tracks llama.cpp's latest release instead of an old pinned copy — Qwen3, Gemma 3, Llama 4 and LFM2 all check out. The catalog didn't grow today anyway, for a specific, boring reason.</p>
+        </a>
+        <a class="post-card" href="gguf-quant-label-gap.html">
+          <div class="meta">July 9, 2026 · 8 min read</div>
+          <h3>Three "Q4_K_M" downloads of the same model. 2.13 GB apart.</h3>
+          <p>Same model, same quant label, three different files — we compared bartowski, Unsloth and AesSedai's Qwen3.5 builds, and Unsloth's Gemma 3 27B quant against Google's own QAT checkpoint.</p>
+        </a>
+        <a class="post-card" href="architecture-gate.html">
+          <div class="meta">July 7, 2026 · 9 min read</div>
+          <h3>The number "60+ supported models" doesn't mean what you think</h3>
+          <p>Every local-AI app's description carries the same kind of number. Ours vendors an engine that recognizes three Qwen-family architectures — and none of them is the one Qwen's current releases actually use.</p>
+        </a>
+        <a class="post-card" href="slm-weekly-1.html">
+          <div class="meta">July 7, 2026 · 5 min read</div>
+          <h3>We checked two similar 1.5B models this week. Only one would load.</h3>
+          <p>SLM Weekly #1: what we added to the privateSLM catalog, what we skipped, and the exact grep command that told us which was which.</p>
+        </a>
+        <a class="post-card" href="privateslm-2-0.html">
+          <div class="meta">July 3, 2026 · 4 min read</div>
+          <h3>privateSLM 2.0: a chat app that uses the model already inside your phone</h3>
+          <p>Zero-download AI chat via Apple Intelligence, a local GGUF fallback, real chat history and hands-free voice — everything on device.</p>
+        </a>
+        <a class="post-card" href="what-is-an-slm.html">
+          <div class="meta">July 3, 2026 · 6 min read</div>
+          <h3>What is an SLM? Small language models, explained</h3>
+          <p>GPT-class models get the headlines, but the most interesting shift in AI is happening at the small end. Here's why 1–3B parameter models matter.</p>
+        </a>
+        <a class="post-card" href="apple-foundation-models.html">
+          <div class="meta">July 3, 2026 · 7 min read</div>
+          <h3>Apple Intelligence for developers: the Foundation Models framework</h3>
+          <p>iOS 26 gives every app direct access to Apple's on-device model. What it can do, what it can't, and what we learned shipping with it.</p>
+        </a>
+        <a class="post-card" href="on-device-vs-cloud.html">
+          <div class="meta">July 3, 2026 · 5 min read</div>
+          <h3>Why on-device AI beats the cloud for privacy</h3>
+          <p>"We don't store your data" is a promise. Physics is a guarantee. The case for AI that never phones home.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
