@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>73x faster than an H200, at a tenth of the power — because the model isn't loaded, it's the chip — privateSLM blog</title>
+  <meta name="description" content="Taalas's first test chip serves Llama 3.1 8B at ~17,000 tokens/sec — 73x an Nvidia H200, at a tenth of the power — by casting the model's weights directly into silicon instead of loading them from memory. AMD just bought the company. What that means for engines, like ours, built to run whichever model you download.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-07-taalas-model-silicon.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>73x faster than an Nvidia H200, at a tenth of the power — because the model isn't loaded. It's the chip.</h1>
+    <div class="meta">August 7, 2026 · 8 min read</div>
+
+    <p>Taalas's first test chip serves Meta's Llama 3.1 8B at roughly 17,000 tokens per second — about 73 times faster than an Nvidia H200, at a tenth of the power. On August 6, AMD agreed to buy the company that built it: its third AI acquisition in nine months, after MK1 in November and memory-optimization startup Mext in June.</p>
+
+    <p>We've spent five of our last dozen posts on some version of the same problem: a model our engine can't load, because llama.cpp's graph builder doesn't recognize its architecture yet, or because the quant that fits our size cap isn't the one the model card recommends. That's a software compatibility problem. Taalas's entire pitch is that you can make it disappear — not by fixing the software, but by not having any. If there's no runtime negotiating between a generic chip and an arbitrary model, there's nothing left to be incompatible.</p>
+
+    <h2>What "casting a model into transistors" actually means</h2>
+    <p>Every engine we've written about here — llama.cpp, MLX, CoreML/ANE, Apple's own Foundation Models path — shares one thing in common: the weights live in memory (DRAM, HBM, unified RAM, whatever the device has) and get streamed into a general-purpose compute array on every forward pass. That streaming is the actual bottleneck in most inference workloads; it's why "memory bandwidth," not raw FLOPs, dominates every serious llama.cpp performance discussion.</p>
+
+    <p>Taalas's approach removes that step entirely. Instead of storing a weight as a number the chip reads and multiplies, the weight's value is built into the physical dataflow — the wiring itself is shaped by what the number is. Co-founder and CEO Ljubisa Bajic has described the founding idea as building "the hardware around the model" rather than the model around generic hardware. There's no "load weights" phase at inference time, because the weights were never a separate thing from the silicon to begin with.</p>
+
+    <p>The test chip, HC1, is a TSMC 6nm part built specifically to serve Llama 3.1 8B, revealed in February 2026. What makes a company like this economically possible at all — rather than a one-off stunt chip nobody could ever afford to iterate on — is a detail buried in the coverage: only 2 of the transformer's 100-plus layers actually differ in physical layout between one model-chip design and the next, because most of a transformer stack is structurally identical block to block. That lets Taalas reuse over 98% of a prior design and cut tape-out time to roughly two months, instead of the year-plus a from-scratch ASIC normally takes. Their next chip, HC2, is aimed at models around 20 billion parameters — inching toward the weight class of specialists already in privateSLM's own catalog, though nowhere near a phone.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Metric</th><th style="padding:6px 10px;">Figure</th><th style="padding:6px 0;">Source</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">HC1 throughput, Llama 3.1 8B</td><td style="padding:6px 10px;">~17,000 tok/s</td><td style="padding:6px 0;">SiliconANGLE, citing Taalas</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">vs. Nvidia H200</td><td style="padding:6px 10px;">73x faster</td><td style="padding:6px 0;">SiliconANGLE, citing Taalas</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Power draw vs. H200</td><td style="padding:6px 10px;">~1/10th</td><td style="padding:6px 0;">SiliconANGLE, citing Taalas</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Process node</td><td style="padding:6px 10px;">TSMC 6nm</td><td style="padding:6px 0;">SiliconANGLE</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Layout reused between model chips</td><td style="padding:6px 10px;">&gt;98% (2 of 100+ layers change)</td><td style="padding:6px 0;">SiliconANGLE</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Tape-out time</td><td style="padding:6px 10px;">~2 months</td><td style="padding:6px 0;">SiliconANGLE</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Total funding raised</td><td style="padding:6px 10px;">~$219M ($169M round, Feb 2026)</td><td style="padding:6px 0;">SiliconANGLE / AMD</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">HC2 target model size</td><td style="padding:6px 10px;">~20B parameters</td><td style="padding:6px 0;">SiliconANGLE</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Sources: <a href="https://siliconangle.com/2026/08/06/amd-acquires-taalas-hardwire-ai-models-silicon/" target="_blank" rel="noopener">SiliconANGLE, Aug 6 2026</a>; <a href="https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market" target="_blank" rel="noopener">AMD investor relations press release</a>.</p>
+
+    <h2>The bill nobody put in the press release</h2>
+    <p>AMD's announcement and most of the coverage it generated read like a highlight reel — understandably, it's a genuinely striking number. The <a href="https://news.ycombinator.com/item?id=49201970" target="_blank" rel="noopener">Hacker News discussion</a> underneath it is a useful corrective, and worth citing precisely as commentary rather than vendor fact, since none of these figures come from Taalas or AMD themselves:</p>
+    <ul>
+      <li>One commenter's back-of-envelope math put an 8B model stored directly in silicon (effectively acting as ROM) at roughly 800mm² of die area, versus roughly 80mm² for the equivalent capacity in DRAM — a rough 10x area cost, which on a leading-edge node is a real manufacturing cost multiplier, not a rounding error.</li>
+      <li>A separate comment argued that baking a model into the dataflow only buys "moderate gains" on its own, because memory bandwidth — the same bottleneck GPUs fight — doesn't fully disappear just because the weights are physically local; it changes shape rather than vanishing.</li>
+      <li>The obvious structural point: a Taalas chip is permanently one model. GPUs stay useful when you want to run a different model tomorrow; an HC1 does not — you're not swapping weights, you're fabricating new silicon, whatever that ~2-month reuse trick brings the cost down to.</li>
+      <li>One estimate for what it would take to serve a trillion-parameter frontier model this way — 50 to 100 chips per instance, meaning "thousands of 100-chip fabs" for real deployment volume — is a sharp reminder that this approach was demonstrated at 8B parameters, not GPT-class scale, and the two are not obviously the same problem.</li>
+      <li>Commenters trying Taalas's own public demo (chatjimmy.ai) reported it was fast but gave "complete junk" answers on anything involving new facts or slightly esoteric topics — a reminder that raw tokens/second says nothing about what model is actually running or how current its knowledge is.</li>
+    </ul>
+
+    <h2>Where this lands on the spectrum we keep mapping</h2>
+    <p>This isn't the first time we've measured the price of "runs anything" versus "runs one thing, extremely well." Our <a href="2026-07-20-energy-cost-of-open-models.html">July 20 post</a> found that on the same iPhone 17 Pro, Apple's own vertically-integrated Foundation Models path beats llama.cpp's GGUF-compatible path by 2.3x in joules per generated token — not because Apple's silicon is exotic, but because a runtime built for exactly one model, with no compatibility surface to maintain, has less overhead to pay for than one built to load whatever architecture a user happens to download.</p>
+
+    <p>Taalas is that same force taken to its literal, physical limit. Apple's 2.3x comes from software specialization — one model, one tuned runtime, still running on general-purpose Neural Engine hardware. Taalas's reported 73x comes from deleting the runtime and the memory bus altogether: there is no "compatible" or "incompatible" architecture, because there's no architecture-agnostic hardware left to be compatible with. It's the same curve our engine-compatibility posts have been tracing for weeks, just extended past the point where "software" is even the right word for what's running.</p>
+
+    <p>And that's exactly why it's a demonstration, not a threat, to what privateSLM does. An ASIC is a bet on one model at a volume that can absorb a ~2-month tape-out (best case) and the die-area cost a HN commenter estimated at roughly 10x a DRAM-based chip. privateSLM's own catalog is the opposite bet: a generalist plus more than a dozen domain specialists — coding, math, medical, legal, finance, translation, mental health — because most people using an on-device model don't want the single fastest possible model, they want whichever model fits what they're doing right now. Someone can download Nanbeige4.2-3B this afternoon for a reasoning task and BioMistral 7B tonight for a biomedical question; nobody is fabricating a new chip for that swap, and nobody building consumer hardware at iPhone volumes is going to solder in a chip that's permanently one 8B model either.</p>
+
+    <h2>What actually changes for on-device users</h2>
+    <p>Nothing ships in our catalog because of this — there's no GGUF here, no download URL, nothing to verify. What changes is the baseline for how big the "compatibility tax" we keep measuring can get before an industry player decides it's worth paying $219M-plus to eliminate it entirely. AMD's answer, for datacenter-scale serving of a fixed model, is apparently yes. For a phone in your pocket that needs to run whichever model you actually asked for, the honest tradeoff hasn't moved: you're still going to pay some real efficiency cost for the freedom to choose, and 73x is now the number that tells you exactly how expensive that freedom can get at the extreme end, not the number that makes it disappear.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've found a model-specific inference chip that ships anything close to phone-scale, or a GGUF-to-ASIC path we haven't heard of, we want to know.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — pick your model, swap it anytime, nothing ever leaves your device</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

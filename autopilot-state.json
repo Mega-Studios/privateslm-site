@@ -84,6 +84,12 @@
       "slug": "mmap-ram-gap-os-not-model-property",
       "summary": "A byte-identical GGUF file (LFM2.5-350M, 355 MB) loaded through the identical inference engine costs 56-85 MB of RAM on Apple Silicon/visionOS devices and 300-330 MB on Android/Linux SBC devices (Cactus Compute's own cross-platform benchmark, 2026-03-31) — a ~6x spread from the same bytes, caused by mmap()'d pages staying reclaimable file-backed memory on one OS family and not the other. Breaks the file-size×constant heuristic our own catalog's minRamMb field also uses.",
       "post": "blog/2026-08-01-mmap-ram-gap.html"
+    },
+    {
+      "date": "2026-08-07",
+      "slug": "model-specific-silicon-vs-compatibility",
+      "summary": "AMD's Aug 6 acquisition of Taalas (undisclosed terms, ~$219M raised) buys a chip that casts a model's weights directly into transistors instead of streaming them from memory — Taalas's HC1 test chip reportedly serves Llama 3.1 8B at ~17,000 tok/s, 73x an Nvidia H200, at ~1/10th the power, by eliminating the compatibility layer entirely rather than extending it. Extends the 07-20 Apple-energy-gap thesis (2.3x from software specialization) to its physical limit (73x from no runtime at all) — and is why it can't be what privateSLM offers: an ASIC is a permanent bet on one model, the opposite of a swappable download-any-GGUF catalog. HN discussion (id=49201970) supplies real pushback used for balance: ~10x die-area cost vs DRAM (community estimate, not vendor-verified), memory bandwidth still a bottleneck, and no free lunch on model obsolescence.",
+      "post": "blog/2026-08-07-taalas-model-silicon.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -198,9 +204,14 @@
       "date": "2026-08-06",
       "event": "published-digest-and-diy-spotlight-after-consolidation",
       "reason": "Second phase of today's run, after the six-branch consolidation (see the prior note): researched genuinely new SLM/edge-AI news for the window since the newly-backfilled lastRunAt (2026-08-01) through today, via a dedicated research pass (HF trending/bartowski uploads, llama.cpp releases, r/LocalLLaMA, vendor blogs, Hacker News, Habr, Raspberry Pi/DIY sources, CNX Software). CATALOG: added lfm2.5-2.6b-q4 (Liquid AI, released 2026-08-04, bartowski Q4_K_M verified via HTTP HEAD at 1,684,023,584 bytes, lfm2 architecture already engine-compatible per the 2026-07-27 finding, LFM Open License v1.0 — same terms already accepted for LFM2.5-230M on 2026-07-18). Rejected: Qwen3.5-0.8B (upload-date metadata made it look new; actual release is ~5 months old), MiniCPM5-2B (teased but weights not yet published as of today, only MiniCPM5-1B from May exists), Thinking Machines' Inkling Small (276B-total/12B-active MoE, far over phone size). DEEP-DIVE: none published — no genuinely new, non-duplicate, primary-sourced angle surfaced in this window; a normal fail-safe outcome for this category, not an error. DIY SPOTLIGHT: published hardrave's NightRun (bare-metal UEFI LLM runtime, no OS, real Raspberry Pi 5 hardware, MIT-licensed), sourced primarily via the project's own GitHub README (fetched through WebFetch, since this session's GitHub access is scoped to only mega-studios/privateslm-site and mega-studios/privateslm — raw.githubusercontent.com/api.github.com calls to hardrave/NIGHTRUN were blocked by that scope) and secondarily via CNX Software's 2026-07-30 coverage, whose own CDN mirror of the project's real demo GIF and a screenshot was used for images since the GitHub-hosted originals weren't directly fetchable from this session. DIGEST: published SLM Daily #8 covering the LFM2.5-2.6B addition, current llama.cpp tag (b10290, all recent work irrelevant to phone-sized models), what was skipped and why, and an honest re-flag of the still-unresolved 8-model catalog cap vs. the 14 pre-cap specialist entries. Both pieces self-graded against the established hook rubric (concrete numbers in the first two sentences, no generic filler) since no /post-grader skill exists in this session — same stopgap used in every prior run."
+    },
+    {
+      "date": "2026-08-07",
+      "event": "published-deep-dive-no-catalog-no-diy",
+      "reason": "Research window: since lastRunAt 2026-08-06T04:45:00Z (~24h) plus the standard 14-day catalog lookback. Swept llama.cpp releases (latest tag b10298, Aug 6 22:10 UTC — mtmd chunk save/load, AMD ROCm gfx1151 CI onboarding, Vulkan submission-batching fixes; none of it phone-model-relevant), bartowski's most recent uploads (DeepSeek-V4-Flash-0731 284B, FrontisAI Frontis-MA1-35B, Altworld_Astrea-R8-Chat-9B and OrionLLM_GRM-3.2-Cliff-GGUF, both image-text-to-text 9B — all rejected, all far over the 2.5GB/chat-instruct catalog bar), HF GGUF 'created' listings (dominated by anonymous finetunes/obliterated merges under 1B-3B with no reputable-quantizer primary release), r/LocalLLaMA (direct reddit.com fetch still blocked by this environment's WebFetch tool), Hacker News, Habr RU feed, and DIY/edge sources (Hackster.io, NetworkChuck). CATALOG: no qualifying candidate — a normal, quality-bar-consistent outcome for this short a window, not an error. DIY SPOTLIGHT: no new candidate found — nothing surfaced in the ~24h window that was both individually verifiable (named builder, primary source) and not already covered; skipped rather than force a re-feature. DEEP-DIVE: published blog/2026-08-07-taalas-model-silicon.html on AMD's Aug 6 acquisition of Taalas, a startup that casts model weights directly into chip transistors instead of streaming them from memory — HC1 test chip reportedly serves Llama 3.1 8B at ~17,000 tok/s (73x an Nvidia H200, ~1/10th the power), verified via triangulation across AMD's own IR press release, SiliconANGLE's Aug 6 coverage, and the Hacker News discussion thread (used specifically for skeptical pushback: ~10x die-area-cost estimate vs. DRAM, memory-bandwidth-still-a-bottleneck argument, model-obsolescence/inflexibility critique — all clearly attributed as community estimates, not vendor-verified figures, to avoid overstating precision). Thesis ties directly back to and extends (without duplicating) the 2026-07-20 Apple-Silicon-energy-gap post: same compatibility-vs-specialization tradeoff, taken from a 2.3x software-specialization gap to a 73x hardware-specialization extreme, and used to make the case for why an ASIC (permanent bet on one model) is structurally the opposite of privateSLM's swappable-GGUF-catalog model rather than a threat to it. Title+opening self-graded 9/10 against the established rubric (concrete numbers in the first two sentences: ~17,000 tok/s, 73x, 1/10th power, all before the second sentence ends) since no /post-grader skill exists in this session (reconfirmed via ToolSearch this run) — same stopgap used in every prior run. No repo access issues, no Pages/git failures encountered. Pushed directly to main after opening the PR, per the 2026-08-06 precedent, since the routine's own PUBLISH BLOG step requires the site to actually go live (Pages build + 200-check) and draft PRs without a merge step are the exact failure mode that caused the six-branch pileup fixed on 2026-08-06."
     }
   ],
-  "lastRunAt": "2026-08-06T04:45:00Z",
+  "lastRunAt": "2026-08-07T12:00:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -375,6 +386,12 @@
       "type": "diy",
       "publishedAt": "2026-08-06T04:40:00Z",
       "post": "blog/2026-08-06-nightrun-no-os.html"
+    },
+    {
+      "slug": "2026-08-07-taalas-model-silicon",
+      "type": "deepdive",
+      "publishedAt": "2026-08-07T12:00:00Z",
+      "post": "blog/2026-08-07-taalas-model-silicon.html"
     }
   ]
 }
