@@ -1,5 +1,5 @@
 {
-  "digestCounter": 8,
+  "digestCounter": 9,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -90,6 +90,12 @@
       "slug": "model-specific-silicon-vs-compatibility",
       "summary": "AMD's Aug 6 acquisition of Taalas (undisclosed terms, ~$219M raised) buys a chip that casts a model's weights directly into transistors instead of streaming them from memory — Taalas's HC1 test chip reportedly serves Llama 3.1 8B at ~17,000 tok/s, 73x an Nvidia H200, at ~1/10th the power, by eliminating the compatibility layer entirely rather than extending it. Extends the 07-20 Apple-energy-gap thesis (2.3x from software specialization) to its physical limit (73x from no runtime at all) — and is why it can't be what privateSLM offers: an ASIC is a permanent bet on one model, the opposite of a swappable download-any-GGUF catalog. HN discussion (id=49201970) supplies real pushback used for balance: ~10x die-area cost vs DRAM (community estimate, not vendor-verified), memory bandwidth still a bottleneck, and no free lunch on model obsolescence.",
       "post": "blog/2026-08-07-taalas-model-silicon.html"
+    },
+    {
+      "date": "2026-08-09",
+      "slug": "diffusion-llm-latency-myth",
+      "summary": "Diffusion LLMs are marketed as the on-device latency fix (parallel token generation vs. sequential), but the only real phone-NPU benchmark (arXiv:2606.13740, llada.cpp on real Qualcomm Snapdragon phones) shows naive NPU offload alone buys only 8.78x and the full engineered pipeline is still slower than the autoregressive model it replaces on the weakest of three tested chips, only winning (up to 3.9x) on the newest silicon. The fix that makes it fast — fewer sampling steps — collapses LLaDA-8B's GSM8K score from 73.6% to 6.1% (arXiv:2510.04146v2, Apple-affiliated Berkeley paper), a 12x accuracy cost for a 4x speedup. No diffusion LLM currently ships on-device in production; Gemini Diffusion and Mercury are both cloud-hosted demos.",
+      "post": "blog/2026-08-09-diffusion-llm-latency-myth.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -149,6 +155,13 @@
       "date": "2026-08-06",
       "post": "blog/2026-08-06-nightrun-no-os.html",
       "note": "Covered secondarily by CNX Software (2026-07-30); GitHub raw content for hardrave/NIGHTRUN was not directly fetchable from this session (GitHub access scoped to mega-studios/privateslm-site and mega-studios/privateslm only), so the demo GIF and a screenshot were sourced from CNX Software's own CDN mirror of the project's real images instead — both traced back to and credited as the project's own via the repo README description confirmed through WebFetch."
+    },
+    {
+      "name": "duddnr0719's bonsai-27b-jetson — PrismML's Bonsai 27B (1-bit, 26.9B params) running on a Jetson Orin NX 16GB via a private llama.cpp fork",
+      "sourceUrl": "https://github.com/duddnr0719/bonsai-27b-jetson",
+      "date": "2026-08-09",
+      "post": "blog/2026-08-09-bonsai-jetson.html",
+      "note": "Callback to the 2026-07-18 Bonsai/Apple deep-dive, which flagged Bonsai as MLX-only with no GGUF path. PrismML itself later published prism-ml/Bonsai-27B-gguf (native Q1_0 pack) plus a private PrismML-Eng/llama.cpp fork with custom Q1_0_g128 kernels — still not mainline, so it does not clear privateSLM's own engine-compatibility gate. Demo GIF (docs/demo.gif, 250KB, confirmed via curl) downloaded and committed to assets/blogimg/bonsai-jetson-demo.gif. Numbers (128.94 tok/s pp, 6.76 tok/s gen, 3.53 GiB, 25W) verified against both the builder's own README and PrismML's model card (~3.8GB, consistent)."
     }
   ],
   "discussionsCreated": [
@@ -209,9 +222,14 @@
       "date": "2026-08-07",
       "event": "published-deep-dive-no-catalog-no-diy",
       "reason": "Research window: since lastRunAt 2026-08-06T04:45:00Z (~24h) plus the standard 14-day catalog lookback. Swept llama.cpp releases (latest tag b10298, Aug 6 22:10 UTC — mtmd chunk save/load, AMD ROCm gfx1151 CI onboarding, Vulkan submission-batching fixes; none of it phone-model-relevant), bartowski's most recent uploads (DeepSeek-V4-Flash-0731 284B, FrontisAI Frontis-MA1-35B, Altworld_Astrea-R8-Chat-9B and OrionLLM_GRM-3.2-Cliff-GGUF, both image-text-to-text 9B — all rejected, all far over the 2.5GB/chat-instruct catalog bar), HF GGUF 'created' listings (dominated by anonymous finetunes/obliterated merges under 1B-3B with no reputable-quantizer primary release), r/LocalLLaMA (direct reddit.com fetch still blocked by this environment's WebFetch tool), Hacker News, Habr RU feed, and DIY/edge sources (Hackster.io, NetworkChuck). CATALOG: no qualifying candidate — a normal, quality-bar-consistent outcome for this short a window, not an error. DIY SPOTLIGHT: no new candidate found — nothing surfaced in the ~24h window that was both individually verifiable (named builder, primary source) and not already covered; skipped rather than force a re-feature. DEEP-DIVE: published blog/2026-08-07-taalas-model-silicon.html on AMD's Aug 6 acquisition of Taalas, a startup that casts model weights directly into chip transistors instead of streaming them from memory — HC1 test chip reportedly serves Llama 3.1 8B at ~17,000 tok/s (73x an Nvidia H200, ~1/10th the power), verified via triangulation across AMD's own IR press release, SiliconANGLE's Aug 6 coverage, and the Hacker News discussion thread (used specifically for skeptical pushback: ~10x die-area-cost estimate vs. DRAM, memory-bandwidth-still-a-bottleneck argument, model-obsolescence/inflexibility critique — all clearly attributed as community estimates, not vendor-verified figures, to avoid overstating precision). Thesis ties directly back to and extends (without duplicating) the 2026-07-20 Apple-Silicon-energy-gap post: same compatibility-vs-specialization tradeoff, taken from a 2.3x software-specialization gap to a 73x hardware-specialization extreme, and used to make the case for why an ASIC (permanent bet on one model) is structurally the opposite of privateSLM's swappable-GGUF-catalog model rather than a threat to it. Title+opening self-graded 9/10 against the established rubric (concrete numbers in the first two sentences: ~17,000 tok/s, 73x, 1/10th power, all before the second sentence ends) since no /post-grader skill exists in this session (reconfirmed via ToolSearch this run) — same stopgap used in every prior run. No repo access issues, no Pages/git failures encountered. Pushed directly to main after opening the PR, per the 2026-08-06 precedent, since the routine's own PUBLISH BLOG step requires the site to actually go live (Pages build + 200-check) and draft PRs without a merge step are the exact failure mode that caused the six-branch pileup fixed on 2026-08-06."
+    },
+    {
+      "date": "2026-08-09",
+      "event": "published-digest-deepdive-and-diy-spotlight",
+      "reason": "Research window: since lastRunAt 2026-08-07T12:00:00Z (~40h) plus the standard 14-day catalog lookback, run via four parallel research sweeps (catalog candidates, llama.cpp engine delta, deep-dive thesis, DIY spotlight) followed by two targeted follow-ups (mobile-NPU diffusion-LLM papers; direct README/model-card verification for the DIY candidate). CATALOG: zero qualifying candidates. Seven checked and rejected: LFM2.5-1.2B-Thinking (base release Jan 20 2026, outside 14-day window), Qwen3.6-27B/35B-A3B (no sub-4B variant exists, both far over size cap), Nemotron 3 Nano Omni 30B-A3B (GGUF file tens of GB despite 3B active params), Inkling Small (already-rejected 276B-total MoE), Granite 4.0 Nano (Apache-2.0 and small, but release is ~10 months old, Oct 2025), Tiny Aya (CC-BY-NC license, excluded on license grounds alone), Mistral Small 4 (released March 2026, over size cap). ENGINE: llama.cpp advanced b10298->b10331 (33 tags, ~2 days); diffed src/llama-arch.h directly, confirmed zero new LLM_ARCH_* tags. One genuine, phone-relevant fix found and used as the digest's hook: PR #26708 (merged Aug 7), a Metal ggml_metal_op_norm threadgroup-sizing bug that could leave the thread count not a multiple of the SIMD width, silently corrupting NORM/RMS_NORM mean/variance on affected hidden/head dimensions — directly relevant since our own engine is a Metal-backed xcframework. DEEP-DIVE: published blog/2026-08-09-diffusion-llm-latency-myth.html — diffusion LLMs are marketed as the on-device latency fix but the only real phone-NPU benchmark (arXiv:2606.13740, llada.cpp, tested on real Qualcomm Snapdragon 8 Gen3/Elite/Elite Gen5 phones) shows naive NPU offload alone buys only 8.78x, the full engineered pipeline (186x over a naive-CPU baseline) is still slower than the autoregressive model it replaces on the weakest of three tested phones, and only wins (up to 3.9x) on the newest silicon; the fix that makes it fast enough — fewer sampling steps — collapses LLaDA-8B's GSM8K score from 73.6% to 6.1% (arXiv:2510.04146v2, Apple-affiliated Berkeley/ICSI/LBNL paper). A second candidate paper (arXiv:2605.20179, 'TIDE') was checked and explicitly excluded from the piece after direct verification showed it's a datacenter GPU MoE-offloading paper, not edge-NPU evidence — caught before publication, not after. No diffusion LLM currently ships on-device in production (Gemini Diffusion and Mercury are both cloud-hosted demos, verified via DeepMind's and Inception's own pages). Distinct from all 14 prior theses (none touch generation architecture/diffusion vs. autoregressive). DIY SPOTLIGHT: published blog/2026-08-09-bonsai-jetson.html, a callback to the 2026-07-18 Bonsai/Apple post — verified directly (WebFetch on both the builder's README and PrismML's own prism-ml/Bonsai-27B-gguf model card, plus the PrismML-Eng/llama.cpp fork README) that PrismML has since published a native GGUF Q1_0 pack and a private llama.cpp fork with custom Q1_0_g128 kernels, and that GitHub user duddnr0719 built a setup guide running it on a Seeed reComputer Orin NX 16GB (JetPack 6.2.1, CUDA 12.6, MAXN) at 128.94 tok/s prompt processing / 6.76 tok/s generation / ~25W, 3.53 GiB on disk. Explicitly still fails privateSLM's own engine-compatibility gate (private fork, not mainline) — noted honestly in the piece rather than treated as a resolution of the July 18 finding. Demo GIF (250KB, confirmed via curl HEAD) downloaded from the builder's own repo and committed to assets/blogimg/bonsai-jetson-demo.gif, consistent with the established real-footage-first convention. All three pieces' titles+openings self-graded 9/10 against the established rubric (concrete numbers within the first two sentences) since no /post-grader skill exists in this session (reconfirmed via ToolSearch) — same stopgap used in every prior run; the DIY piece's opening was rewritten once during drafting to move its numbers earlier after an initial self-grade found them arriving too late (sentence 4, not sentence 2). Repo work done via local git clone (per docs/weekly-slm-routine.md's documented git-clone-over-base64 guidance for image-carrying commits) on the harness-assigned branch claude/brave-brown-yni2bg, then pushed and opened as a PR per this session's git-operations instructions — a deviation from the 2026-08-06/08-07 direct-to-main precedent, made because this session's own harness instructions explicitly designate a development branch and require a PR rather than a direct push; if this PR is not merged promptly, a future run should treat that as the same kind of stranded-branch risk flagged repeatedly before 2026-08-06 and merge or consolidate it rather than silently re-doing the work. No repo access issues, no Pages/git failures encountered as of this note (Pages build + 200-check to be confirmed after merge)."
     }
   ],
-  "lastRunAt": "2026-08-07T12:00:00Z",
+  "lastRunAt": "2026-08-09T04:22:05Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -392,6 +410,24 @@
       "type": "deepdive",
       "publishedAt": "2026-08-07T12:00:00Z",
       "post": "blog/2026-08-07-taalas-model-silicon.html"
+    },
+    {
+      "slug": "2026-08-09-diffusion-llm-latency-myth",
+      "type": "deepdive",
+      "publishedAt": "2026-08-09T04:22:05Z",
+      "post": "blog/2026-08-09-diffusion-llm-latency-myth.html"
+    },
+    {
+      "slug": "2026-08-09-bonsai-jetson",
+      "type": "diy",
+      "publishedAt": "2026-08-09T04:22:05Z",
+      "post": "blog/2026-08-09-bonsai-jetson.html"
+    },
+    {
+      "slug": "2026-08-09-slm-daily-9",
+      "type": "digest",
+      "publishedAt": "2026-08-09T04:22:05Z",
+      "post": "blog/2026-08-09-slm-daily-9.html"
     }
   ]
 }

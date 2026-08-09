@@ -10,6 +10,9 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone: https://www.privateslm.dev/blog/2026-08-09-diffusion-llm-latency-myth.html
+- We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-09-bonsai-jetson.html
+- SLM Daily #9 (catalog digest): https://www.privateslm.dev/blog/2026-08-09-slm-daily-9.html
 - 73x faster than an Nvidia H200, at a tenth of the power — because the model isn't loaded, it's the chip: https://www.privateslm.dev/blog/2026-08-07-taalas-model-silicon.html
 - A Raspberry Pi boots straight into a chat prompt. There's no operating system underneath it. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-06-nightrun-no-os.html
 - SLM Daily #8 (catalog digest): https://www.privateslm.dev/blog/2026-08-06-slm-daily-8.html

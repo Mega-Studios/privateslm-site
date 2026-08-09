@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #9: a Metal bug quietly returned the wrong answer on Apple's own GPU — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #9: a Metal shader bug that could silently corrupt normalization math on any hidden dimension not a multiple of the SIMD width got fixed August 7 — directly relevant to our Metal-backed engine. Zero catalog additions this edition; seven candidates checked and ruled out, and why.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-09-slm-daily-9.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #9: a Metal bug quietly returned the wrong answer on Apple's own GPU</h1>
+    <div class="meta">August 9, 2026 · 4 min read</div>
+
+    <p>A Metal shader bug that could silently corrupt a model's own normalization math — on any hidden or head dimension that isn't a multiple of the GPU's SIMD width — got fixed in llama.cpp on August 7, one day after our last check. It's the only phone-relevant change in 33 build tags over two days, and it lands directly on the Metal backend our own xcframework build uses. Nothing else this edition needed our attention: zero catalog additions, seven candidates checked and rejected.</p>
+
+    <h2>The bug: wrong math, not a crash</h2>
+    <p>Tag <strong>b10331</strong> is the current latest, up from b10298 when we last checked. The one fix worth flagging is <a href="https://github.com/ggml-org/llama.cpp/pull/26708" target="_blank" rel="noopener">PR #26708</a>, merged August 7: <code>ggml_metal_op_norm</code> sized its threadgroup as <code>min(nth, ne00_t)</code>, which could leave the thread count not a multiple of Metal's SIMD width. The cross-simdgroup reduction that follows then silently dropped part of the partial-sum tail — producing a wrong mean and variance for the whole row on any model whose hidden or head dimension didn't happen to divide evenly. Not a crash, not an error message. A quietly wrong number, on Apple GPUs specifically, for however long that build was live. Since our engine is a Metal-backed xcframework fetched fresh from "latest" at every build (see <a href="engine-version-blind-spot.html">our July 13 post</a> on exactly this non-determinism), whether any specific install was affected depends entirely on when it happened to build — which nothing in the app currently records.</p>
+
+    <p>Everything else in the window is server/WebUI tooling (Docker-based sandboxing, chat-form slash commands, a model-scheduler LRU policy) or SYCL backend catch-up work for Intel Arc GPUs, including new ops for DeepSeek V4 — an architecture that was already merged well before this window, just getting broader backend coverage now. We diffed <code>src/llama-arch.h</code> between b10298 and b10331 directly: no new <code>LLM_ARCH_*</code> tag landed. LFM2, LFM2MoE, the full Qwen3 family, Gemma3/3n/4, and DeepSeek V4 are all unchanged and all still supported.</p>
+
+    <h2>What we checked and rejected for the catalog</h2>
+    <ul>
+      <li><strong>LFM2.5-1.2B-Thinking</strong> (Liquid AI) — real, reasoning-tuned, but the base release dates to January 20, 2026. Not new, just newly noticed.</li>
+      <li><strong>Qwen3.6-27B / 35B-A3B</strong> — both far over our size cap at any quant; no sub-4B Qwen3.6 variant exists yet.</li>
+      <li><strong>Nemotron 3 Nano Omni (30B-A3B)</strong> — Nvidia's new omni-modal model has GGUF quants, but the file itself runs tens of GB even with only 3B active parameters. Wrong shape for a phone.</li>
+      <li><strong>Inkling Small</strong> (Thinking Machines) — already on our rejected list; still a 276B-total MoE, not a phone candidate at any quant.</li>
+      <li><strong>Granite 4.0 Nano</strong> (IBM) — genuinely small and Apache-2.0, but the release is from October 2025. Nearly ten months old, not "new."</li>
+      <li><strong>Tiny Aya</strong> (Cohere Labs) — 3.35B, GGUF quants exist near our size cap, but the license is CC-BY-NC (non-commercial), which our catalog rules exclude outright.</li>
+      <li><strong>Mistral Small 4</strong> — released March 2026, and "Small" for Mistral still runs well above our 2.5 GB cap at any quant we could find.</li>
+    </ul>
+    <p>The newest actual uploads on Hugging Face's GGUF "created" sort this week were, almost without exception, anonymous community finetunes and merges — not reputable-quantizer originals of a new base model, and not something we'd verify well enough to put in front of users.</p>
+
+    <h2>Also this edition</h2>
+    <p>Two other pieces published today. Our deep-dive checks the "diffusion LLMs will make on-device AI fast" pitch against the only real phone-NPU benchmark we could find, and the accuracy cost of the shortcut that makes it work at all — <a href="2026-08-09-diffusion-llm-latency-myth.html">read it here</a>. And an <strong>Edge in the Wild</strong> spotlight on a builder who got PrismML's Bonsai 27B — the model we said in July had no GGUF path — running on a Jetson Orin NX at 6.76 tok/s, via a route that still doesn't touch mainline llama.cpp — <a href="2026-08-09-bonsai-jetson.html">read it here</a>.</p>
+
+    <h2>The catalog now</h2>
+    <p>Still 22 models, unchanged since <a href="2026-08-06-slm-daily-8.html">SLM Daily #8</a>. Same standing caveat: we hold ourselves to a cap of 8 generalist entries, and 14 of the 22 are pre-cap specialist models (medical, legal, finance and similar) we haven't unilaterally pulled from a catalog people are actively downloading from. Still flagging it rather than letting it go quiet.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

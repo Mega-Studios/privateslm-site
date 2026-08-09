@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true. — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: PrismML's Bonsai 27B shipped as MLX-only in July, no llama.cpp path in sight. A solo builder, duddnr0719, now runs a 26.9B-parameter, 1-bit version of it on a Jetson Orin NX 16GB at 6.76 tokens/sec on 25 watts — via a native GGUF pack and a private llama.cpp fork that still doesn't touch mainline, or our own catalog.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-09-bonsai-jetson.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true.</h1>
+    <div class="meta">August 9, 2026 · 7 min read</div>
+
+    <p>PrismML's Bonsai 27B shipped in July as MLX-only — no GGUF, no conversion path, a real wall <a href="2026-07-18-bonsai-1bit-apple.html">we wrote about at the time</a>. Three weeks later, GitHub user <strong>duddnr0719</strong> is running a 26.9-billion-parameter, 1-bit build of it on a Jetson Orin NX 16GB — a board the project's own README calls "palm-sized" — at 6.76 tokens a second on roughly 25 watts, over a route mainline llama.cpp still can't read.</p>
+
+    <p><strong>Edge in the Wild</strong> is our occasional spotlight on real builders running AI on hardware they own. This one: <a href="https://github.com/duddnr0719/bonsai-27b-jetson" target="_blank" rel="noopener">bonsai-27b-jetson</a>, MIT-licensed setup scripts and docs over an Apache 2.0 model, published July 22, 2026.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/bonsai-jetson-demo.gif" alt="Animated terminal demo of Bonsai 27B generating text on a Jetson Orin NX, with live tokens/sec performance stats visible" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">Bonsai 27B generating live output on a Jetson Orin NX 16GB. Demo GIF from <a href="https://github.com/duddnr0719/bonsai-27b-jetson" target="_blank" rel="noopener">duddnr0719's own repo</a>.</figcaption>
+    </figure>
+
+    <h2>What actually changed since July</h2>
+    <p>The gap we flagged in July wasn't a rumor — it was accurate at the time. What closed it wasn't a mainline llama.cpp update; it was PrismML themselves publishing a second model card, <a href="https://huggingface.co/prism-ml/Bonsai-27B-gguf" target="_blank" rel="noopener">prism-ml/Bonsai-27B-gguf</a>, alongside a private fork of the engine at <a href="https://github.com/PrismML-Eng/llama.cpp" target="_blank" rel="noopener">PrismML-Eng/llama.cpp</a> that adds the custom kernels needed to read it. The card describes the GGUF Q1_0 pack as the model's "native layout" — the binary weights aren't expanded back toward full precision to fit a generic format, the on-disk size and the deployed size match. That's consistent with what we wrote in July: Bonsai isn't a big model quantized down after the fact, it's trained natively at 1.125 bits per weight, and the GGUF release keeps that property rather than undoing it.</p>
+
+    <p>The catch, and it's the one that keeps this out of privateSLM's own catalog: the fork's README is explicit that its <code>Q1_0_g128</code> (group-128) kernels are a private, non-standard extension — a model saved this way "won't load on standard llama.cpp," their words, not ours. It's a real GGUF file now, sitting on Hugging Face under Apache 2.0, and it still fails our engine-compatibility gate for exactly the reason every architecture-gate post on this blog exists: our build fetches mainline ggml-org/llama.cpp, and mainline doesn't recognize this quantization scheme. The July irony softened; it didn't resolve.</p>
+
+    <h2>What duddnr0719 actually built</h2>
+    <p>The repo is a guide plus setup scripts for running the 1-bit Bonsai release on a <strong>Seeed reComputer Orin NX 16GB (J401)</strong>, on JetPack 6.2.1 / L4T r36.4.3, CUDA 12.6, with the board in MAXN power mode — a genuine palm-sized edge box, not a desktop GPU rig, running a model in the same weight class as several frontier open releases.</p>
+
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Parameters</td><td>26.9 billion</td></tr>
+      <tr><td>Quantization</td><td>1-bit, custom Q1_0_g128</td></tr>
+      <tr><td>On-disk size</td><td>3.53 GiB</td></tr>
+      <tr><td>Context window</td><td>262,144 tokens</td></tr>
+      <tr><td>Prompt processing</td><td>128.94 tok/s</td></tr>
+      <tr><td>Token generation</td><td>6.76 tok/s</td></tr>
+      <tr><td>Power draw</td><td>~25 W</td></tr>
+    </table>
+    <p class="cite">Source: <a href="https://github.com/duddnr0719/bonsai-27b-jetson" target="_blank" rel="noopener">github.com/duddnr0719/bonsai-27b-jetson</a> README, cross-checked against <a href="https://huggingface.co/prism-ml/Bonsai-27B-gguf" target="_blank" rel="noopener">PrismML's own Bonsai-27B-gguf model card</a> (~3.8 GB for the 1-bit Q1_0 file, consistent with the 3.53 GiB figure above).</p>
+
+    <p>The builder is candid about where 1-bit compression shows its seams — the same honesty we'd want from our own catalog copy. The README states plainly: "1-bit quantization is extreme compression," and that "non-English output (e.g. Korean) sometimes mixes in tokens from other languages or gets technical terms wrong," recommending PrismML's larger ternary build (5.9 GB in the original model card, listed around 7.2 GB in this fork's packaging) for non-English production use. That's a specific, falsifiable claim about a specific failure mode — not a vague disclaimer — and it matches the pattern we found in PrismML's own July benchmark table, where Bonsai's 1-bit build held 89.5% of full-precision quality in aggregate but didn't hold it evenly across every category.</p>
+
+    <h2>Why this is still the extreme end, not the mainstream path</h2>
+    <p>duddnr0719's profile shows this isn't a one-off: other repos there run a GRPO-tuned Qwen2.5-3B for IoT anomaly detection on a Jetson Orin Nano, and a tuberculosis-screening model, also on Jetson hardware — a builder specifically working the edge-AI-on-Jetson niche, not someone who stumbled into one viral repo. That context matters for how much weight to put on the numbers: this is a maintained, repeat pattern from someone who has reason to get the details right.</p>
+
+    <p>What it doesn't do is change the compatibility math for an app like ours. Running Bonsai 27B today means compiling a private fork most users will never touch, on hardware with a dedicated NVIDIA GPU and 16 GB of RAM to spare — a genuinely different device class from a phone, and a genuinely different install process from tapping a download button in a catalog. The 6.76 tokens/second figure is real and it's a meaningful result for a 27B-class model on a device this size, but it's also 25 watts and a command line away from "runs in an app," not a straight line to one.</p>
+
+    <p><strong>Source / credit:</strong> Bonsai 27B is PrismML's model, Apache 2.0, first covered on this blog on <a href="2026-07-18-bonsai-1bit-apple.html">July 18</a>. The Jetson build is the independent work of GitHub user <a href="https://github.com/duddnr0719" target="_blank" rel="noopener">duddnr0719</a>, MIT-licensed, at <a href="https://github.com/duddnr0719/bonsai-27b-jetson" target="_blank" rel="noopener">github.com/duddnr0719/bonsai-27b-jetson</a>. Demo GIF is the project's own.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — running anything at 1-bit on your own edge hardware? Tell us what broke and what didn't.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
