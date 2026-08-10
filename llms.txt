@@ -10,6 +10,7 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- 319,000 parameters. Two days on a phone charger. Zero pretraining, anywhere, ever. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-10-qapla-esp32-onchip-training.html
 - 73x faster than an Nvidia H200, at a tenth of the power — because the model isn't loaded, it's the chip: https://www.privateslm.dev/blog/2026-08-07-taalas-model-silicon.html
 - A Raspberry Pi boots straight into a chat prompt. There's no operating system underneath it. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-06-nightrun-no-os.html
 - SLM Daily #8 (catalog digest): https://www.privateslm.dev/blog/2026-08-06-slm-daily-8.html
