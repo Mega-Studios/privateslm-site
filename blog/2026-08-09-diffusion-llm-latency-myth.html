@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone — privateSLM blog</title>
+  <meta name="description" content="Diffusion language models are pitched as the fix for on-device latency — parallel token generation instead of one at a time. On the only real phone-NPU benchmark that exists, the naive version is 8x slower than the autoregressive model it's replacing, and the fix that makes it fast collapses GSM8K accuracy 12x. What the numbers actually say, from an Apple-affiliated paper down to real Snapdragon silicon.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-09-diffusion-llm-latency-myth.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone</h1>
+    <div class="meta">August 9, 2026 · 9 min read</div>
+
+    <p>Cut a diffusion language model's sampling steps from 128 down to 4 — the obvious lever for making it fast enough to ship on a phone — and its GSM8K math score doesn't degrade gracefully. It falls from 73.6% to 6.1%. A 32x reduction in steps buys roughly a 4x speedup and costs a 12x collapse in accuracy. That trade comes straight from LLaDA-8B's own published numbers, and it's the arithmetic underneath a pitch we keep seeing repeated as settled fact: that diffusion LLMs are the way on-device AI finally gets fast, because they generate a whole block of tokens per step instead of one at a time.</p>
+
+    <p>The pitch isn't crazy on its face — it's just untested against real hardware in most of the coverage repeating it. We went looking for the actual benchmarks: one from a Berkeley/ICSI/LBNL team with an Apple co-author, published on Apple's own machine-learning research page, run on desktop GPUs; and one that's rarer and more useful for an app like ours — a from-scratch diffusion-LLM engine benchmarked on three actual Qualcomm phones. Between them, the numbers tell a much less flattering story than "parallel means fast."</p>
+
+    <h2>The pitch: a whole block of tokens per step, not one</h2>
+    <p>An autoregressive model — every GGUF privateSLM's catalog ships, Llama, Qwen, Gemma, all of it — predicts exactly one next token, appends it, and repeats. A diffusion language model instead starts with a block of masked/noisy tokens and iteratively denoises the whole block toward real text over a fixed number of steps, in principle finalizing several tokens per step instead of one. If you can cut the number of forward passes needed to produce N tokens, you cut latency — that's the entire case for diffusion LLMs as an on-device speed unlock, and it's the framing behind marketing pages for products like Google DeepMind's Gemini Diffusion (claimed 1,479 tokens/sec) and Inception Labs' Mercury ("5 to 10x faster than speed-optimized models from OpenAI, Anthropic, and Google").</p>
+
+    <p>Neither of those numbers comes from a phone. Gemini Diffusion is an experimental, waitlist-gated cloud demo. Mercury is benchmarked on H100 GPUs and sold as an API. As far as we could establish, no diffusion LLM currently runs in production on a phone or edge NPU — the only real on-device attempt we found is a research prototype, which is exactly why its numbers matter more than either vendor's demo page.</p>
+
+    <h2>The catch: bidirectional attention breaks the thing that makes autoregressive models fast</h2>
+    <p>The performance characterization that matters here is <a href="https://arxiv.org/abs/2510.04146" target="_blank" rel="noopener">arXiv:2510.04146</a>, "Beyond Next-Token Prediction," out of UC Berkeley/ICSI/LBNL with an Apple-affiliated co-author, published via Apple's own machine-learning research page. It benchmarks LLaDA-8B-Instruct (diffusion) against Llama-3-8B-Instruct (autoregressive) directly, on an RTX A6000 and an A100.</p>
+
+    <p>The core finding is structural, not incidental: autoregressive models get fast after the first token because of KV caching — once a token's key/value vectors are computed, they're cached and reused for every later token, so each new token only costs one incremental forward pass. Diffusion LLMs use bidirectional attention across the whole block being denoised, which is fundamentally incompatible with that trick — every step, in the naive formulation, reprocesses the sequence from something close to scratch. The paper notes that the field's own standard convention — setting the number of diffusion steps K equal to the generation length — means the model "finalizes only one token per step on average," which the authors flatly call "hugely inefficient." Even with the best workaround available (block-wise decoding plus an approximate KV cache), the diffusion model stays slower than the autoregressive one at matched prompt and output lengths under that convention, and the gap widens as the prompt gets longer — with a 2K-token prompt, the diffusion model's latency is higher than the autoregressive model's even at short output lengths, before you've generated anything close to a long response.</p>
+
+    <p>Batching makes it worse in exactly the direction an agentic, tool-calling, RAG-heavy on-device workload needs it not to: autoregressive throughput scales cleanly up to batch size 16 on an A100 at short prompts, while block-wise diffusion decoding plateaus around batch size 8 and sits well below the autoregressive model in absolute tokens/sec. Diffusion peak memory scales with batch size times the <em>full</em> sequence length rather than just the incremental cache, so it hits out-of-memory at smaller batches as prompts grow — the opposite of what long system prompts and tool contexts need.</p>
+
+    <h2>What happens when you actually try this on a phone</h2>
+    <p>All of the above is desktop-GPU evidence — real, but not proof of what happens on a phone's memory bandwidth and NPU. For that, there's exactly one paper we could find that tests it directly: <a href="https://arxiv.org/abs/2606.13740" target="_blank" rel="noopener">arXiv:2606.13740</a>, "Efficient On-Device Diffusion LLM Inference with Mobile NPU," which built a from-scratch engine called llada.cpp and ran LLaDA-8B-Instruct against Llama-3-8B-Instruct, both Q4_0-quantized, on three real Qualcomm phones: a OnePlus 12 (Snapdragon 8 Gen3, 45 TOPS), a OnePlus Ace5 Pro (Snapdragon 8 Elite, 65.25 TOPS, their primary test device), and a OnePlus 15 (Snapdragon 8 Elite Gen5, 89.4 TOPS).</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">LLaDA-8B, 128-token generation, Snapdragon 8 Elite</th><th style="padding:6px 10px;">Latency</th><th style="padding:6px 0;">vs. naive CPU</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Naive CPU, no cache</td><td style="padding:6px 10px;">2,996 s</td><td style="padding:6px 0;">1x (baseline)</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">CPU + KV cache</td><td style="padding:6px 10px;">607 s</td><td style="padding:6px 0;">4.9x</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">NPU offload alone</td><td style="padding:6px 10px;">341 s</td><td style="padding:6px 0;">8.78x</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Full llada.cpp pipeline</td><td style="padding:6px 10px;">16.1 s</td><td style="padding:6px 0;">186x</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2606.13740, Table reporting GSM8K-task latency on the Snapdragon 8 Elite (OnePlus Ace5 Pro).</p>
+
+    <p>186x sounds like the headline number to run with. It's real, and it's the result of genuine systems engineering — multi-block speculative decoding, a revision-correction pass, and NPU offload combined, not any one trick alone. But look at the row that gets skipped in a pull-quote: <strong>NPU offload by itself, the "just run it on the AI chip" version everyone assumes will be fast, only buys 8.78x</strong> — the naive path to "diffusion on a phone" is nearly as inefficient on real silicon as it is on paper. And even after the full pipeline, the paper's own device breakdown shows llada.cpp is <em>still slower than Llama-3-8B</em> on the weakest of the three phones (the Snapdragon 8 Gen3). It only starts winning on the Snapdragon 8 Elite, and the best case — up to 3.9x faster than the autoregressive model — shows up only on the newest, fastest chip of the three, the Snapdragon 8 Elite Gen5. The "diffusion is inherently faster on-device" claim, tested against real phones instead of a demo, turns out to depend entirely on which phone.</p>
+
+    <h2>The fix that works, and exactly what it costs</h2>
+    <p>The naive lever for making a diffusion model fast enough to ship — take fewer denoising steps — is where the accuracy story gets genuinely brutal, and it's documented directly in the Berkeley/Apple paper's own numbers for LLaDA-8B:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Sampling steps (K)</th><th style="padding:6px 10px;">GSM8K</th><th style="padding:6px 0;">HumanEval pass@1</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">128</td><td style="padding:6px 10px;">73.6%</td><td style="padding:6px 0;">35.4%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">4</td><td style="padding:6px 10px;">6.1%</td><td style="padding:6px 0;">3.7%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2510.04146v2, "Beyond Next-Token Prediction," LLaDA-8B step-count ablation.</p>
+
+    <p>That's not a smooth curve you can tune to taste — it's a cliff. A 32x reduction in steps buys roughly a 4x latency win and takes GSM8K from a 74%-class model down to a 6%-class one, a collapse in accuracy nearly three times steeper than the speedup it bought. The more careful, systems-engineered fix that llada.cpp actually ships — multi-block speculative decoding, which predicts several blocks ahead and verifies them, rather than crudely truncating steps — is far gentler but still not free: it drops GSM8K from 39.0% to 37.5% and HellaSwag from 51.0% to 46.0% on its own, before a revision-correction pass recovers most (not all) of the loss.</p>
+
+    <p>There's a second, more specific accuracy tax buried in the same paper, and it's the one that should worry anyone thinking about shipping this in a chat app: block-wise decoding needs a KV cache to be fast at all, but the standard way of getting one — reusing the cache from the previous block instead of recomputing bidirectional attention over the whole sequence — measurably corrupts the model's own reasoning about earlier tokens. Reusing a stale cache after block-wise decoding costs 6.5 points on GSM8K, 4.0 on BoolQ, 3.5 on ARC-Challenge, and 4.5 on HellaSwag versus full recompute. The exact hack that makes a diffusion LLM fast enough to be usable is the same hack that makes it measurably worse at the thing you're asking it to do.</p>
+
+    <h2>What this means for an engine built to run whichever model you ask for</h2>
+    <p>Nothing here changes what ships in privateSLM's catalog — there's no diffusion GGUF to evaluate, no download URL, no llama.cpp architecture tag to check, because nothing in this space has actually reached that stage of shippability yet. What it does change is how we'd read the next "diffusion LLMs solve on-device latency" headline that crosses our desk. The honest version of that claim, backed by the only phone-hardware benchmark that currently exists, is narrower and more conditional than the pitch: a diffusion model can beat an autoregressive one of the same size on a phone, but only on the newest, fastest NPU silicon, only after a nontrivial amount of custom systems engineering that a naive NPU port doesn't get you, and only if you're willing to eat a real, measured accuracy cost for the caching trick that gets you there. None of that is a reason to write diffusion LLMs off — a research field this new should be expected to look rough before it looks finished. It's a reason not to take the marketing page's tokens-per-second number as the number that would actually show up in your hand.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run a diffusion LLM on real phone or edge NPU hardware yourself, we want your numbers, good or bad.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — proven autoregressive models, running on your device today</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

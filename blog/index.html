@@ -27,6 +27,21 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-09-diffusion-llm-latency-myth.html">
+          <div class="meta">August 9, 2026 · 9 min read</div>
+          <h3>A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone</h3>
+          <p>Diffusion LLMs are pitched as the on-device latency fix — parallel tokens instead of one at a time. The only real phone-NPU benchmark that exists says otherwise: the naive version is still slower than the model it's replacing on all but the newest chips, and the fix that makes it fast collapses GSM8K accuracy 12x.</p>
+        </a>
+        <a class="post-card" href="2026-08-09-bonsai-jetson.html">
+          <div class="meta">August 9, 2026 · 7 min read</div>
+          <h3>We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true.</h3>
+          <p>Edge in the Wild: PrismML's Bonsai 27B shipped MLX-only in July. A solo builder now runs a 26.9B-parameter, 1-bit build of it on a Jetson Orin NX 16GB at 6.76 tok/s on 25 watts — via a native GGUF pack and a private llama.cpp fork that still doesn't touch mainline.</p>
+        </a>
+        <a class="post-card" href="2026-08-09-slm-daily-9.html">
+          <div class="meta">August 9, 2026 · 4 min read</div>
+          <h3>SLM Daily #9: a Metal bug quietly returned the wrong answer on Apple's own GPU</h3>
+          <p>A Metal shader bug that could silently corrupt normalization math on Apple GPUs got fixed the day after our last check. Zero catalog additions this edition — seven candidates checked and ruled out, and why.</p>
+        </a>
         <a class="post-card" href="2026-08-07-taalas-model-silicon.html">
           <div class="meta">August 7, 2026 · 8 min read</div>
           <h3>73x faster than an Nvidia H200, at a tenth of the power — because the model isn't loaded. It's the chip.</h3>
