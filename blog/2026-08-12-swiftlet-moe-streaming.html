@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>An 80B-parameter model just ran in 4.3 GB of RAM — on an unmodified Mac, no cluster, no cloud — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: independent builder leonickson1 streamed Qwen3-Next-80B's mixture-of-experts weights straight off SSD instead of loading them into RAM, running an 80-billion-parameter model in 4.3 GB of peak memory on an Apple Silicon Mac — and a 35B model on an iPhone.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-12-swiftlet-moe-streaming.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>An 80B-parameter model just ran in 4.3 GB of RAM — on an unmodified Mac, no cluster, no cloud</h1>
+    <div class="meta">August 12, 2026 · 7 min read</div>
+
+    <p>Qwen3-Next-80B-A3B is an 80-billion-parameter model. Its 4-bit GGUF-equivalent weights take up 42 GB on disk. An independent builder going by <strong>leonickson1</strong> got it generating text on an ordinary Apple Silicon Mac using a peak of 4.3 GB of RAM — under a tenth of the file size — by never loading most of the model into memory at all.</p>
+
+    <p><strong>Source &amp; credit:</strong> the runtime, the benchmarks, and the writeup are the independent work of leonickson1 (GitHub handle; the same person publishes a companion free iOS app, "Priv AI," under the name Monish Soundar Raj). Everything below is our summary and framing — read the original: <a href="https://github.com/leonickson1/Swiftlet" target="_blank" rel="noopener">github.com/leonickson1/Swiftlet</a> (Apache 2.0). Also discussed at length on <a href="https://news.ycombinator.com/item?id=49158333" target="_blank" rel="noopener">Hacker News</a> (312 points).</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/swiftlet-privai-screenshot.jpg" alt="Screenshot of the Priv AI iPhone app showing a dark-themed chat interface with a 'Local Intelligence' hero header and a model selector" loading="lazy" style="width:100%;max-width:320px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">Priv AI, leonickson1's companion app built on the same streaming runtime described here. Screenshot via <a href="https://github.com/leonickson1/localLLM" target="_blank" rel="noopener">leonickson1/localLLM</a> on GitHub.</figcaption>
+    </figure>
+
+    <h2>The trick: never hold the model you're not using</h2>
+    <p>Qwen3-Next-80B-A3B is a mixture-of-experts (MoE) model — the "A3B" in its name means roughly 3 billion parameters actually fire per token, even though the full network stores 80 billion across many specialist "expert" sub-networks. Every existing engine we know of, including the one privateSLM ships, still has to memory-map or fully load that entire 80B-parameter file before it can serve a single token, because it doesn't know in advance which experts a given token will need. Swiftlet's approach is to stop assuming that: it streams each token's specific expert weights off SSD on demand, keeping only the currently-needed slice of the model resident in RAM. The README's own numbers, measured on an M5 Mac:</p>
+
+    <table>
+      <tr><th>Model</th><th>Disk</th><th>Peak RAM</th><th>Decode speed</th></tr>
+      <tr><td>Qwen3.6-35B-A3B, 4-bit</td><td>18 GB</td><td>2.6 GB</td><td>7–11 tok/s</td></tr>
+      <tr><td>Qwen3.6-35B-A3B, 8-bit</td><td>34 GB</td><td>7.6 GB</td><td>3.5–4 tok/s</td></tr>
+      <tr><td>Qwen3-Next-80B-A3B, 4-bit</td><td>42 GB</td><td>4.3 GB</td><td>4.5–5 tok/s</td></tr>
+    </table>
+
+    <p>And on a phone: the README states the 35B model "also runs on an iPhone 17 in about 2.5 GB of RAM, at about 1 tok/s today." One token per second isn't fast — for context, it's roughly what a 7B model gets on much older hardware with no streaming trick at all — but the number that matters here isn't the speed, it's that a 35-billion-parameter model produced any tokens whatsoever on a phone without a cluster, a cloud API, or the model ever existing in RAM as a single contiguous 18 GB block.</p>
+
+    <h2>The honest caveat: this speeds up decode, not the hard part</h2>
+    <p>The Hacker News thread is worth reading specifically because commenters pushed on the weakest part of the pitch, and the author didn't dodge it. Several pointed out that tokens-per-second during generation isn't the real bottleneck for anything beyond short chat messages — prompt processing (prefill) is, because it has to touch far more of the streamed weights up front. leonickson1's own reply: "the honest answer is this is good for chat-length stuff, not for feeding it a 10k token document" — with a 10,000-token prompt reportedly taking on the order of half an hour to process before generation even starts. That's a real, load-bearing limitation, not a footnote: it means Swiftlet currently solves the "can this model exist on this hardware at all" problem without solving the "can you actually use it for long-context work" problem. The author also clarified that tuning the on-disk cache size barely moves decode speed either way — the bottleneck there is GPU dispatch overhead, not SSD read speed, with the cache hitting anywhere from 43% to 70% of requests at similar throughput regardless of size.</p>
+
+    <h2>Not claiming to be first, and saying so</h2>
+    <p>The README credits prior art directly rather than presenting the idea as novel: "ANEMLL showed a 397B MoE streaming on an iPhone 17 Pro as a proof of concept in early 2026," and a dedicated section describes specific design lessons borrowed from two other projects, drumih/turbo-fieldfare (a Gemma-streaming experiment) and JustVugg/colibri. That kind of explicit sourcing is unusual enough in a 312-point Show HN that it's worth calling out on its own — the pitch here is "a usable, documented implementation of an idea a few people were independently circling," not "we invented weight streaming."</p>
+
+    <h2>Why this matters more than a clever demo</h2>
+    <p>Every model in privateSLM's own catalog is capped by the same constraint Swiftlet is attacking: to run a model at all today, our engine has to hold its full weights resident, which is exactly why our biggest catalog entries top out around 8 GB of RAM and nothing close to an 80B-class model is on the table. Weight-streaming for MoE architectures is a structurally different answer to that ceiling than "wait for phones to ship more RAM" — it decouples how big a model's total parameter count can be from how much memory running it requires, which is precisely the trade our "the model comes to your data" pitch depends on getting better over time. We're not adding this to privateSLM this week: it's a from-scratch Swift/Metal runtime, not a llama.cpp patch, built specifically for MoE architectures our current engine already loads a different way, and the prefill bottleneck the author flagged himself is a real gap before it's chat-ready. But it's a concrete, working, 488-star proof that the RAM ceiling on how large a genuinely local model can be isn't as fixed as it looks from inside a single-engine catalog.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — tried MoE weight-streaming yourself, or hit the prefill wall leonickson1 describes? Tell us your numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
