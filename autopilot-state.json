@@ -1,5 +1,5 @@
 {
-  "digestCounter": 9,
+  "digestCounter": 10,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -96,6 +96,12 @@
       "slug": "diffusion-llm-latency-myth",
       "summary": "Diffusion LLMs are marketed as the on-device latency fix (parallel token generation vs. sequential), but the only real phone-NPU benchmark (arXiv:2606.13740, llada.cpp on real Qualcomm Snapdragon phones) shows naive NPU offload alone buys only 8.78x and the full engineered pipeline is still slower than the autoregressive model it replaces on the weakest of three tested chips, only winning (up to 3.9x) on the newest silicon. The fix that makes it fast — fewer sampling steps — collapses LLaDA-8B's GSM8K score from 73.6% to 6.1% (arXiv:2510.04146v2, Apple-affiliated Berkeley paper), a 12x accuracy cost for a 4x speedup. No diffusion LLM currently ships on-device in production; Gemini Diffusion and Mercury are both cloud-hosted demos.",
       "post": "blog/2026-08-09-diffusion-llm-latency-myth.html"
+    },
+    {
+      "date": "2026-08-13",
+      "slug": "thermal-cliff-sustained-load-benchmark-fiction",
+      "summary": "Every on-device LLM tok/s figure quoted publicly (model cards, our own catalog copy included) is a cold-start number from the first 1-2 replies. arXiv:2603.23640's sustained-load study shows an iPhone 16 Pro loses 44.1% of throughput by iteration 8, and a Samsung Galaxy S24 Ultra hits a hard OS-enforced GPU frequency floor at iteration 6 that stops inference outright rather than slowing it. MLPerf Mobile's own methodology already builds in cooldown breaks for exactly this contamination risk elsewhere in the suite, but its LLM/edge track doesn't inherit that discipline.",
+      "post": "blog/2026-08-13-thermal-cliff.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -169,6 +175,11 @@
       "date": "2026-08-10",
       "post": "blog/2026-08-10-qapla-esp32-onchip-training.html",
       "note": "Covered secondarily by Hackster News (2026-08-05, 'Klingon Meets TinyML' — article HTML 403s WebFetch, not used as a source). Primary sourcing entirely from the builder's own GitHub README (Apache 2.0) via WebFetch, cross-checked against ggml-org/llama.cpp for nothing (no engine dependency — pure C, no GGUF/llama.cpp involved). Two real device photos verified live via HTTP HEAD/GET on raw.githubusercontent.com, downloaded, visually inspected, and mirrored into assets/blogimg/ as qapla-training.jpg and qapla-klingon-output.jpg. Exact loss-table numbers (step 1495/2549/4905) and gradcheck error (1.07e-08) cross-verified against both the README text and the OLED readout visible in the photos themselves before publishing."
+    },
+    {
+      "name": "Samuel Alexander's (s4muela) Muse-Glimmer-30B on a Qualcomm Dragonwing IQ-9075 EVK — dense 30B vision-language model doing real visual PCB inspection, tool calling and long-document Q&A entirely on-device, at 91% of the board's measured peak memory bandwidth",
+      "sourceUrl": "https://www.hackster.io/s4muela/muse-glimmer-30b-on-dragonwing-iq-9075-an-llm-that-sees-cafde6",
+      "date": "2026-08-13"
     }
   ],
   "discussionsCreated": [
@@ -246,7 +257,7 @@
       "reason": "This run opened on privateslm-site with two open, unmerged autopilot draft PRs already sitting on main: #42 (SLM Daily #9 + diffusion-LLM-latency deep-dive + Bonsai/Jetson spotlight, opened 2026-08-09) and #43 (Qapla' ESP32 on-chip training spotlight, opened 2026-08-10) — the same draft-PR-rot pattern the repo's own notes have flagged repeatedly since before the 2026-08-06 six-branch consolidation. Both PRs' content was reviewed in full (every new blog post read end-to-end, sourcing and hook quality checked) and found to clear the quality bar. Merged #42 directly. #43 then reported a real GitHub merge conflict against the new main (both PRs touched the same top-of-list lines in blog/index.html, llms.txt, and autopilot-state.json, since both branched from the same stale base) — reconciled by hand: cloned the repo locally, pulled #43's two real device photos and blog-post HTML unmodified from its branch, recomputed the state-file/index/llms.txt diffs against the new main, and opened/merged a fresh PR (#44) carrying #43's content forward with nothing lost. Closed #43 as superseded. All four newly-live post URLs plus the updated blog index were curl-verified at HTTP 200 after the merge.\n\nSecond phase: fresh research for the window since the newly-consolidated lastRunAt (2026-08-10T04:25:00Z) through this run (~24h), plus the standard 14-day catalog lookback. llama.cpp advanced to tag b10356 (Aug 11) — mostly ROCm/Android-affinity/backend-sampling infrastructure work, nothing indicating a new phone-relevant LLM_ARCH_* tag; a same-day WebFetch summary mentioning a 'Granite-Switch' per-token-LoRA-adapter architecture (tag b10342) could not be corroborated against a second primary source (a direct fetch of the PR URL actually queried returned the already-covered Metal NORM/RMS_NORM fix instead), so per the quality bar's 'can't source it, cut it' rule this was NOT used as a deep-dive lead. CATALOG: no qualifying candidate found in HF trending/created GGUF listings or bartowski's recent uploads — nothing sub-4B, chat/instruct, reputable-quantizer, and released within 14 days surfaced. DEEP-DIVE: no non-duplicate, primary-sourced angle survived the sweep. DIY SPOTLIGHT: no new individually-verifiable builder project (named author, primary source) surfaced in the ~24h window; Hackster.io and Habr results returned only older/generic listicle content, not a fresh dated build. Result: PR consolidation was the substantive work this run; no new blog content published beyond the consolidated #44 merge — a normal quality-bar fail-safe outcome for the fresh-research phase, not an error. No repo access issues, no Pages/git failures encountered."
     }
   ],
-  "lastRunAt": "2026-08-11T04:24:44Z",
+  "lastRunAt": "2026-08-13T12:30:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -451,6 +462,24 @@
       "type": "diy",
       "publishedAt": "2026-08-10T04:25:00Z",
       "post": "blog/2026-08-10-qapla-esp32-onchip-training.html"
+    },
+    {
+      "slug": "2026-08-13-thermal-cliff",
+      "type": "deepdive",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-thermal-cliff.html"
+    },
+    {
+      "slug": "2026-08-13-muse-glimmer-dragonwing",
+      "type": "diy",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-muse-glimmer-dragonwing.html"
+    },
+    {
+      "slug": "2026-08-13-slm-daily-10",
+      "type": "digest",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-slm-daily-10.html"
     }
   ]
 }

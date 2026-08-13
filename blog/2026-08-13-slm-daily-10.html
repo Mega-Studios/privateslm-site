@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #10: the first model we skipped for a reason that isn't in our own rulebook — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #10: four candidates checked since our last edition, zero added. LiquidAI's brand-new LFM2.5-VL-3B clears every published catalog rule and still doesn't ship — because our own engine has no code path that ever hands a model a photo.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-13-slm-daily-10.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #10: the first model we skipped for a reason that isn't in our own rulebook</h1>
+    <div class="meta">August 13, 2026 · 4 min read</div>
+
+    <p>Four catalog candidates crossed our desk since <a href="2026-08-09-slm-daily-9.html">SLM Daily #9</a>. Zero got added — same outcome as last edition, but for a genuinely new reason this time. LiquidAI's LFM2.5-VL-3B, released August 12, clears every rule we've ever published: supported architecture, reputable quantizer, phone-sized file, a license we already ship under. It still doesn't go in the catalog, because we grepped our own app and found there's no code anywhere that ever hands a model a photo.</p>
+
+    <h2>What we checked and rejected</h2>
+    <ul>
+      <li><strong>LFM2.5-VL-3B</strong> (Liquid AI, released August 12) — a 3.1B-parameter vision-language model: the LFM2.5-2.6B text backbone already in our catalog, plus a SigLIP2 NaFlex vision encoder bolted on. bartowski's Q4_K_M quant is <strong>1,684,023,328 bytes</strong> (1.68 GB) — we HEAD-checked the URL ourselves and got that exact content-length back, not a rounded UI figure. The <code>lfm2</code> architecture tag is confirmed present in llama.cpp mainline (we diffed <code>src/llama-arch.cpp</code> directly). License is the same LFM Open License v1.0 our existing <code>lfm2.5-2.6b-q4</code> entry already ships under. Every box ticked — and it's still not going in. Reason: this app has zero image-input UI (no camera button, no photo picker, nothing in <code>ChatView.swift</code>) and <code>LlamaEngine.swift</code> loads exactly one GGUF via <code>llama_model_load_from_file</code>, with no <code>clip_model_load</code> or <code>mmproj</code> call anywhere in the codebase. The model's entire reason for existing — the "VL" in its name — would be dead weight the moment it landed on a phone. We'd be shipping a vision model to an app that structurally cannot show it a picture. That's not an architecture gate or a license problem; it's a product gap our own catalog rules never wrote a line for, so we're writing one now: a VL model doesn't qualify until the app can actually feed it an image.</li>
+      <li><strong>Meta Muse-Glimmer-30B</strong> (released August 10) — dense 30B, Apache-2.0, <code>muse-glimmer</code> architecture confirmed present in llama.cpp mainline. bartowski's Q4_K_M is roughly 17.3 GB — about 7x over our 2.5 GB phone-friendly cap, at any quant that still resembles Q4. It's real, it's good, and it's the exact model our Edge in the Wild spotlight below is running today, on hardware built for a file this size. Not this catalog.</li>
+      <li><strong>NVIDIA Nemotron 3.5 Lightning 30B-A3B</strong> (released August 11) — hybrid Mamba-2/MoE/Attention, <strong>3B active</strong> parameters out of 30B total, OpenMDW-1.1 license (NVIDIA's own card calls it explicitly "ready for commercial and non-commercial use"). <code>nemotron_h_moe</code> is confirmed present in llama.cpp mainline. The active-parameter count is the headline NVIDIA leads with, and it's genuinely small at inference time — but the file on disk still has to hold every expert whether or not a given token routes through it. bartowski's Q4_K_M comes out to roughly 25.5 GB. "3B active" is a compute story, not a download-size one.</li>
+      <li><strong>Cactus Needle2</strong> (Cactus Compute, last updated on Hugging Face August 12) — genuinely tiny: 45M parameters, a single 14 MB binary, ~28 MB peak session RAM, Apache-2.0. We checked the license tag on the model card ourselves. It fails the gate for a reason none of our other rejections this year have: it isn't a GGUF at all. It's a custom 2-bit format ("Cactus Quants") baked into its own dependency-free engine, installed via <code>pip install cactus-needle</code>, with no llama.cpp architecture tag to even check against. Interesting to watch — it's benchmarked against FunctionGemma-270M and Apple's on-device Foundation Model at 5–70x smaller — but there's no version of "add it to our catalog" that means anything while our engine only speaks GGUF.</li>
+    </ul>
+
+    <h2>The catalog now</h2>
+    <p>Still 22 models, unchanged since <a href="2026-08-06-slm-daily-8.html">SLM Daily #8</a> added LFM2.5-2.6B on August 6. Same standing caveat as last time: 8 of the 22 are the generalist tier we hold to a cap, the other 14 are pre-cap specialist entries (medical, legal, finance and similar) we haven't unilaterally pulled from a catalog people are actively downloading from.</p>
+
+    <h2>Also this edition</h2>
+    <p>Our deep-dive checks what "tokens per second" on a phone actually means once you look past the first reply — the number in every model card, including LFM2.5-VL-3B's own, turns out to describe a device state that survives about four seconds. <a href="2026-08-13-thermal-cliff.html">Read it here</a>. And an <strong>Edge in the Wild</strong> spotlight on Samuel Alexander running Muse-Glimmer-30B — the model we just skipped above for being 7x over our size cap — doing real visual PCB inspection on a Qualcomm Dragonwing IQ-9075, at 91% of the board's peak memory bandwidth. <a href="2026-08-13-muse-glimmer-dragonwing.html">Read it here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

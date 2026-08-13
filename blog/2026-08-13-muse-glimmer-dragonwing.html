@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>91% of peak memory bandwidth, spent generating 2.84 tokens a second — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Samuel Alexander runs Meta's Muse-Glimmer-30B — a dense 30B vision-language model, 17.3 GB at Q4_K_M — entirely on a Qualcomm Dragonwing IQ-9075 edge board, no cloud calls. 2.84 tokens/sec turns out to be 91% of the board's own measured memory bandwidth, and the model is honest when it hallucinates a part number.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-13-muse-glimmer-dragonwing.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>91% of peak memory bandwidth, spent generating 2.84 tokens a second</h1>
+    <div class="meta">August 13, 2026 · 7 min read</div>
+
+    <p>2.84 tokens a second sounds slow next to anything in our own catalog. It isn't slow — it's close to physically maximal. Do the arithmetic on what a dense 30B model actually has to read off disk and RAM for every single token, and 2.84 tok/s on a Qualcomm Dragonwing IQ-9075 works out to roughly 47.5 GB/s of sustained memory traffic, against a board whose own measured peak read bandwidth is about 52 GB/s. That's 91% of everything the memory bus can physically do, spent inspecting a hand-soldered circuit board for a bent pin — with no cloud call anywhere in the loop.</p>
+
+    <p><strong>Edge in the Wild</strong> is our occasional spotlight on real builders running AI on hardware they own. This one: <a href="https://www.hackster.io/s4muela/muse-glimmer-30b-on-dragonwing-iq-9075-an-llm-that-sees-cafde6" target="_blank" rel="noopener">Muse Glimmer 30B on Dragonwing IQ-9075: an LLM that sees</a>, published August 12, 2026 by Hackster.io contributor <strong>Samuel Alexander</strong> (<a href="https://www.hackster.io/s4muela" target="_blank" rel="noopener">s4muela</a>) — a Top-1%-contributor maker in Hackster's Qualcomm channel, and this is his second guide on this specific board, following an earlier one benchmarking YOLOv11/YOLO26 object detection on the same hardware's NPU. Code and full write-up: <a href="https://github.com/SamuelAlexander/dragonwing-muse-glimmer-30b" target="_blank" rel="noopener">github.com/SamuelAlexander/dragonwing-muse-glimmer-30b</a>, Apache-2.0.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/dragonwing-hero.jpg" alt="Qualcomm Dragonwing IQ-9075 evaluation kit board, the edge hardware running Muse Glimmer 30B entirely locally" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The Qualcomm Dragonwing IQ-9075 EVK — Cortex-A78C cores, a Hexagon NPU, and up to 36 GB of LPDDR5. Photo from <a href="https://github.com/SamuelAlexander/dragonwing-muse-glimmer-30b" target="_blank" rel="noopener">Samuel Alexander's own repo</a>.</figcaption>
+    </figure>
+
+    <h2>The board and the math behind "slow"</h2>
+    <p>The IQ-9075 EVK pairs Cortex-A78C CPU cores with a Hexagon NPU (v73 HTP library) and up to 36 GB of LPDDR5-3200 with inline ECC, running Ubuntu 24.04. Alexander built llama.cpp for it natively (<code>-DGGML_NATIVE=ON</code>, to get the board's Cortex-A78C dot-product instructions) and ran it on the CPU backend — no NPU offload for the language model itself. The model is Meta's <strong>Muse-Glimmer-30B</strong>, Apache-2.0: a 52-layer, 27.85B-parameter text tower plus a 1.8B-parameter vision encoder, packaged as a 16.8 GB k-quant GGUF plus a separate 1.4 GB vision-projector file, with a 131,072-token context window.</p>
+
+    <p>Here's the number that makes 2.84 tokens/sec the right result instead of a disappointing one: this is a <em>dense</em> model, meaning every one of its roughly 15.6 GB of resident weights per forward pass has to be read from memory for every single token generated, with no shortcut. 2.84 tok/s × 15.6 GB/token comes out to about 47.5 GB/s of sustained read traffic — against the board's own measured peak of roughly 52 GB/s. The model isn't struggling; the memory bus is running flat out. It's the same reason our own digest today <a href="2026-08-13-slm-daily-10.html">just passed on NVIDIA's Nemotron 3.5 Lightning 30B-A3B</a> for the opposite reason — that model only activates 3B parameters per token, so a mixture-of-experts architecture can outrun its own on-disk size. A dense model like Muse-Glimmer can't: on-disk size and per-token traffic are the same number.</p>
+
+    <h2>Three real tasks, one honestly-reported mistake</h2>
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/dragonwing-pcb-inspection.jpg" alt="Close-up photo of a hand-soldered PCB with a bent header pin, the actual test image used for the model's visual inspection demo" loading="lazy" style="width:100%;max-width:560px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The actual inspection subject — a deliberately imperfect solder job, photographed on an iPhone 16 Pro. From the project's <a href="https://github.com/SamuelAlexander/dragonwing-muse-glimmer-30b" target="_blank" rel="noopener">test-data set</a>.</figcaption>
+    </figure>
+
+    <p>The guide runs three genuinely different workloads, each with a checkable output rather than a vibe:</p>
+    <ul>
+      <li><strong>Visual defect inspection</strong> — photograph the board above and ask the model, in plain English, to check for defects. It correctly flags the bent header pins in structured JSON. It also hallucinates a component label — "D6" on a board that only has D1 through D5 — and Alexander reports the miss as plainly as the hit, calling it out as the specific failure mode to design around rather than editing it out of the writeup. A full verdict takes 212–277.7 seconds depending on how much reasoning effort is dialed in; encoding the image alone takes 34.0 seconds at 512px and 131.9 seconds at 1024px — roughly 4x the cost for 2x the resolution.</li>
+      <li><strong>Tool calling</strong> — given three greenhouse-control functions (<code>run_pump</code>, <code>set_vent</code>, <code>log_observation</code>) and a sensor report, the model picks the single correct call.</li>
+      <li><strong>Long-document Q&amp;A</strong> — the board's own 96,951-character official documentation, ingested once (a real 66 minutes, at these speeds), then cached: a KV-cache slot save/restore round-trip measured at 2.4 ms to save and 1.5 ms to restore, so follow-up questions cost about a minute each instead of another hour. One of those follow-ups catches a genuine inconsistency between two of the vendor's own doc pages over which Bluetooth version the board supports — which Alexander then verifies against the board's actual <code>hciconfig</code> output, not just a second LLM opinion.</li>
+    </ul>
+    <p class="cite">Source: <a href="https://github.com/SamuelAlexander/dragonwing-muse-glimmer-30b" target="_blank" rel="noopener">github.com/SamuelAlexander/dragonwing-muse-glimmer-30b</a>, README and benchmark results.</p>
+
+    <h2>Two tiers, and why the slow one is the point</h2>
+    <p>Alexander's framing ties directly back to his earlier NPU guide on the same board: YOLOv11 object detection runs at 166 FPS, about 6 ms per frame, on the Hexagon NPU — a "reflex tier" for always-on, cheap, fast perception. Muse-Glimmer-30B is the "deliberation tier" sitting behind it: slow, occasional, and reserved for judgment calls a reflex model can't make — did the solder job actually pass, does this reading warrant venting the greenhouse, does this spec sheet actually match the hardware. Two tiers, two very different latency budgets, both running on the same box with nothing leaving it.</p>
+
+    <p>He's explicit about why that constraint matters, not just how it works: the inspection photos in this guide never touched a network, and for a factory line, a clinic, or anything under an NDA, that's often the only acceptable arrangement rather than a nice-to-have. It's close to a textbook version of the thesis this blog keeps returning to — the model comes to your data, not your data to the model — running on hardware that has nothing to do with our own catalog or our own app.</p>
+
+    <h2>Why it isn't (and won't soon be) in our catalog</h2>
+    <p>We covered the reason in today's digest: bartowski's Q4_K_M of Muse-Glimmer-30B runs about 17.3 GB, and the model's own resident footprint on this board — weights, vision encoder, and a full 131K-token KV cache — comes to roughly 21.6 GB of the board's 36 GB. That's a board built to hold a model this size with room to spare, not a phone with a few gigabytes to give one app. What we'd still hold our own catalog copy to is the standard Alexander sets here without being asked: report the honest failure mode next to the win, show the actual memory math instead of a marketing tok/s figure, and verify a claim against the real hardware instead of trusting the model's own answer.</p>
+
+    <p><strong>Source / credit:</strong> Muse-Glimmer-30B is Meta's model, Apache-2.0. This build and every number above is the independent work of Hackster.io contributor <a href="https://www.hackster.io/s4muela" target="_blank" rel="noopener">Samuel Alexander (s4muela)</a> — full guide at <a href="https://www.hackster.io/s4muela/muse-glimmer-30b-on-dragonwing-iq-9075-an-llm-that-sees-cafde6" target="_blank" rel="noopener">Hackster.io</a>, code at <a href="https://github.com/SamuelAlexander/dragonwing-muse-glimmer-30b" target="_blank" rel="noopener">github.com/SamuelAlexander/dragonwing-muse-glimmer-30b</a>. Photos are the project's own.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — running a dense model on bandwidth-limited edge hardware yourself? Tell us what your memory bus actually sustains.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private on-device AI chat</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

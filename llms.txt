@@ -10,6 +10,9 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- 37.58 tokens/sec on an iPhone 16 Pro lasts about four seconds: https://www.privateslm.dev/blog/2026-08-13-thermal-cliff.html
+- 91% of peak memory bandwidth, spent generating 2.84 tokens a second (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-13-muse-glimmer-dragonwing.html
+- SLM Daily #10 (catalog digest): https://www.privateslm.dev/blog/2026-08-13-slm-daily-10.html
 - 319,000 parameters. Two days on a phone charger. Zero pretraining, anywhere, ever. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-10-qapla-esp32-onchip-training.html
 - A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone: https://www.privateslm.dev/blog/2026-08-09-diffusion-llm-latency-myth.html
 - We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-09-bonsai-jetson.html
