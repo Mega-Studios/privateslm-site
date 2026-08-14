@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right. — privateSLM blog</title>
+  <meta name="description" content="Rob Porter's torchwright compiler writes exact algorithms directly into the weights of a stock Phi-3 checkpoint — zero gradient descent, zero training data. Tested against six frontier LLMs on direct-answer multiplication, the compiled model scores 100% at every operand length while five of six frontier models can't clear 30% at five digits. What it means that the checkpoint is an ordinary architecture privateSLM's own engine already runs.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-14-torchwright-zero-training-transformer.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right.</h1>
+    <div class="meta">August 14, 2026 · 11 min read</div>
+
+    <p>Give six frontier language models the same 500 random five-digit multiplication problems, no scratchpad, no tool calls, just a direct answer at temperature zero, and five of them score below 30%. None reaches 90%. Then run the same 500 problems through a transformer that was never trained on anything — no gradient descent, no dataset, not one training step — and it gets all of them right. Every one, at every operand length the test covered, three digits through seven. The trained models get steadily worse as the numbers get bigger. The untrained one doesn't move, because "trained" is the wrong word for what happened to its weights. They were computed.</p>
+
+    <p>This is the work of independent researcher <a href="https://ood.dev/about/" target="_blank" rel="noopener">Rob Porter</a>, published across three posts on his blog <a href="https://ood.dev/" target="_blank" rel="noopener">Out of Distribution</a> between July 23 and August 13, 2026 — the most recent of them landing inside our research window for this edition. The tool behind it, <a href="https://github.com/physicsrob/torchwright" target="_blank" rel="noopener">torchwright</a> (MIT license, source on GitHub), is a compiler that turns an ordinary Python computation graph into the weight matrices of a real transformer checkpoint. Not a synthetic training set that teaches a model to imitate an algorithm — the algorithm's own logic, hand-derived and written directly into the weights. The output loads through vanilla Hugging Face `transformers`, no custom model code, because it's built on a stock Phi-3 architecture — the same architecture family privateSLM already ships in its catalog as Phi-4 Mini.</p>
+
+    <h2>The question: is bad arithmetic a training problem or an architecture problem?</h2>
+    <p>Porter's starting point is a genuine open question in the field: transformers are proven Turing-complete under idealized assumptions, so in principle nothing stops one from computing exact arithmetic. In practice, LLMs are notoriously unreliable at it without a scratchpad or tool call. Is that a limitation of the architecture, or just a limitation of what gradient descent happens to find? Porter's approach sidesteps the debate entirely: instead of asking what a transformer <em>can learn</em>, calculate the exact weights necessary for a transformer to <em>implement</em> a specific algorithm. If the weights exist and the forward pass produces the right answer, the architecture can express the algorithm — full stop, no appeal to training required.</p>
+
+    <p>The idea of hand-constructed transformer weights isn't new; Porter cites <a href="https://arxiv.org/abs/2301.05062" target="_blank" rel="noopener">Tracr</a>, which compiles a language called RASP into transformer weights, as prior art. Porter built his own compiler instead of reusing Tracr because he wanted to express arbitrary computation graphs in ordinary Python rather than RASP's own language. The substrate he started from was deliberately minimal: FFNs with ReLU, a hand-designed position encoding, and — notably — no normalization layers, chosen purely because they were easier to derive exact constructions for. Only later did the compiler target a real, standard architecture.</p>
+
+    <h2>How a computation graph becomes attention weights</h2>
+    <p>The residual stream — the running sum every transformer layer reads from and adds to — is the only shared memory a transformer has. Torchwright treats it like a whiteboard with numbered columns: every value a computation graph produces claims a block of columns for as long as something downstream still needs it. Because a transformer layer's skip connection means each sublayer can only <em>add</em> to the stream (<code>out = in + f(in)</code>), the compiler has exactly two primitive moves — write a new value into zeroed columns, or free a column by writing that value's negation into it once nothing needs it anymore. Addition of two values falls out for free: route both into the same columns and let the skip connection sum them.</p>
+
+    <p>From there Porter built up a library of primitives — comparison via a token-embedding-style dot-product trick, lookup tables via wide FFN layers, one-hot routing — and composed them into full algorithms. The result, from the project's own README:</p>
+
+    <pre><code>from transformers import pipeline
+
+generate = pipeline("text-generation", model="binary_increment_hf_bundle")
+print(generate("1011\n", return_full_text=False)[0]["generated_text"])
+# 1100</code></pre>
+
+    <p>An ordinary Phi-3 checkpoint, loaded with the standard Hugging Face pipeline, incrementing a binary number correctly. Every weight in it was computed by the compiler from a Python description of binary addition with carry propagation. Nothing about that checkpoint's file format, tokenizer, or loading path distinguishes it from any other Phi-3 GGUF conversion candidate.</p>
+
+    <h2>Four calculators, four places to hide the work</h2>
+    <p>Porter's second post pushes the same compiler at multiplication — the operation where trained LLMs degrade fastest. He built four separate calculators, all accepting the same <code>A op B\n</code> input grammar and all producing byte-identical answers, that differ only in <em>where</em> they put the serial work carrying digits requires:</p>
+
+    <ul>
+      <li><strong>Grade-school</strong> — the standard column-by-column algorithm taught in school, with carries propagating right to left. The published three-digit checkpoint compiles to <strong>27 layers</strong> at <code>d_model=2048, d_hidden=4096</code>.</li>
+      <li><strong>Hardware-style</strong> — borrows carry-lookahead and carry-save reduction from digital circuit design, trading width for depth. Two layers deeper than grade-school at three digits (29 vs. 27), but the trade inverts as operands widen: at ten digits it needs only 36 layers versus grade-school's 43.</li>
+      <li><strong>Scratchpad</strong> — moves the serial dependency out of the network's depth and into the generated token stream itself, emitting intermediate carry/digit records instead of jumping straight to the answer. Layer count stays essentially flat (18) as operand length grows, because the work is now paid for in tokens, not layers.</li>
+      <li><strong>Memorizing</strong> — skips computing the answer at all and stores every possible input/output pair directly, trading computation for a lookup table. It works, but the table grows roughly tenfold per added operand digit; Porter's extrapolation puts a three-digit version at around 700 million parameters and 200 layers, so the published checkpoint stops at two digits.</li>
+    </ul>
+
+    <p>All four were exhaustively checked against their full input domains — the grade-school, hardware-style, and scratchpad checkpoints against all 3,000,000 possible three-digit expressions each, the memorizing checkpoint against its smaller 30,000-expression domain. Every one of them got every expression right, on every check.</p>
+
+    <h2>Versus the frontier</h2>
+    <p>The number that matters for a claim like "exact multiplication fits inside transformer weights" is how it stacks up against models people actually use. Porter ran the same test — direct-answer multiplication, reasoning disabled, temperature zero, four retry attempts allowed for malformed responses — against six frontier LLMs and his own seven-digit grade-school checkpoint, sampling 500 fresh expressions at each operand length:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Model</th><th style="padding:6px 10px;">3×3</th><th style="padding:6px 10px;">4×4</th><th style="padding:6px 10px;">5×5</th><th style="padding:6px 10px;">6×6</th><th style="padding:6px 0;">7×7</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">GPT-5.6 Sol</td><td style="padding:6px 10px;">99.2%</td><td style="padding:6px 10px;">69.4%</td><td style="padding:6px 10px;">21.4%</td><td style="padding:6px 10px;">5.2%</td><td style="padding:6px 0;">0.0%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Claude Opus 5†</td><td style="padding:6px 10px;">95.4%</td><td style="padding:6px 10px;">78.0%</td><td style="padding:6px 10px;">13.0%</td><td style="padding:6px 10px;">1.0%</td><td style="padding:6px 0;">0.0%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Grok 4.3</td><td style="padding:6px 10px;">78.4%</td><td style="padding:6px 10px;">25.2%</td><td style="padding:6px 10px;">2.4%</td><td style="padding:6px 10px;">0.2%</td><td style="padding:6px 0;">0.0%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">DeepSeek V4 Pro</td><td style="padding:6px 10px;">99.6%</td><td style="padding:6px 10px;">55.2%</td><td style="padding:6px 10px;">26.4%</td><td style="padding:6px 10px;">2.2%</td><td style="padding:6px 0;">0.0%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Kimi K3</td><td style="padding:6px 10px;">97.4%</td><td style="padding:6px 10px;">64.8%</td><td style="padding:6px 10px;">6.4%</td><td style="padding:6px 10px;">0.2%</td><td style="padding:6px 0;">0.0%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Qwen 3.7 Max</td><td style="padding:6px 10px;">100.0%</td><td style="padding:6px 10px;">99.0%</td><td style="padding:6px 10px;">87.4%</td><td style="padding:6px 10px;">55.2%</td><td style="padding:6px 0;">7.4%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;"><strong>Compiled (torchwright)</strong></td><td style="padding:6px 10px;"><strong>100.0%</strong></td><td style="padding:6px 10px;"><strong>100.0%</strong></td><td style="padding:6px 10px;"><strong>100.0%</strong></td><td style="padding:6px 10px;"><strong>100.0%</strong></td><td style="padding:6px 0;"><strong>100.0%</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: ood.dev, "A calculator, compiled into a transformer," Aug 9 2026. † 42% of Claude Opus 5's six-digit attempts never produced a parseable direct answer after four retries and were scored wrong — the model kept showing its work despite instructions not to.</p>
+
+    <p>Qwen 3.7 Max is the standout among the trained models, holding on well past the others for reasons Porter says he doesn't know. Every other model is at effectively zero by seven digits. The compiled checkpoint — the same one, unchanged, used for every column — never drops below 100%. Porter is careful about what this does and doesn't prove: it's not a general-capability result, since the compiled model was built for exactly this input grammar and a fixed maximum operand length, and a large enough lookup table could trivially "solve" any finite domain. The actual claim is narrower and, we think, more interesting: exact multiplication can be implemented in transformer weights directly, using an ordinary decoder-only architecture, and none of the six frontier models tested reliably finds that same computation through training, even though the capacity to express it was apparently there the whole time.</p>
+
+    <h2>It's not a research artifact. It's a Phi-3 checkpoint.</h2>
+    <p>The published three-digit grade-school checkpoint, <a href="https://huggingface.co/physicsrob/torchwright-calculator-simple-max-digits-3" target="_blank" rel="noopener">physicsrob/torchwright-calculator-simple-max-digits-3</a> on Hugging Face, reports <code>"architectures": ["Phi3ForCausalLM"]</code> in its config — the same model class as Microsoft's Phi-4 Mini, which privateSLM already ships in the Generalists category of our own catalog. It has a genuinely tiny 18-token vocabulary (digits, an operator each, a newline, and a couple of special tokens — this checkpoint has never seen the word "the"), 27 layers, and roughly a billion parameters in fp32, none of it quantized. It is not a chat model, it fails every one of our CATALOG RULES on purpose (single-task, non-instruct, a vocabulary too narrow to hold a sentence), and we're not adding it to anything. What it demonstrates is more useful to us than a catalog entry: the architecture our engine already runs, unmodified, is expressive enough to host exact, guaranteed-correct arithmetic with zero training in the loop — if someone converted this checkpoint to GGUF, the same llama.cpp build behind privateSLM's chat models would very likely load it and produce exactly the digits the compiler put there, on the first try, forever.</p>
+
+    <p>Porter didn't stop at calculators. The day before we wrote this — August 13, 2026 — he published a third post, <a href="https://ood.dev/posts/doom/" target="_blank" rel="noopener">"Doom, compiled into a transformer"</a>: a 38-layer <code>Phi3ForCausalLM</code> checkpoint that takes level geometry and a player position/viewing angle as its prompt and generates the pixels of the frame Doom's own renderer would have drawn — the original rendering algorithm translated into transformer weights, not imitated by training on rendered frames. Same compiler, same "no training anywhere" constraint, same stock architecture. It's a stunt, and Porter treats it as one, but the fact that it's the same trick as the calculator — not a special case — is the actual point: if an algorithm can be written down as a fixed computation graph, torchwright can, in principle, put it inside a transformer's weights with a correctness guarantee no amount of fine-tuning gives you.</p>
+
+    <h2>What this means for us</h2>
+    <p>Nothing here ships in privateSLM this week, and nothing here contradicts anything we've written about training, quantization, or benchmark gaps in trained chat models — this is a different category of object entirely. But it's a genuinely new data point in a debate our audience cares about: when a small on-device model gets arithmetic wrong, is that the ceiling of what a 3B-parameter transformer can do, or the ceiling of what gradient descent happened to find for it this time? Porter's answer, backed by an exhaustively-verified 3,000,000-expression checkpoint and a head-to-head loss against six current frontier models, leans hard toward the second. That's a more optimistic story for small models than it sounds — it means the architecture privateSLM already runs on your phone has more headroom for exact, reliable computation than its current training-derived weights are using. Whether anyone builds a practical hybrid — a trained chat model with compiled subroutines stitched into the same weight space for the operations it can't be trusted to learn — is an open problem. Porter's compiler is, at minimum, proof the substrate can hold it.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've tried GGUF-converting a torchwright checkpoint yourself, or found another compiled-weights project we should know about, tell us.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — real models, running on your device today</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
