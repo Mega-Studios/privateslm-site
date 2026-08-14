@@ -1,5 +1,5 @@
 {
-  "digestCounter": 10,
+  "digestCounter": 9,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -471,11 +471,6 @@
     {
       "slug": "2026-08-14-nanomind-s3-esp32",
       "type": "diy",
-      "publishedAt": "2026-08-14T04:36:58Z"
-    },
-    {
-      "slug": "2026-08-14-slm-daily-10",
-      "type": "digest",
       "publishedAt": "2026-08-14T04:36:58Z"
     }
   ]

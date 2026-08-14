@@ -12,7 +12,6 @@
 ## Blog
 - Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right.: https://www.privateslm.dev/blog/2026-08-14-torchwright-zero-training-transformer.html
 - All 15.2 million parameters, computed live, every token — on a $4 chip, at 2.96 tokens a second (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-14-nanomind-s3-esp32.html
-- SLM Daily #10 (catalog digest): https://www.privateslm.dev/blog/2026-08-14-slm-daily-10.html
 - 319,000 parameters. Two days on a phone charger. Zero pretraining, anywhere, ever. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-10-qapla-esp32-onchip-training.html
 - A 4x speedup that costs 12x the accuracy: what diffusion LLMs actually do on a real phone: https://www.privateslm.dev/blog/2026-08-09-diffusion-llm-latency-myth.html
 - We said this model had no GGUF path. A palm-sized Jetson board proves that's now half true. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-09-bonsai-jetson.html
