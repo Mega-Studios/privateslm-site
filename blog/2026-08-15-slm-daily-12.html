@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #12: our day-one catalog entry just lost to a newcomer by 42x on one benchmark — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #12: Liquid AI's LFM2.5-1.2B-Instruct beats Llama 3.2 1B Instruct — in our catalog since launch — on all seven of Liquid's own published benchmarks, including a 42x gap on AIME25, at a smaller file size. First straight replacement in the catalog's history.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-15-slm-daily-12.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #12: our day-one catalog entry just lost to a newcomer by 42x on one benchmark</h1>
+    <div class="meta">August 15, 2026 · 5 min read</div>
+
+    <p>0.33 versus 14.00 — that's Llama 3.2 1B Instruct against Liquid AI's brand-new LFM2.5-1.2B-Instruct on AIME25, by Liquid's own published numbers. It isn't a cherry-picked outlier: the newcomer beats Llama 3.2 1B on all seven benchmarks Liquid tested it against, in a smaller file. Llama 3.2 1B has been in privateSLM's catalog since before this blog existed. Today it's out, and LFM2.5-1.2B-Instruct is in — the first straight one-for-one replacement this catalog has ever made, rather than a pure addition.</p>
+
+    <h2>The numbers, from the vendor that has something to lose by inflating them</h2>
+    <p>Liquid AI published a direct head-to-head table on LFM2.5-1.2B-Instruct's own model card, released August 5, comparing it against four "relevant sub-2B models" including the exact Llama 3.2 1B Instruct build we've shipped since launch:</p>
+
+    <table style="width:100%; border-collapse:collapse; margin:1.5em 0; font-size:0.92em;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border,#444);">
+          <th style="text-align:left; padding:6px 8px;">Model</th>
+          <th style="text-align:right; padding:6px 8px;">GPQA</th>
+          <th style="text-align:right; padding:6px 8px;">MMLU-Pro</th>
+          <th style="text-align:right; padding:6px 8px;">IFEval</th>
+          <th style="text-align:right; padding:6px 8px;">IFBench</th>
+          <th style="text-align:right; padding:6px 8px;">Multi-IF</th>
+          <th style="text-align:right; padding:6px 8px;">AIME25</th>
+          <th style="text-align:right; padding:6px 8px;">BFCLv3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:6px 8px;"><strong>LFM2.5-1.2B-Instruct</strong></td><td style="text-align:right; padding:6px 8px;"><strong>38.89</strong></td><td style="text-align:right; padding:6px 8px;"><strong>44.35</strong></td><td style="text-align:right; padding:6px 8px;"><strong>86.23</strong></td><td style="text-align:right; padding:6px 8px;"><strong>47.33</strong></td><td style="text-align:right; padding:6px 8px;"><strong>60.98</strong></td><td style="text-align:right; padding:6px 8px;"><strong>14.00</strong></td><td style="text-align:right; padding:6px 8px;"><strong>49.12</strong></td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:6px 8px;">Qwen3-1.7B (instruct)</td><td style="text-align:right; padding:6px 8px;">34.85</td><td style="text-align:right; padding:6px 8px;">42.91</td><td style="text-align:right; padding:6px 8px;">73.68</td><td style="text-align:right; padding:6px 8px;">21.33</td><td style="text-align:right; padding:6px 8px;">56.48</td><td style="text-align:right; padding:6px 8px;">9.33</td><td style="text-align:right; padding:6px 8px;">46.30</td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:6px 8px;">Granite 4.0-1B</td><td style="text-align:right; padding:6px 8px;">24.24</td><td style="text-align:right; padding:6px 8px;">33.53</td><td style="text-align:right; padding:6px 8px;">79.61</td><td style="text-align:right; padding:6px 8px;">21.00</td><td style="text-align:right; padding:6px 8px;">43.65</td><td style="text-align:right; padding:6px 8px;">3.33</td><td style="text-align:right; padding:6px 8px;">52.43</td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:6px 8px;">Llama 3.2 1B Instruct</td><td style="text-align:right; padding:6px 8px;">16.57</td><td style="text-align:right; padding:6px 8px;">20.80</td><td style="text-align:right; padding:6px 8px;">52.37</td><td style="text-align:right; padding:6px 8px;">15.93</td><td style="text-align:right; padding:6px 8px;">30.16</td><td style="text-align:right; padding:6px 8px;">0.33</td><td style="text-align:right; padding:6px 8px;">21.44</td></tr>
+        <tr><td style="padding:6px 8px;">Gemma 3 1B IT</td><td style="text-align:right; padding:6px 8px;">24.24</td><td style="text-align:right; padding:6px 8px;">14.04</td><td style="text-align:right; padding:6px 8px;">63.25</td><td style="text-align:right; padding:6px 8px;">20.47</td><td style="text-align:right; padding:6px 8px;">44.31</td><td style="text-align:right; padding:6px 8px;">1.00</td><td style="text-align:right; padding:6px 8px;">16.64</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.85em; opacity:0.8;">Source: <a href="https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct" target="_blank" rel="noopener">LiquidAI/LFM2.5-1.2B-Instruct model card</a>, published August 5, 2026. GPQA/MMLU-Pro/IFBench/AIME25 follow ArtificialAnalysis's methodology; IFEval/Multi-IF average strict and loose scoring; BFCLv3 uses Liquid's tool-use handler.</p>
+
+    <p>We didn't just trust the table. We HEAD-checked <code>LiquidAI/LFM2.5-1.2B-Instruct-GGUF</code>'s Q4_K_M file ourselves and got back <strong>730,895,168 bytes</strong> (730.9 MB) — smaller than Llama 3.2 1B's own Q4_K_M (807.7 MB), which has been in our catalog since it launched. Same size tier, same <code>lfm2</code> architecture already confirmed compatible in llama.cpp mainline (it's the same family as our existing LFM2.5-2.6B entry), same LFM Open License v1.0 we already ship under. A model beating the incumbent on seven independent metrics, in a smaller file, isn't a marginal upgrade our "replace only when it strictly dominates" rule is built for — it's the exact case that rule exists for.</p>
+
+    <p>One honest caveat: these are Liquid's own numbers, not a benchmark we ran ourselves, and Llama 3.2 1B is now nearly two years old — this says less about Meta's engineering than about how far the 1B-parameter class has moved since. We're not aware of any independent leaderboard that disputes the ranking, but if one surfaces showing a different picture, we'll say so.</p>
+
+    <h2>What's now in the catalog</h2>
+    <p>Generalists: Llama 3.2 3B, Qwen2.5 1.5B, Gemma 2 2B, Phi-4 Mini, G9v3 3B, Nanbeige4.2 3B, LFM2.5 2.6B, and now <strong>LFM2.5 1.2B</strong> in place of Llama 3.2 1B — still 8, our generalist cap. 14 pre-cap specialist models (medical, legal, finance and similar) are unchanged, for the same standing reason as every prior edition: we haven't unilaterally pulled models people are actively downloading from a catalog with no size cap on that tier.</p>
+
+    <h2>Engine check</h2>
+    <p>llama.cpp advanced from b10362 (Aug 11) to <strong>b10436</strong> (Aug 15) — 74 tags in four days, all optimization and bugfix work (SYCL, server metrics, WASI threading). We diffed <code>llama-arch.h</code> directly: no new architecture tags land in this window that change anything for a phone-sized model.</p>
+
+    <h2>Also this edition</h2>
+    <p>Our deep-dive digs into a new paper on 4-bit quantization's language-by-language cost — the same nf4 truncation your phone's SLM ships with can push a model's accuracy on some languages below random chance, while barely touching English on the identical checkpoint. <a href="2026-08-15-multilingual-quantization-tax.html">Read it here</a>. No Edge in the Wild spotlight this edition — nothing that met our attribution and verification bar surfaced in the window since our last check.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

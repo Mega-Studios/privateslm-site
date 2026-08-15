@@ -1,16 +1,15 @@
 {
   "models": [
     {
-      "id": "llama-3.2-1b-instruct-q4",
-      "name": "Llama 3.2 1B Instruct",
+      "id": "lfm2.5-1.2b-q4",
+      "name": "LFM2.5 1.2B Instruct",
       "category": "Generalists",
-      "description": "Smallest & fastest. Good for older phones.",
-      "url": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-      "hfRepoUrl": "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF",
-      "fileName": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-      "sizeBytes": 807694464,
-      "minRamMb": 2048,
-      "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+      "description": "Smallest & fastest — replaces Llama 3.2 1B, which it beats on every published benchmark (GPQA, MMLU-Pro, IFEval, tool-use) at a smaller file size. 32K context, tool-calling support. LFM Open License v1.0 (same terms as our other LFM2 entries).",
+      "url": "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF/resolve/main/LFM2.5-1.2B-Instruct-Q4_K_M.gguf",
+      "hfRepoUrl": "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "fileName": "LFM2.5-1.2B-Instruct-Q4_K_M.gguf",
+      "sizeBytes": 730895168,
+      "minRamMb": 2048
     },
     {
       "id": "qwen2.5-1.5b-instruct-q4",
