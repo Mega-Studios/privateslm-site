@@ -1,5 +1,5 @@
 {
-  "digestCounter": 9,
+  "digestCounter": 11,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -96,6 +96,24 @@
       "slug": "diffusion-llm-latency-myth",
       "summary": "Diffusion LLMs are marketed as the on-device latency fix (parallel token generation vs. sequential), but the only real phone-NPU benchmark (arXiv:2606.13740, llada.cpp on real Qualcomm Snapdragon phones) shows naive NPU offload alone buys only 8.78x and the full engineered pipeline is still slower than the autoregressive model it replaces on the weakest of three tested chips, only winning (up to 3.9x) on the newest silicon. The fix that makes it fast — fewer sampling steps — collapses LLaDA-8B's GSM8K score from 73.6% to 6.1% (arXiv:2510.04146v2, Apple-affiliated Berkeley paper), a 12x accuracy cost for a 4x speedup. No diffusion LLM currently ships on-device in production; Gemini Diffusion and Mercury are both cloud-hosted demos.",
       "post": "blog/2026-08-09-diffusion-llm-latency-myth.html"
+    },
+    {
+      "date": "2026-08-12",
+      "slug": "eu-ai-act-article-50-text-watermark-gap",
+      "summary": "EU AI Act Article 50(2), enforceable since August 2, 2026, requires AI-generated text (not just image/video/audio) to carry a machine-readable, detectable mark, on pain of fines up to EUR15M or 3% of global turnover. No model in privateSLM's catalog, and no stage in llama.cpp's public sampler API (verified against our own LlamaEngine.swift sampler chain), implements any such marking. Being genuinely offline/user-modifiable and being verifiably watermarked are close to structurally incompatible. Who bears the Art. 50(2) obligation for an app built on independently-downloaded open weights plus a third-party local inference engine is not addressed by any guidance we found.",
+      "post": "blog/2026-08-12-eu-ai-act-watermark-gap.html"
+    },
+    {
+      "date": "2026-08-13",
+      "slug": "thermal-cliff-sustained-load-benchmark-fiction",
+      "summary": "Every on-device LLM tok/s figure quoted publicly (model cards, our own catalog copy included) is a cold-start number from the first 1-2 replies. arXiv:2603.23640's sustained-load study shows an iPhone 16 Pro loses 44.1% of throughput by iteration 8, and a Samsung Galaxy S24 Ultra hits a hard OS-enforced GPU frequency floor at iteration 6 that stops inference outright rather than slowing it. MLPerf Mobile's own methodology already builds in cooldown breaks for exactly this contamination risk elsewhere in the suite, but its LLM/edge track doesn't inherit that discipline.",
+      "post": "blog/2026-08-13-thermal-cliff.html"
+    },
+    {
+      "date": "2026-08-14",
+      "slug": "torchwright-compiled-not-trained-transformer",
+      "summary": "Rob Porter's torchwright compiler writes exact algorithms (arithmetic, a binary incrementer, Doom's renderer) directly into the weights of a stock Phi-3 checkpoint, with zero training/gradient descent anywhere. The compiled multiplication checkpoint beats six frontier LLMs at direct-answer multiplication (100% vs as low as 0% at seven digits), demonstrating the architecture already used by privateSLM's own Phi-4 Mini catalog entry has headroom for guaranteed-correct computation that training doesn't reliably find.",
+      "post": "blog/2026-08-14-torchwright-zero-training-transformer.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -169,6 +187,27 @@
       "date": "2026-08-10",
       "post": "blog/2026-08-10-qapla-esp32-onchip-training.html",
       "note": "Covered secondarily by Hackster News (2026-08-05, 'Klingon Meets TinyML' — article HTML 403s WebFetch, not used as a source). Primary sourcing entirely from the builder's own GitHub README (Apache 2.0) via WebFetch, cross-checked against ggml-org/llama.cpp for nothing (no engine dependency — pure C, no GGUF/llama.cpp involved). Two real device photos verified live via HTTP HEAD/GET on raw.githubusercontent.com, downloaded, visually inspected, and mirrored into assets/blogimg/ as qapla-training.jpg and qapla-klingon-output.jpg. Exact loss-table numbers (step 1495/2549/4905) and gradcheck error (1.07e-08) cross-verified against both the README text and the OLED readout visible in the photos themselves before publishing."
+    },
+    {
+      "name": "leonickson1's Swiftlet — MoE weight-streaming runtime that ran Qwen3-Next-80B-A3B in 4.3GB peak RAM on an Apple Silicon Mac (42GB on disk), and Qwen3.6-35B on an iPhone 17",
+      "sourceUrl": "https://github.com/leonickson1/Swiftlet",
+      "date": "2026-08-12",
+      "post": "blog/2026-08-12-swiftlet-moe-streaming.html",
+      "note": "Companion free App Store app 'Priv AI' (github.com/leonickson1/localLLM, dev name Monish Soundar Raj) supplied the only real embeddable screenshot found (Swiftlet's own README has zero images, only badges) — resized/compressed and committed to assets/blogimg/swiftlet-privai-screenshot.jpg. HN thread (news.ycombinator.com/item?id=49158333, 312 pts) included substantive pushback on prefill/long-context speed which the post includes verbatim rather than omitting. Apache 2.0. Do not re-feature without a materially new update."
+    },
+    {
+      "name": "Samuel Alexander's (s4muela) Muse-Glimmer-30B on a Qualcomm Dragonwing IQ-9075 EVK — dense 30B vision-language model doing real visual PCB inspection, tool calling and long-document Q&A entirely on-device, at 91% of the board's measured peak memory bandwidth",
+      "sourceUrl": "https://www.hackster.io/s4muela/muse-glimmer-30b-on-dragonwing-iq-9075-an-llm-that-sees-cafde6",
+      "date": "2026-08-13",
+      "post": "blog/2026-08-13-muse-glimmer-dragonwing.html",
+      "note": "Real photos verified via HTTP HEAD and EXIF metadata (iPhone 16 Pro, dated Aug 11 2026), committed to assets/blogimg/dragonwing-hero.jpg and assets/blogimg/dragonwing-pcb-inspection.jpg. Apache 2.0. Do not re-feature without a materially new update."
+    },
+    {
+      "name": "Salman Farsi's (6farsi) NanoMind-S3 — a fully dense 15.2M-parameter LLaMA-2-architecture transformer (Karpathy's stories15M) running on a single $4 ESP32-S3, every parameter computed on every token (no flash-embedding lookup shortcut)",
+      "sourceUrl": "https://www.hackster.io/6farsi/nanomind-s3-fully-dense-15-2m-param-llm-on-esp32-s3-73937f",
+      "date": "2026-08-14",
+      "post": "blog/2026-08-14-nanomind-s3-esp32.html",
+      "note": "Verified via the Hackster.io page (Jina-reader proxy workaround for the 403) and the linked GitHub repo (github.com/imFARSI/NanoMind-S3, MIT). Real hero photo pulled from the builder's own Hackster upload (hackster.imgix.net), resized/compressed, committed to assets/blogimg/nanomind-s3-hero.jpg. Do not re-feature without a materially new update."
     }
   ],
   "discussionsCreated": [
@@ -244,9 +283,14 @@
       "date": "2026-08-11",
       "event": "consolidation-plus-fail-safe-no-publish",
       "reason": "This run opened on privateslm-site with two open, unmerged autopilot draft PRs already sitting on main: #42 (SLM Daily #9 + diffusion-LLM-latency deep-dive + Bonsai/Jetson spotlight, opened 2026-08-09) and #43 (Qapla' ESP32 on-chip training spotlight, opened 2026-08-10) — the same draft-PR-rot pattern the repo's own notes have flagged repeatedly since before the 2026-08-06 six-branch consolidation. Both PRs' content was reviewed in full (every new blog post read end-to-end, sourcing and hook quality checked) and found to clear the quality bar. Merged #42 directly. #43 then reported a real GitHub merge conflict against the new main (both PRs touched the same top-of-list lines in blog/index.html, llms.txt, and autopilot-state.json, since both branched from the same stale base) — reconciled by hand: cloned the repo locally, pulled #43's two real device photos and blog-post HTML unmodified from its branch, recomputed the state-file/index/llms.txt diffs against the new main, and opened/merged a fresh PR (#44) carrying #43's content forward with nothing lost. Closed #43 as superseded. All four newly-live post URLs plus the updated blog index were curl-verified at HTTP 200 after the merge.\n\nSecond phase: fresh research for the window since the newly-consolidated lastRunAt (2026-08-10T04:25:00Z) through this run (~24h), plus the standard 14-day catalog lookback. llama.cpp advanced to tag b10356 (Aug 11) — mostly ROCm/Android-affinity/backend-sampling infrastructure work, nothing indicating a new phone-relevant LLM_ARCH_* tag; a same-day WebFetch summary mentioning a 'Granite-Switch' per-token-LoRA-adapter architecture (tag b10342) could not be corroborated against a second primary source (a direct fetch of the PR URL actually queried returned the already-covered Metal NORM/RMS_NORM fix instead), so per the quality bar's 'can't source it, cut it' rule this was NOT used as a deep-dive lead. CATALOG: no qualifying candidate found in HF trending/created GGUF listings or bartowski's recent uploads — nothing sub-4B, chat/instruct, reputable-quantizer, and released within 14 days surfaced. DEEP-DIVE: no non-duplicate, primary-sourced angle survived the sweep. DIY SPOTLIGHT: no new individually-verifiable builder project (named author, primary source) surfaced in the ~24h window; Hackster.io and Habr results returned only older/generic listicle content, not a fresh dated build. Result: PR consolidation was the substantive work this run; no new blog content published beyond the consolidated #44 merge — a normal quality-bar fail-safe outcome for the fresh-research phase, not an error. No repo access issues, no Pages/git failures encountered."
+    },
+    {
+      "date": "2026-08-15",
+      "event": "consolidated-three-diverged-draft-prs-46-47-48",
+      "reason": "This run found the repo's own long-flagged draft-PR-rot pattern recurring a third time: three open, unmerged, non-overlapping autopilot draft PRs (#46 opened 2026-08-12, #47 opened 2026-08-13, #48 opened 2026-08-14) had accumulated on privateslm-site since the last merge to main on 2026-08-11, each independently branched from the same stale main tip (24a6318) because main never advanced while each ran. All three were reviewed end-to-end (every new post read in full, every image checked, sourcing spot-verified) and all cleared the quality bar cleanly -- this was not a quality problem, purely an unmerged-branch problem. Reconciled by hand via local git clone: cherry-picked every unique file from all three branches (8 blog posts, 4 real images, no losses) onto a fresh branch off current main. The only real conflict was a numbering collision -- #46 and #47 each independently wrote a 'SLM Daily #10' because neither run knew about the other's parallel work. Kept #46's edition (2026-08-12-slm-daily-10.html, the EXAONE 4.5 sliding-window-attention KV-cache bug) as the true #10 since it published first chronologically, and renumbered #47's edition (2026-08-13-slm-daily-11.html, the LFM2.5-VL-3B vision-model product-gap finding) to #11, fixing its title/meta/H1/canonical-URL/internal 'since Daily #9' cross-reference and one inbound link from the Dragonwing spotlight post that pointed at the old filename. #48 (torchwright + NanoMind-S3) had already noticed the collision risk in its own PR description and deliberately dropped its own digest draft rather than triple up, so it needed no digest-numbering changes -- its two posts (deep-dive + DIY spotlight) carried forward unmodified. Net: digestCounter 9->11 (two genuinely distinct digest editions, not one renumbered twice), 3 deep-dive theses and 3 DIY spotlights merged into their respective state lists in chronological order, zero catalog changes across all three source runs (all three independently found no qualifying candidate in their windows, for different verified reasons each time -- consistent, not duplicated, since each checked a different or newly-surfaced set of candidates). Closing PRs #46, #47, #48 as superseded once this consolidated content is live. All 8 new post URLs plus the updated blog index to be curl-verified at HTTP 200 after push."
     }
   ],
-  "lastRunAt": "2026-08-11T04:24:44Z",
+  "lastRunAt": "2026-08-14T04:36:58Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -451,6 +495,54 @@
       "type": "diy",
       "publishedAt": "2026-08-10T04:25:00Z",
       "post": "blog/2026-08-10-qapla-esp32-onchip-training.html"
+    },
+    {
+      "slug": "2026-08-12-slm-daily-10",
+      "type": "digest",
+      "publishedAt": "2026-08-12T04:35:00Z",
+      "post": "blog/2026-08-12-slm-daily-10.html"
+    },
+    {
+      "slug": "2026-08-12-eu-ai-act-watermark-gap",
+      "type": "deepdive",
+      "publishedAt": "2026-08-12T04:35:00Z",
+      "post": "blog/2026-08-12-eu-ai-act-watermark-gap.html"
+    },
+    {
+      "slug": "2026-08-12-swiftlet-moe-streaming",
+      "type": "diy",
+      "publishedAt": "2026-08-12T04:35:00Z",
+      "post": "blog/2026-08-12-swiftlet-moe-streaming.html"
+    },
+    {
+      "slug": "2026-08-13-thermal-cliff",
+      "type": "deepdive",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-thermal-cliff.html"
+    },
+    {
+      "slug": "2026-08-13-muse-glimmer-dragonwing",
+      "type": "diy",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-muse-glimmer-dragonwing.html"
+    },
+    {
+      "slug": "2026-08-13-slm-daily-11",
+      "type": "digest",
+      "publishedAt": "2026-08-13T12:30:00Z",
+      "post": "blog/2026-08-13-slm-daily-11.html"
+    },
+    {
+      "slug": "2026-08-14-torchwright-zero-training-transformer",
+      "type": "deepdive",
+      "publishedAt": "2026-08-14T04:36:58Z",
+      "post": "blog/2026-08-14-torchwright-zero-training-transformer.html"
+    },
+    {
+      "slug": "2026-08-14-nanomind-s3-esp32",
+      "type": "diy",
+      "publishedAt": "2026-08-14T04:36:58Z",
+      "post": "blog/2026-08-14-nanomind-s3-esp32.html"
     }
   ]
 }

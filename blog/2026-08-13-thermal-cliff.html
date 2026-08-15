@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>37.58 tokens/sec on an iPhone 16 Pro lasts about four seconds — privateSLM blog</title>
+  <meta name="description" content="Every on-device LLM benchmark you've read — ours included — quotes a number from the first one or two replies. A real sustained-load study found an iPhone 16 Pro loses 44% of its throughput by iteration eight, and a Samsung Galaxy S24 Ultra doesn't slow down at iteration six — the OS floors the GPU clock and inference stops outright.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-13-thermal-cliff.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>37.58 tokens/sec on an iPhone 16 Pro lasts about four seconds</h1>
+    <div class="meta">August 13, 2026 · 7 min read</div>
+
+    <p>An iPhone 16 Pro running a 4-bit Qwen2.5-1.5B hits 37.58 tokens/sec on its first reply. By the third reply it's down to 25.31 — a 37% drop — and by the eighth it has settled at 22.56, a 44% loss from where it started, and stays there. That's not a worst-case number from a stress test. It's what a real, thermally-equilibrated phone does under exactly the kind of back-and-forth a chat app actually produces, measured in a real paper, with a stopwatch running the whole time. On a Samsung Galaxy S24 Ultra, the same test doesn't produce a slower number at iteration six. It produces no number at all — the OS floors the GPU clock and inference stops.</p>
+
+    <p>Every "N tokens/sec on iPhone" line you've read — ours included, and this week's LFM2.5-VL-3B model card is no exception — describes the first data point in that curve, not the tenth. The paper behind these numbers is <a href="https://arxiv.org/abs/2603.23640" target="_blank" rel="noopener">arXiv:2603.23640</a>, "LLM Inference at the Edge: Mobile, NPU, and GPU — Performance Efficiency Trade-offs Under Sustained Load" (Tummalapalli, Arayakandy, Pal &amp; Kundan, submitted March 24 2026, revised June 7 2026). The setup is deliberately boring, on purpose: Qwen2.5-1.5B, 4-bit quantized, a fixed 258-token prompt, 20 warm iterations per device with a 1-second gap between them, every device thermally equilibrated to 22°C±2°C before the clock starts. Four platforms: iPhone 16 Pro, Samsung Galaxy S24 Ultra, a Raspberry Pi 5 with a Hailo-10H NPU, and an RTX 4050 laptop GPU as a desktop baseline.</p>
+
+    <h2>The number on the model card is the first data point on the curve</h2>
+    <p>Cold-start numbers aren't wrong, exactly — they're real measurements of a real device state. The problem is that the state only lasts a few replies.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">iPhone 16 Pro, Qwen2.5-1.5B Q4, 258-token prompt</th><th style="padding:6px 10px;">Tok/s</th><th style="padding:6px 0;">vs. peak</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Iterations 1–2 (cold start)</td><td style="padding:6px 10px;">37.58</td><td style="padding:6px 0;">baseline</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Iteration 3</td><td style="padding:6px 10px;">25.31</td><td style="padding:6px 0;">−37.3%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Iterations 8–20 (sustained)</td><td style="padding:6px 10px;">22.56</td><td style="padding:6px 0;">−44.1%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2603.23640, sustained-load benchmark table for the iPhone 16 Pro. The paper reports the device spent 65% of the full 20-iteration run in a "Hot" thermal state.</p>
+
+    <p>Forty-four percent isn't a rounding error and it isn't specific to this one model — it's a consequence of what a phone's chassis physically is: a sealed aluminum-and-glass slab with no fan, sitting a few millimeters from a battery and a hand. There's nowhere for the heat a sustained matrix-multiply workload generates to go except into the case, and the case's job is to protect the battery and the person holding it, not to keep clocking a chip at full tilt. The throttle isn't a bug in iOS. It's the thermal design doing exactly what it's supposed to do.</p>
+
+    <h2>On a Samsung flagship, the OS doesn't throttle — it vetoes</h2>
+    <p>The iPhone's curve is a slope. The Galaxy S24 Ultra's is a cliff. The paper reports a mean of 9.93 tokens/sec across its first five valid iterations — already the device's own version of the throttle, lower than the iPhone's sustained number — and then, at iteration six, with the GPU at 78.3°C and the CPU at 73.8°C, the OS floors the GPU clock from its 629–680 MHz working range down to 231 MHz. Inference doesn't get slower from there. It stops. That's a hard OS-enforced frequency floor, not a soft throttle curve — the difference between "your chat reply arrives late" and "your chat reply doesn't arrive."</p>
+
+    <p>Two comparison points from the same paper make it clear this is a phone-chassis problem, not a property of the model or the 4-bit quant:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Platform</th><th style="padding:6px 10px;">Sustained tok/s</th><th style="padding:6px 0;">Behavior under load</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">RTX 4050 laptop GPU</td><td style="padding:6px 10px;">131.7</td><td style="padding:6px 0;">CV 2.2%, 55–70°C, no throttling observed</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Raspberry Pi 5 + Hailo-10H NPU</td><td style="padding:6px 10px;">6.9 (&lt;2 W)</td><td style="padding:6px 0;">near-zero variance, energy-proportional</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2603.23640, cross-platform sustained-load comparison.</p>
+
+    <p>The RTX 4050 has an actual fan and an open-air laptop chassis behind it; it never leaves its 55–70°C band across the whole run, and its coefficient of variation — 2.2% — means the tenth iteration looks almost exactly like the first. The Hailo-10H NPU proves the same point from the opposite direction: it's 19x slower than the RTX 4050 in absolute terms, but it draws under 2 watts doing it, so there's essentially no heat to dissipate in the first place and its output barely varies either. Both of the stable platforms are stable because they were never close to a thermal limit. Both phones are unstable because they were, almost immediately.</p>
+
+    <h2>The industry's own benchmark knows about this — and doesn't test for it</h2>
+    <p>This isn't an obscure failure mode nobody has thought about. MLPerf Mobile Inference, the closest thing the industry has to a standard mobile benchmark, explicitly builds in cooldown breaks between test runs — the methodology paper (<a href="https://arxiv.org/pdf/2012.02328" target="_blank" rel="noopener">arXiv:2012.02328</a>) and the MLSys writeup specify rest periods up to 10 minutes after a full suite — precisely because the benchmark's authors know thermal throttling will contaminate back-to-back results otherwise. The tooling to avoid this problem already exists and has existed since the benchmark's early versions. But per its current published scenario documentation, MLPerf's newer LLM/edge track measures peak performance without tracking thermal throttling or sustained-workload behavior at all — the cooldown discipline that protects the rest of the suite doesn't carry over to the numbers a phone vendor would actually quote for an LLM.</p>
+
+    <p>A second, independent paper stumbled into the same wall from a different angle. "Watt Counts" (<a href="https://arxiv.org/html/2604.09048v1" target="_blank" rel="noopener">arXiv:2604.09048</a>), measuring on-device LLM energy efficiency, found throttling onset "normally occurs from 75°C" on mobile GPUs — close to the 78.3°C the S24 Ultra hit right before its clock floor kicked in — and had to actively design around it to get numbers they trusted: waiting for power draw to stabilize within ±3 W and GPU temperature to drop below 65°C before recording a measurement. Two separate research teams, working on different questions, independently concluded that a phone has to be babied out of its own thermal response before its numbers mean anything — and neither the marketing page for a model nor most model cards do any babying at all.</p>
+
+    <h2>What this means for a number you're about to read on a model card</h2>
+    <p>Nothing here is a claim that any specific model card is lying, and it's not a claim we can make about our own app's numbers either — we haven't run a 20-iteration thermally-controlled study on our own engine, and we're not going to pretend a single paper on Qwen2.5-1.5B is a direct measurement of every model in our catalog on every phone we support. What we can say, because it's the paper's own methodology and not our extrapolation: the industry-wide convention for quoting on-device LLM speed is a cold-start number, MLPerf's own edge track inherits that convention rather than the cooldown discipline the rest of the suite already knows how to apply, and on at least one popular flagship, "sustained" isn't slower — it's a wall.</p>
+
+    <p>The practical read for anyone comparing on-device models by their headline tok/s figure: treat that number as "the best reply you'll get," not "the reply you'll get." A real conversation is a sequence of replies, not one. The gap between the first and the eighth is the number that would actually predict what a ten-message chat feels like — and almost nobody publishes it.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run your own sustained-load test on a phone, iPad, or Mac, we want the numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — see what your own device actually sustains</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

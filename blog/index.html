@@ -27,6 +27,46 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-14-torchwright-zero-training-transformer.html">
+          <div class="meta">August 14, 2026 · 11 min read</div>
+          <h3>Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right.</h3>
+          <p>Rob Porter's torchwright compiler writes exact algorithms directly into a stock Phi-3 checkpoint's weights — zero gradient descent, zero training data — and beats six frontier LLMs at direct-answer multiplication, 100% to as low as 0%. The checkpoint is the same architecture family already in our own catalog.</p>
+        </a>
+        <a class="post-card" href="2026-08-14-nanomind-s3-esp32.html">
+          <div class="meta">August 14, 2026 · 8 min read</div>
+          <h3>All 15.2 million parameters, computed live, every token — on a $4 chip, at 2.96 tokens a second</h3>
+          <p>Edge in the Wild: Salman Farsi's NanoMind-S3 runs a fully dense LLaMA-2-architecture transformer on a single ESP32-S3 — no lookup-table shortcuts, no flash-embedding trick, every one of its 15.2M parameters computed on every token.</p>
+        </a>
+        <a class="post-card" href="2026-08-13-thermal-cliff.html">
+          <div class="meta">August 13, 2026 · 7 min read</div>
+          <h3>37.58 tokens/sec on an iPhone 16 Pro lasts about four seconds</h3>
+          <p>Every on-device LLM benchmark quotes a first-reply number. A real sustained-load study found an iPhone 16 Pro loses 44% of its throughput by the eighth reply — and a Samsung Galaxy S24 Ultra doesn't slow down at the sixth. The OS floors the GPU clock and inference stops outright.</p>
+        </a>
+        <a class="post-card" href="2026-08-13-muse-glimmer-dragonwing.html">
+          <div class="meta">August 13, 2026 · 7 min read</div>
+          <h3>91% of peak memory bandwidth, spent generating 2.84 tokens a second</h3>
+          <p>Edge in the Wild: Samuel Alexander runs Meta's dense 30B Muse-Glimmer vision-language model entirely on a Qualcomm Dragonwing IQ-9075 edge board, no cloud calls — 2.84 tok/s turns out to be 91% of the board's own peak memory bandwidth, and the model is honest when it hallucinates a part number.</p>
+        </a>
+        <a class="post-card" href="2026-08-13-slm-daily-11.html">
+          <div class="meta">August 13, 2026 · 4 min read</div>
+          <h3>SLM Daily #11: the first model we skipped for a reason that isn't in our own rulebook</h3>
+          <p>Four candidates checked since our last edition, zero added. LiquidAI's LFM2.5-VL-3B clears every published catalog rule and still doesn't ship — because our own engine has no code path that ever hands a model a photo.</p>
+        </a>
+        <a class="post-card" href="2026-08-12-eu-ai-act-watermark-gap.html">
+          <div class="meta">August 12, 2026 · 9 min read</div>
+          <h3>€15 million is the fine. August 2nd was the deadline. No open-weight text model can comply yet.</h3>
+          <p>The EU AI Act's new content-marking law took effect August 2 and requires AI-generated text to carry a machine-readable, detectable mark. No model in our catalog does this, neither does llama.cpp's sampler, and it's unclear whose obligation it even is — a compliance gap the whole open-weight ecosystem shares.</p>
+        </a>
+        <a class="post-card" href="2026-08-12-swiftlet-moe-streaming.html">
+          <div class="meta">August 12, 2026 · 7 min read</div>
+          <h3>An 80B-parameter model just ran in 4.3 GB of RAM — on an unmodified Mac, no cluster, no cloud</h3>
+          <p>Edge in the Wild: independent builder leonickson1 streams a mixture-of-experts model's weights straight off SSD instead of loading them, running Qwen3-Next-80B in 4.3 GB of peak RAM on a Mac — and a 35B model on an iPhone.</p>
+        </a>
+        <a class="post-card" href="2026-08-12-slm-daily-10.html">
+          <div class="meta">August 12, 2026 · 4 min read</div>
+          <h3>SLM Daily #10: one skipped check nearly doubled a model's memory use — and broke its answers</h3>
+          <p>A one-line ordering bug in llama.cpp disabled sliding-window attention for EXAONE 4.5, pushing its KV cache from 1952 MiB to 4160 MiB and corrupting output — fixed August 11. Zero catalog additions this edition; six candidates checked and rejected, why.</p>
+        </a>
         <a class="post-card" href="2026-08-10-qapla-esp32-onchip-training.html">
           <div class="meta">August 10, 2026 · 8 min read</div>
           <h3>319,000 parameters. Two days on a phone charger. Zero pretraining, anywhere, ever.</h3>

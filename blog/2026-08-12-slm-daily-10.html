@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #10: one skipped check nearly doubled a model's memory use — and broke its answers — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #10: a one-line ordering bug in llama.cpp disabled sliding-window attention for EXAONE 4.5, pushing its KV cache from 1952 MiB to 4160 MiB and corrupting output while it was live — fixed August 11. Zero catalog additions this edition; six candidates checked and rejected, why.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-12-slm-daily-10.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #10: one skipped check nearly doubled a model's memory use — and broke its answers</h1>
+    <div class="meta">August 12, 2026 · 4 min read</div>
+
+    <p>1,952 MiB versus 4,160 MiB — that's the KV cache a real, currently-shipping model used before and after a one-line ordering fix landed in llama.cpp on August 11. The bug didn't just waste memory: while it was live, affected builds produced what the fix's own author calls "nonsensical output generation." It's the only phone-relevant change worth flagging since our last check. Everything else this edition is routine: zero catalog additions, six candidates checked and rejected.</p>
+
+    <h2>The bug: a check ran before the number it depends on was read</h2>
+    <p>The current latest tag is <strong>b10362</strong> (August 11), up from b10331 when <a href="2026-08-09-slm-daily-9.html">Daily #9</a> last checked. The fix that matters is <a href="https://github.com/ggml-org/llama.cpp/pull/26848" target="_blank" rel="noopener">PR #26848</a>, "fix SWA not being enabled for EXAONE 4.5," merged the same day by ggerganov. The model-loading code checked <code>hparams.n_layer() == 64</code> to decide whether sliding-window attention (SWA) should turn on — but <code>n_layer()</code> returns <code>n_layer_all - n_layer_nextn</code>, and at the point that check ran, <code>n_layer_nextn</code> hadn't been read from the GGUF yet, so it still held its default of zero. Any EXAONE 4.5 GGUF with a multi-token-prediction (MTP) head — block_count 65, nextn 1, exactly what LG's official release ships — evaluated <code>n_layer()</code> as 65 at that moment, missed the <code>== 64</code> check, and silently skipped the entire SWA code path in favor of dense attention over the full context.</p>
+
+    <p>The visible symptom wasn't a crash. <code>llama_model_n_swa()</code> still correctly reported a 4096-token window; the internal <code>swa_type</code> just silently stayed <code>LLAMA_SWA_TYPE_NONE</code>. Dense attention over the full context that SWA was supposed to cap is exactly why the KV cache measured 4160 MiB instead of the expected ~1952 MiB — a real 2.1x, not a rounding difference — and it's also the direct cause of the broken output: EXAONE 4.5 was designed and trained expecting a bounded attention window, and giving it unbounded dense attention instead measurably changed what it produced. EXAONE 4.0 was never affected — it has no MTP head, so its block_count is 64 and the check passed correctly.</p>
+
+    <p>We diffed <code>src/llama-arch.h</code> against our last check: no new <code>LLM_ARCH_*</code> tag beyond <code>LLM_ARCH_MUSE_GLIMMER</code>, added this week to support Meta's new release (more on that below). LFM2, LFM2MoE, the Qwen3 family, and Gemma3/3n/4 are all unchanged and still fine.</p>
+
+    <h2>What we checked and rejected for the catalog</h2>
+    <ul>
+      <li><strong>Muse Glimmer 30B</strong> (Meta, released August 10, Apache-2.0) — llama.cpp shipped native architecture support within days, which is a genuinely fast turnaround. Doesn't change the verdict: even the smallest official 4-bit quants run 17–29.6 GB, nowhere near our 2.5 GB phone cap.</li>
+      <li><strong>NVIDIA Nemotron-3.5-Lightning-30B-A3B</strong> — a mixture-of-experts model with only ~3B active parameters per token, but the full GGUF still has to store all the experts. File size lands in the ~30 GB class at Q4 regardless of how few parameters fire per token.</li>
+      <li><strong>SpatialAxiom-9B and SpatialAxiom-35B-A3B</strong> — both over our cap at every quant we found.</li>
+      <li><strong>EXAONE 4.5, 1.2B tier</strong> — small enough to fit easily, but LG's license explicitly prohibits redistribution and commercial use without a separate agreement. Rejected on license, not size.</li>
+      <li><strong>webAI-Official/TwIL-LM3</strong> (3B) — fails on two independent grounds: a non-commercial license, and the model card's own admission that it "lacks instruction-following alignment work," meaning it isn't a chat/instruct model at all.</li>
+    </ul>
+    <p>One note, not a rejection: <strong>LFM2.5-2.6B</strong> (Liquid AI) is real and genuinely dropped in-window, but it's already been in our catalog since we added it in July — not new to us, just newly re-surfaced in trending lists.</p>
+
+    <h2>Also published today</h2>
+    <p>Two other pieces. Our deep-dive looks at what the EU's new AI-content transparency law — enforceable since August 2 — actually requires of a text-generating AI system, and why nothing in the open-weight GGUF ecosystem, including our own engine, has any mechanism to satisfy it — <a href="2026-08-12-eu-ai-act-watermark-gap.html">read it here</a>. And an <strong>Edge in the Wild</strong> spotlight on an independent builder who got an 80-billion-parameter model running in 4.3 GB of RAM on an unmodified Mac by streaming its weights from disk instead of loading them — <a href="2026-08-12-swiftlet-moe-streaming.html">read it here</a>.</p>
+
+    <h2>The catalog now</h2>
+    <p>Still 22 models, unchanged since <a href="2026-08-09-slm-daily-9.html">Daily #9</a>. Same standing note: we cap ourselves at 8 generalist entries, and 14 of the 22 are pre-cap specialist models (medical, legal, finance and similar) that we haven't unilaterally pulled from a catalog people are actively downloading from.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
