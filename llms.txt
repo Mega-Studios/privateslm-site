@@ -10,6 +10,8 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- 23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only: https://www.privateslm.dev/blog/2026-08-15-multilingual-quantization-tax.html
+- SLM Daily #12 (catalog digest): https://www.privateslm.dev/blog/2026-08-15-slm-daily-12.html
 - Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right.: https://www.privateslm.dev/blog/2026-08-14-torchwright-zero-training-transformer.html
 - All 15.2 million parameters, computed live, every token — on a $4 chip, at 2.96 tokens a second (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-14-nanomind-s3-esp32.html
 - 37.58 tokens/sec on an iPhone 16 Pro lasts about four seconds: https://www.privateslm.dev/blog/2026-08-13-thermal-cliff.html

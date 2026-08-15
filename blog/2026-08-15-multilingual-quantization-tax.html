@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only — privateSLM blog</title>
+  <meta name="description" content="A new independent study finds 4-bit quantization doesn't apply an even tax across languages. Qwen 3.5 2B's Russian reasoning score falls from 23.6% to 7.5% — worse than the 10% random-chance floor — while the identical checkpoint's English score barely moves. The quantization step every phone-sized model goes through has a language bill nobody itemizes.</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-15-multilingual-quantization-tax.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only</h1>
+    <div class="meta">August 15, 2026 · 10 min read</div>
+
+    <p>Qwen 3.5 2B answers multiple-choice reasoning questions in Russian correctly 23.6% of the time at full precision — already mediocre against a 10% random-chance floor on a ten-choice test, but clearly better than guessing. Quantize the exact same checkpoint to 4 bits, the step nearly every on-device model goes through before it ships to a phone, and that number drops to 7.5%. Below random. The model didn't get slightly worse at Russian. It got quantized into a worse Russian reasoner than a die roll, while its English score on the identical benchmark barely moved. Nobody ships a "Q4_K_M, minus your second language" warning label, because until now nobody had measured the gap language by language.</p>
+
+    <h2>The paper nobody had written yet</h2>
+    <p>The numbers above come from <a href="https://arxiv.org/abs/2608.09941" target="_blank" rel="noopener">"The Multilingual Quantization Tax: Structural Collapse and Typological Fragility in Edge SLMs"</a> (arXiv:2608.09941), by independent researcher Mohammad Wathiq Soualhi, posted June 21, 2026 and still uncorroborated by follow-up work as of this writing. It's a real, reproducible, and — as far as we can find — entirely unscooped result: quantization research has evaluated the "quantization tax" (the accuracy a model loses when you shrink its weights) almost exclusively in English. This paper asks what happens to the other seven-plus billion people whose languages a phone-sized model is also trained on.</p>
+
+    <p>The setup is deliberately narrow, and that narrowness is what makes the numbers trustworthy rather than a marketing slide. Soualhi ran the 2B and 4B instruction-tuned variants of Google's Gemma 4 and Alibaba's Qwen 3.5 — both current, real, phone-class architectures — through <a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank" rel="noopener">lm-evaluation-harness</a> (v0.4.12) on a vLLM (v0.20.1) backend, comparing native bfloat16 weights against calibration-free 4-bit NormalFloat (nf4) quantization via bitsandbytes (v0.45.3) — the same family of "just shrink the weights, no fancy calibration set" quantization that GGUF's own K-quants belong to, though it isn't the identical algorithm llama.cpp uses (more on that distinction below). Eight typologically different languages — English, Chinese, Russian, Japanese, Arabic, Hindi, Swahili, Yoruba — across two benchmarks: MMLU-Pro X Lite (a 10-choice reasoning test, 10% random baseline) and Global PIQA (binary physical-commonsense questions, 50% baseline, with both translated and untranslated versions of each question). Internal "thinking" modes were switched off on every model, specifically so a chain-of-thought couldn't paper over a broken forward pass. Total compute: about 14 GPU-hours on a single RTX A6000 — modest, but real, and the full evaluation commands are published in the paper's appendix for anyone who wants to rerun it.</p>
+
+    <h2>The tax isn't a tax. It's a tariff, and it isn't flat.</h2>
+    <p>Here's the full table, straight from the paper, all values in percent, higher is better:</p>
+
+    <table style="width:100%; border-collapse:collapse; margin:1.5em 0; font-size:0.85em;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border,#444);">
+          <th style="text-align:left; padding:5px 6px;">Model / state</th>
+          <th style="text-align:right; padding:5px 6px;">English</th>
+          <th style="text-align:right; padding:5px 6px;">Chinese</th>
+          <th style="text-align:right; padding:5px 6px;">Russian</th>
+          <th style="text-align:right; padding:5px 6px;">Japanese</th>
+          <th style="text-align:right; padding:5px 6px;">Arabic</th>
+          <th style="text-align:right; padding:5px 6px;">Hindi</th>
+          <th style="text-align:right; padding:5px 6px;">Swahili</th>
+          <th style="text-align:right; padding:5px 6px;">Yoruba</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:4px 6px;">Gemma 4 E2B-it, bf16</td><td style="text-align:right;">57.3</td><td style="text-align:right;">39.6</td><td style="text-align:right;">51.4</td><td style="text-align:right;">49.2</td><td style="text-align:right;">36.9</td><td style="text-align:right;">49.2</td><td style="text-align:right;">35.9</td><td style="text-align:right;">13.3</td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:4px 6px;">Gemma 4 E2B-it, nf4 <em>(tax)</em></td><td style="text-align:right;">52.4 <em>(−4.9)</em></td><td style="text-align:right;">39.5 <em>(−0.1)</em></td><td style="text-align:right;">44.7 <em>(−6.7)</em></td><td style="text-align:right;">44.2 <em>(−5.0)</em></td><td style="text-align:right;">36.2 <em>(−0.7)</em></td><td style="text-align:right;">44.9 <em>(−4.3)</em></td><td style="text-align:right;">30.4 <em>(−5.5)</em></td><td style="text-align:right;">14.3 <em>(+1.0)</em></td></tr>
+        <tr><td style="padding:4px 6px;">Gemma 4 E4B-it, bf16</td><td style="text-align:right;">65.5</td><td style="text-align:right;">54.4</td><td style="text-align:right;">58.5</td><td style="text-align:right;">59.0</td><td style="text-align:right;">48.6</td><td style="text-align:right;">56.8</td><td style="text-align:right;">49.2</td><td style="text-align:right;">23.0</td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:4px 6px;">Gemma 4 E4B-it, nf4 <em>(tax)</em></td><td style="text-align:right;">61.2 <em>(−4.3)</em></td><td style="text-align:right;">50.3 <em>(−4.1)</em></td><td style="text-align:right;">52.9 <em>(−5.6)</em></td><td style="text-align:right;">53.2 <em>(−5.8)</em></td><td style="text-align:right;"><strong>37.2 (−11.4)</strong></td><td style="text-align:right;">52.9 <em>(−3.9)</em></td><td style="text-align:right;">42.0 <em>(−7.1)</em></td><td style="text-align:right;">18.2 <em>(−4.8)</em></td></tr>
+        <tr><td style="padding:4px 6px;">Qwen 3.5 2B, bf16</td><td style="text-align:right;">50.3</td><td style="text-align:right;">44.9</td><td style="text-align:right;">23.6</td><td style="text-align:right;">34.9</td><td style="text-align:right;">34.7</td><td style="text-align:right;">1.0</td><td style="text-align:right;">11.1</td><td style="text-align:right;">16.3</td></tr>
+        <tr style="border-bottom:1px solid var(--border,#333);"><td style="padding:4px 6px;">Qwen 3.5 2B, nf4 <em>(tax)</em></td><td style="text-align:right;">44.9 <em>(−5.4)</em></td><td style="text-align:right;">36.4 <em>(−8.5)</em></td><td style="text-align:right;"><strong>7.5 (−16.1)</strong></td><td style="text-align:right;">27.4 <em>(−7.5)</em></td><td style="text-align:right;">27.2 <em>(−7.5)</em></td><td style="text-align:right;">0.5 <em>(−0.5)</em></td><td style="text-align:right;"><strong>1.2 (−9.9)</strong></td><td style="text-align:right;">5.6 <em>(−10.7)</em></td></tr>
+        <tr><td style="padding:4px 6px;">Qwen 3.5 4B, bf16</td><td style="text-align:right;">66.0</td><td style="text-align:right;">61.9</td><td style="text-align:right;">61.2</td><td style="text-align:right;">59.0</td><td style="text-align:right;">55.4</td><td style="text-align:right;">3.6</td><td style="text-align:right;">29.9</td><td style="text-align:right;">3.6</td></tr>
+        <tr><td style="padding:4px 6px;">Qwen 3.5 4B, nf4 <em>(tax)</em></td><td style="text-align:right;">66.2 <em>(+0.2)</em></td><td style="text-align:right;">58.3 <em>(−3.6)</em></td><td style="text-align:right;">62.8 <em>(+1.6)</em></td><td style="text-align:right;">55.1 <em>(−3.9)</em></td><td style="text-align:right;">52.7 <em>(−2.7)</em></td><td style="text-align:right;">1.5 <em>(−2.1)</em></td><td style="text-align:right;">23.0 <em>(−7.0)</em></td><td style="text-align:right;">2.4 <em>(−1.2)</em></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.85em; opacity:0.8;">Source: <a href="https://arxiv.org/abs/2608.09941" target="_blank" rel="noopener">arXiv:2608.09941</a>, Table 1 (MMLU-Pro X Lite, 10-choice, 10% random baseline). Bold = the paper's headline collapse cases.</p>
+
+    <p>Two numbers in that table do the real work. Qwen 3.5 2B's Russian score — the single largest drop anywhere in the study, 16.1 points, more than double the next-largest single-language tax in the same row — takes it from a real, if weak, reasoning signal down to a number a coin-weighted die would beat about as often. And Qwen 3.5 2B's Swahili score falls from 11.1% (barely above the 10% floor to begin with) to 1.2% — not a small model doing slightly worse, but a model whose already-thin competence gets erased by weight truncation specifically, on that language, on that architecture.</p>
+
+    <p>The paper's most useful move is refusing to treat every low number as the same kind of failure. Several scores near the 10% baseline — Gemma 4 E2B-it's Yoruba edging up 1.0 point after quantization, for instance — are flagged explicitly as statistical noise, not evidence of anything: the paper runs a standard-error bound (<code>|Δ| &lt; √(SE_base² + SE_quant²)</code>) on the closest cases and shows several of them, including that Yoruba uptick, fall inside the margin where you can't tell signal from noise. That's the opposite of overclaiming — the author is actively pruning weak evidence out of the headline results, which is exactly why the ones that survive (Qwen's Russian and Swahili drops, both far outside any plausible noise band) are worth taking seriously.</p>
+
+    <h2>Two architectures, two completely different failure patterns</h2>
+    <p>If quantization damage were just "big model good, small model bad" or "hard language, easy language," you'd expect Gemma and Qwen to break on the same scripts. They don't. Gemma 4 E4B-it takes its single worst hit on Arabic (−11.4 points) while staying rock-stable on Hindi (−3.9). Qwen 3.5 4B does close to the opposite: it's fine on Arabic (−2.7) but its Hindi score was already sitting at a barely-there 3.6% before quantization even touched it — a base-model weakness, not a quantization-induced one, though quantization still shaves it further to 1.5%. The paper calls this a "double dissociation": the same low-bit truncation attacks a different script depending on which architecture it's hitting, because it's not attacking "foreignness" in the abstract — it's attacking whichever narrow band of high-magnitude outlier weights that specific model's specific pretraining mix happened to allocate to routing that specific script into its reasoning core. Cut those weights down to 4 bits and the routing breaks; the language itself was never the variable, the model's internal wiring for that language was.</p>
+
+    <p>That framing also explains a genuinely counterintuitive finding: a model's own dominant, best-resourced language gets no special protection. Qwen 3.5 4B's English score is quantization-proof (−0.2, arguably a noise-level improvement) — but its Chinese score, the language its own technical report leans on hardest, still takes a real 3.6-point hit. Gemma's English tax (−4.3) lands almost exactly where its Hindi tax does (−3.9), on a model built by a company with vastly more English than Hindi training data. Depth of pretraining buys you a higher starting line, not immunity from the truncation itself — what the paper calls the "Home Language Fragility Paradox."</p>
+
+    <h2>Quantization doesn't erase the knowledge. It severs the bridge to it.</h2>
+    <p>The clearest single piece of evidence for what's actually breaking comes from Global PIQA's split design — the same physical-commonsense questions asked twice, once in natural, untranslated Swahili and once as a machine-translated-from-English version. On the native version, Qwen 3.5 4B's Swahili score drops a negligible 1.00 point after quantization. On the translated version — same language, same underlying commonsense content, but requiring the model to route a query through its English-centric reasoning core first — the same quantized model loses 11.65 points. The knowledge needed to answer "will a glass bottle break if you drop it" in Swahili is still in there; what's gone is the machinery that lets a translated prompt find it. The paper's hypothesis, consistent with prior work on outlier weights in transformer internals (Dettmers et al., 2022), is that cross-lingual routing depends on a small number of high-magnitude weights acting as a bridge between the model's dominant language space and everything else — precisely the weights 4-bit truncation is most likely to clip.</p>
+
+    <p>The same pattern shows up domain by domain, not just language by language. Averaged across every model and language, hard sciences that require multi-step symbolic reasoning take a noticeably bigger hit under quantization — chemistry (−7.53 points), physics (−7.45) — than associative, recall-heavy domains like law or psychology (around −3.7). Quantization isn't an even haircut across everything a model knows; it disproportionately damages the multi-step reasoning chains that were already the most fragile part of a small model's competence, whatever language you're asking in.</p>
+
+    <h2>What this does and doesn't tell us about a GGUF phone app</h2>
+    <p>Here's where we have to be precise rather than alarmist, because the honest caveat matters more than the headline. This study quantizes with calibration-free nf4 via bitsandbytes, run through vLLM on a datacenter GPU — not llama.cpp's Q4_K_M K-quants, which is what every model in privateSLM's own catalog actually ships as. Both are "shrink the weights to roughly 4 bits per parameter without a calibration dataset" approaches, and both are exposed to the same underlying mechanism the paper describes — outlier weights getting clipped by low-bit rounding — but K-quants use per-block scale factors that nf4 doesn't, and we have not seen a study that runs this exact multilingual battery against GGUF K-quants specifically. It is entirely possible K-quants handle some of these cases better, or worse; nobody has measured it yet, us included. It's also worth being clear that this is one independent researcher's paper, posted without institutional affiliation, using two model families at two sizes each — a real, carefully-controlled, fully-reproducible result, not yet corroborated by a second lab, and the author says as much in the paper's own limitations section.</p>
+
+    <p>What survives that caveat is the shape of the finding, not the exact numbers: quantization tax is not a single number you can quote once for a model card and consider done. A phone-sized model that "works great" in the English demo every reviewer runs can be measurably, sometimes catastrophically, worse in a language that same demo never tested — and the gap is invisible from the English-only benchmark tables the whole industry, us included, currently leans on. We don't have a fix to ship today; there isn't a GGUF flag that solves this and no model in our catalog claims otherwise. What changes is what we'd want to see before trusting an "N tokens/sec, this good on MMLU" pitch for a model somebody's going to use in Hindi, Swahili, or Yoruba: a benchmark run in that language, post-quantization, not an English number and an assumption that it generalizes.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run a non-English benchmark against a quantized GGUF model yourself, we'd like to see the numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — every model, checked before it ships</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

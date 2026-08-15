@@ -1,10 +1,11 @@
 {
-  "digestCounter": 11,
+  "digestCounter": 12,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
     "nanbeige4.2-3b-q4",
-    "lfm2.5-2.6b-q4"
+    "lfm2.5-2.6b-q4",
+    "lfm2.5-1.2b-q4"
   ],
   "deepDiveThesesUsed": [
     {
@@ -114,6 +115,12 @@
       "slug": "torchwright-compiled-not-trained-transformer",
       "summary": "Rob Porter's torchwright compiler writes exact algorithms (arithmetic, a binary incrementer, Doom's renderer) directly into the weights of a stock Phi-3 checkpoint, with zero training/gradient descent anywhere. The compiled multiplication checkpoint beats six frontier LLMs at direct-answer multiplication (100% vs as low as 0% at seven digits), demonstrating the architecture already used by privateSLM's own Phi-4 Mini catalog entry has headroom for guaranteed-correct computation that training doesn't reliably find.",
       "post": "blog/2026-08-14-torchwright-zero-training-transformer.html"
+    },
+    {
+      "date": "2026-08-15",
+      "slug": "multilingual-quantization-tax-below-random-chance",
+      "summary": "arXiv:2608.09941 (independent researcher, June 2026) shows 4-bit nf4 quantization applies a wildly uneven tax across languages, not a flat penalty. Qwen 3.5 2B's Russian MMLU-ProX score falls from 23.6% to 7.5% -- below the 10% random-chance floor -- while its English score is nearly untouched. Different architectures collapse on different scripts (Gemma worst on Arabic, Qwen worst on Hindi/Russian) -- a 'typological double dissociation' tied to which outlier weights each model's pretraining allocated to cross-lingual routing, not a uniform 'non-Latin scripts are harder' effect. Global PIQA's native-vs-translated Swahili split (1.00% tax native, 11.65% tax translated, same model) shows quantization severs cross-lingual routing specifically rather than erasing the underlying knowledge. Honest caveat included in the piece: nf4/bitsandbytes is not identical to llama.cpp's GGUF K-quants, and this is one uncorroborated paper -- the shape of the finding (language-by-language quantization damage is invisible from English-only benchmark tables) is the takeaway, not the exact numbers.",
+      "post": "blog/2026-08-15-multilingual-quantization-tax.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -288,9 +295,14 @@
       "date": "2026-08-15",
       "event": "consolidated-three-diverged-draft-prs-46-47-48",
       "reason": "This run found the repo's own long-flagged draft-PR-rot pattern recurring a third time: three open, unmerged, non-overlapping autopilot draft PRs (#46 opened 2026-08-12, #47 opened 2026-08-13, #48 opened 2026-08-14) had accumulated on privateslm-site since the last merge to main on 2026-08-11, each independently branched from the same stale main tip (24a6318) because main never advanced while each ran. All three were reviewed end-to-end (every new post read in full, every image checked, sourcing spot-verified) and all cleared the quality bar cleanly -- this was not a quality problem, purely an unmerged-branch problem. Reconciled by hand via local git clone: cherry-picked every unique file from all three branches (8 blog posts, 4 real images, no losses) onto a fresh branch off current main. The only real conflict was a numbering collision -- #46 and #47 each independently wrote a 'SLM Daily #10' because neither run knew about the other's parallel work. Kept #46's edition (2026-08-12-slm-daily-10.html, the EXAONE 4.5 sliding-window-attention KV-cache bug) as the true #10 since it published first chronologically, and renumbered #47's edition (2026-08-13-slm-daily-11.html, the LFM2.5-VL-3B vision-model product-gap finding) to #11, fixing its title/meta/H1/canonical-URL/internal 'since Daily #9' cross-reference and one inbound link from the Dragonwing spotlight post that pointed at the old filename. #48 (torchwright + NanoMind-S3) had already noticed the collision risk in its own PR description and deliberately dropped its own digest draft rather than triple up, so it needed no digest-numbering changes -- its two posts (deep-dive + DIY spotlight) carried forward unmodified. Net: digestCounter 9->11 (two genuinely distinct digest editions, not one renumbered twice), 3 deep-dive theses and 3 DIY spotlights merged into their respective state lists in chronological order, zero catalog changes across all three source runs (all three independently found no qualifying candidate in their windows, for different verified reasons each time -- consistent, not duplicated, since each checked a different or newly-surfaced set of candidates). Closing PRs #46, #47, #48 as superseded once this consolidated content is live. All 8 new post URLs plus the updated blog index to be curl-verified at HTTP 200 after push."
+    },
+    {
+      "date": "2026-08-15",
+      "event": "published-digest-and-deepdive-catalog-replacement-no-diy",
+      "reason": "Research window: since lastRunAt 2026-08-14T04:36:58Z (~1 day, following the same-day PR consolidation documented in the prior note) plus the standard 14-day catalog lookback, run via three parallel research sweeps (catalog candidates, deep-dive thesis, DIY spotlight).\n\nCATALOG: found and applied the catalog's first-ever straight one-for-one replacement (not a pure addition). LiquidAI/LFM2.5-1.2B-Instruct-GGUF (released 2026-08-05) independently HTTP-HEAD-verified at 730,895,168 bytes Q4_K_M -- smaller than the incumbent llama-3.2-1b-instruct-q4 (807,694,464 bytes). Liquid AI's own model card publishes a direct head-to-head benchmark table against Llama 3.2 1B Instruct (GPQA 38.89 vs 16.57, MMLU-Pro 44.35 vs 20.80, IFEval 86.23 vs 52.37, IFBench 47.33 vs 15.93, Multi-IF 60.98 vs 30.16, AIME25 14.00 vs 0.33, BFCLv3 49.12 vs 21.44) -- LFM2.5-1.2B-Instruct wins all seven published benchmarks. Same lfm2 architecture already confirmed llama.cpp-compatible (same family as the existing lfm2.5-2.6b-q4 entry), same LFM Open License v1.0 already accepted for that entry. Applied CATALOG RULES' 'replace only when the new model strictly dominates' clause: removed llama-3.2-1b-instruct-q4, added lfm2.5-1.2b-q4, keeping the generalist tier at its established 8-model cap. Did not touch privateslm's Sources/ModelInfo.swift bundled offline fallback (still lists llama-3.2-1b-instruct-q4 and qwen2.5-1.5b-instruct-q4) -- consistent with prior runs' precedent that the minimal hardcoded fallback doesn't need to track every live-catalog change, since it exists only for when the live models.json fetch itself fails.\n\nENGINE: llama.cpp advanced b10362 (Aug 11) -> b10436 (Aug 15), 74 tags, all optimization/bugfix work (SYCL, server metrics, WASI threading) -- diffed llama-arch.h directly, zero new architecture tags in the window.\n\nDEEP-DIVE: published blog/2026-08-15-multilingual-quantization-tax.html on arXiv:2608.09941, a genuinely new, unscooped, fully-verified angle (fetched the paper's own ar5iv HTML rendering directly and cross-checked every number quoted in the post against the paper's own Table 1, Table 3, and appendix -- not just trusting a research-agent summary). Distinct from all 19 prior theses (none touch quantization's per-language distribution of damage). Piece explicitly flags the honest caveat that nf4/bitsandbytes quantization is not identical to llama.cpp's GGUF K-quants and that this is one uncorroborated independent paper, rather than overclaiming it proves anything about our own catalog's exact quantized files.\n\nDIY SPOTLIGHT: none published. Dedicated research sweep found two candidates, both with real disqualifying gaps: Roni Bandini's 'Jaime' Arduino UNO Q robot (real builder, real video, but zero disclosed model/quant/tokens-per-second numbers -- fails the 'concrete numbers' bar outright) and Subomi-olagoke's 'mote' tiny transformer engine (strong published numbers, MIT license, but explicitly a laptop/WASM/browser project with microcontroller deployment stated as a future goal, not yet running on physical edge hardware). Neither published. Also flagged as a genuine coverage gap rather than a checked-and-empty result: reddit.com (r/LocalLLaMA, r/homelab) returned 403/blocked to both WebFetch and direct curl from this environment for the whole research window, so that channel could not actually be verified this run.\n\nBoth published pieces' titles+openings self-graded 9/10 against the established hook rubric (concrete numbers within the first two sentences: 0.33 vs 14.00 for the digest, 23.6% vs 7.5% for the deep-dive) since no /post-grader skill exists in this session (reconfirmed via the skills listing this run) -- same stopgap used in every prior run.\n\nPrior to this run's fresh research, this session also found and resolved three unmerged, non-overlapping autopilot draft PRs (#46, #47, #48) that had accumulated on privateslm-site since 2026-08-11 -- see the separate 2026-08-15 'consolidated-three-diverged-draft-prs-46-47-48' note for full detail. Both events happened in the same session/run.\n\nNo repo access issues, no Pages/git failures encountered. All new URLs to be curl-verified at HTTP 200 post-merge."
     }
   ],
-  "lastRunAt": "2026-08-14T04:36:58Z",
+  "lastRunAt": "2026-08-15T04:45:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -543,6 +555,18 @@
       "type": "diy",
       "publishedAt": "2026-08-14T04:36:58Z",
       "post": "blog/2026-08-14-nanomind-s3-esp32.html"
+    },
+    {
+      "slug": "2026-08-15-slm-daily-12",
+      "type": "digest",
+      "publishedAt": "2026-08-15T04:45:00Z",
+      "post": "blog/2026-08-15-slm-daily-12.html"
+    },
+    {
+      "slug": "2026-08-15-multilingual-quantization-tax",
+      "type": "deepdive",
+      "publishedAt": "2026-08-15T04:45:00Z",
+      "post": "blog/2026-08-15-multilingual-quantization-tax.html"
     }
   ]
 }
