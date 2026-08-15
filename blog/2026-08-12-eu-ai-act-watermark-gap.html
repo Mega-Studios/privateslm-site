@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>€15 million is the fine. August 2nd was the deadline. No open-weight text model can comply yet. — privateSLM blog</title>
+  <meta name="description" content="Article 50 of the EU AI Act took effect August 2, 2026, requiring AI-generated text to carry a machine-readable, detectable mark — on pain of fines up to €15M or 3% of global turnover. No model in our catalog, and nothing in llama.cpp's sampler, has any way to do that. A look at a compliance gap the whole open-weight ecosystem shares.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-12-eu-ai-act-watermark-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>€15 million is the fine. August 2nd was the deadline. No open-weight text model can comply yet.</h1>
+    <div class="meta">August 12, 2026 · 9 min read</div>
+
+    <p>On August 2, 2026, the European Commission started enforcing Article 50 of the EU AI Act. Among its requirements: AI-generated content — and the text explicitly says <em>text</em>, not just images, video, and audio — has to be "marked in a machine-readable format and detectable as artificially generated." Miss it, and the penalty is up to €15 million or 3% of global annual turnover, whichever is higher. Every model in privateSLM's own catalog — Llama, Qwen, Gemma, Phi, all of it — ships today with no such mark. Neither does llama.cpp, the engine that runs them, or the sampler in our own app that decides what token comes next. This isn't a privateSLM problem specifically. It's a problem for every open-weight text model on Hugging Face and every app, ours included, that runs one locally.</p>
+
+    <h2>What Article 50 actually asks for</h2>
+    <p>The AI Act's transparency chapter has more than one obligation in it, and it's worth being precise about which one this is. Article 50(1) requires AI systems interacting with people to disclose that they're AI — a chatbot has to say it's a chatbot. Article 50(4) puts a labeling duty on <em>deployers</em> who publish AI-generated text on matters of public interest. Neither of those is the hard one. The hard one is Article 50(2): providers of AI systems, "including general-purpose AI systems," that generate synthetic audio, image, video, or text must ensure the <em>output itself</em> is marked in a machine-readable format and detectable as artificial or manipulated. Not a disclaimer next to the text. The text itself, carrying a mark a piece of software can find without being told in advance what it's looking for.</p>
+
+    <p>There are exemptions, and they're narrow. The obligation doesn't apply where a system performs "only an assistive function for standard editing" — grammar correction, not generation. It doesn't apply where the system "does not substantially alter the input data or its semantics" — again, editing, not authoring. And it doesn't apply to systems authorized by law for criminal investigation. A general-purpose chat model answering an open-ended question doesn't fit any of the three. If you ask privateSLM to write you a cover letter, draft an email, or explain a concept in your own words, that output is squarely the kind of content Article 50(2) is about.</p>
+
+    <h2>The compliance gap nobody in the open-weight ecosystem has closed</h2>
+    <p>The technology to watermark AI text exists — Google DeepMind published SynthID-Text as a peer-reviewed method years before this deadline. The mechanism is elegant: instead of sampling the next token purely from the model's own probability distribution, the sampler tilts that distribution using a pseudorandom function seeded by a secret key and the recent token history. The bias is too small to notice reading the text, but a detector holding the same key can run a statistical test over the token sequence afterward and tell, with high confidence, that this text came from a watermarked model. It works. It's also, by construction, a scheme that assumes the key stays on a server somewhere, because a watermark whose key is sitting in the same binary as the sampler that applies it isn't a secret from the person running that binary — it's a comment in the source code.</p>
+
+    <p>And in practice, hardly anyone has shipped it even where a server exists to hold the key. Compliance trackers published around the enforcement date describe open-source models as "largely unwatermarked unless the model maintainer deliberately implements a scheme" — Stability AI hasn't wired SynthID into Stable Diffusion's public weights; Meta's Llama family doesn't embed SynthID-Text or any equivalent by default. That's the image/video side of the ecosystem, which has had watermarking tooling the longest. Text-only open-weight chat models — the Llama 3.2, Qwen2.5, Gemma 2, and Phi-4 checkpoints that make up privateSLM's own catalog — don't even have a widely-adopted reference implementation to opt into. Nobody shipped the option, so nobody's default changed.</p>
+
+    <h2>Our own sampler is the proof, not an analogy</h2>
+    <p>This isn't a hypothetical about "the industry." It's a fact about our own code. Here's the actual sampler chain privateSLM's <code>LlamaEngine.swift</code> builds for every single reply it generates:</p>
+
+    <pre><code>let sampler = llama_sampler_chain_init(llama_sampler_chain_default_params())
+llama_sampler_chain_add(sampler, llama_sampler_init_penalties(64, settings.repeatPenalty, 0, 0))
+llama_sampler_chain_add(sampler, llama_sampler_init_top_k(settings.topK))
+llama_sampler_chain_add(sampler, llama_sampler_init_top_p(settings.topP, 1))
+llama_sampler_chain_add(sampler, llama_sampler_init_temp(settings.temperature))
+llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED))</code></pre>
+
+    <p>Penalties, top-k, top-p, temperature, then a plain random draw. That's the entire pipeline, and it's the standard llama.cpp sampling chain — nothing custom, nothing that biases token selection toward a detectable pattern. There is no watermarking stage in llama.cpp's public sampler API at all, for us or for anyone else building on it. And even if we added one, the fix would be theatrical: privateSLM's whole value proposition is that the model runs entirely on your device, with nothing phoning home and nothing hidden from you. A watermark is a secret embedded in output that the person generating the output isn't supposed to be able to remove. Ship that secret inside an app whose entire premise is "you, the user, are in full control of what happens on this device," on an open-source inference engine whose source anyone can read and rebuild, and the secret has a lifespan measured in hours before somebody forks the sampler without the extra step. Being genuinely offline and being verifiably watermarked pull in opposite directions almost by definition — the more of the pipeline you can inspect and modify, the less any embedded mark can be trusted to survive.</p>
+
+    <h2>Whose obligation is this, actually?</h2>
+    <p>Article 50(2)'s duty lands on "providers of AI systems, including general-purpose AI systems." For a closed product like ChatGPT, that's unambiguous — OpenAI is both the model provider and the system provider, one company, one obligation. For an app built by downloading someone else's open-weight GGUF and running it through a third-party inference engine, it's genuinely unclear who that is. Is Meta the "provider" because they released the Llama weights? Is it whichever quantizer converted them to GGUF? Is it us, because we're the ones shipping the app that loads the file and generates the text a user reads? We looked for regulatory guidance that addresses this specific compositional case — open weights, downloaded independently, run through a separately-authored local inference engine — and didn't find one. The Act's Code of Practice describes a "layered" compliance approach combining metadata embedding, imperceptible watermarking, and generation logging, precisely because no single technique satisfies every requirement on its own — but every layer in that description assumes a provider who controls the full pipeline end to end, which is exactly the assumption "download any GGUF and run it locally" breaks.</p>
+
+    <p>The AI Act's territorial reach doesn't wait for that question to be answered before it applies, either. Like the GDPR before it, the Act generally governs based on where a system's output is placed on the market or used, not where the company that built it is headquartered — a U.S.-based app publisher isn't automatically exempt just because it isn't an EU company. We're not going to pretend to have a legal opinion on whether that reach extends to a small, one-time-purchase, no-account app with users in the EU; that's a question for people with law degrees, not a blog post. What we can say honestly is that the compliance gap itself is real, verifiable, and currently unaddressed by anyone in this specific product category — local chat apps built on open GGUF weights — including us.</p>
+
+    <h2>What actually changes, and what doesn't</h2>
+    <p>Nothing ships differently in privateSLM today because of this post. There's no watermarking GGUF to add to the catalog, no llama.cpp flag to flip, no vendor patch to wait for — the honest state of the art for text watermarking in an offline, user-controlled inference pipeline is that it doesn't meaningfully exist yet, for us or for anyone building on the same open tools. What this does change is how we'd read the next claim that a given open model or app is "AI Act compliant" without specifying which article. Chatbot disclosure (50(1)) is trivial — one line of UI copy. Machine-readable, detectable content marking (50(2)) is a different, much harder claim, and as far as we can establish, nobody has actually solved it for a locally-run, open-weight text model — a genuine open problem, not a solved one that we're simply behind on. If you're building or running something in this space and have a real answer we haven't found, the forum thread below is the place to make the case.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you know of a text watermarking scheme that actually survives an open, user-modifiable inference pipeline, we want to see it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, nothing hidden in the output</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
