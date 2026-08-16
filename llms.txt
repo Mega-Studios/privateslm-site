@@ -10,6 +10,7 @@
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
 ## Blog
+- 20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation: https://www.privateslm.dev/blog/2026-08-16-prompt-cache-session-bleed.html
 - 23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only: https://www.privateslm.dev/blog/2026-08-15-multilingual-quantization-tax.html
 - SLM Daily #12 (catalog digest): https://www.privateslm.dev/blog/2026-08-15-slm-daily-12.html
 - Five of six frontier LLMs fail 5-digit multiplication. A transformer that was never trained gets it 100% right.: https://www.privateslm.dev/blog/2026-08-14-torchwright-zero-training-transformer.html
