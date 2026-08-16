@@ -150,6 +150,7 @@
       "fileName": "finance-llm.Q4_K_M.gguf",
       "sizeBytes": 4081009920,
       "minRamMb": 8192,
+      "chatTemplate": "llama2-sys",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/finance-llm.Q4_K_M.gguf"
     },
     {
@@ -186,6 +187,7 @@
       "fileName": "deepseek-coder-6.7b-instruct.Q4_K_M.gguf",
       "sizeBytes": 4083015904,
       "minRamMb": 8192,
+      "chatTemplate": "deepseek",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
     },
     {
@@ -210,6 +212,7 @@
       "fileName": "meditron-7b-chat.Q4_K_M.gguf",
       "sizeBytes": 4082074240,
       "minRamMb": 8192,
+      "chatTemplate": "deepseek",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/meditron-7b-chat.Q4_K_M.gguf"
     },
     {
@@ -222,6 +225,7 @@
       "fileName": "finance-chat.Q4_K_M.gguf",
       "sizeBytes": 4081010048,
       "minRamMb": 8192,
+      "chatTemplate": "llama2-sys",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/finance-chat.Q4_K_M.gguf"
     },
     {
@@ -246,6 +250,7 @@
       "fileName": "law-chat.Q4_K_M.gguf",
       "sizeBytes": 4081010048,
       "minRamMb": 8192,
+      "chatTemplate": "llama2-sys",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/law-chat.Q4_K_M.gguf"
     },
     {
@@ -258,6 +263,7 @@
       "fileName": "MentaLLaMA-chat-7B.Q4_K_M.gguf",
       "sizeBytes": 4081004544,
       "minRamMb": 8192,
+      "chatTemplate": "llama2-sys",
       "cdnUrl": "https://pub-7993889847be4c2fb703ef5040abfdbd.r2.dev/MentaLLaMA-chat-7B.Q4_K_M.gguf"
     }
   ]
