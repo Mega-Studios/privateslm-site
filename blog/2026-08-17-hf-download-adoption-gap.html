@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.55 billion downloads went to a model most people have never heard of — privateSLM blog</title>
+  <meta name="description" content="Hugging Face's own Summer 2026 report: not one model released in 2026 cracked the platform's download top 25, thirteen of the twenty-five are from 2022, and 85.6% of all models on the Hub have fewer than 200 lifetime downloads. What that means for a blog that covers a new small model every few days.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-17-hf-download-adoption-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>1.55 billion downloads went to a model most people have never heard of</h1>
+    <div class="meta">August 17, 2026 · 7 min read</div>
+
+    <p>1,550,000,000. That's how many times <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2" target="_blank" rel="noopener">sentence-transformers/all-MiniLM-L6-v2</a> — a 22-million-parameter sentence-embedding model with no chat interface and no leaderboard entry — was downloaded from Hugging Face in the first seven months of 2026, against 5,156 likes. In that same window this blog alone wrote up nine small models topping some benchmark table or other. Not one of them, and nothing else released in 2026 by anyone, cracked Hugging Face's own top 25 most-downloaded models list. Thirteen of those twenty-five date from 2022.</p>
+
+    <p>That's not our number. It's Hugging Face's, from its own <a href="https://huggingface.co/blog/state-of-open-models-summer-2026" target="_blank" rel="noopener">"State of Open Models: Summer 2026"</a> report, published August 14. We run a blog that covers a new small-model release every few days and slots the best of them into a live catalog. This report is, in part, a data-backed argument that doing exactly that tells you almost nothing about what people actually run.</p>
+
+    <h2>The two lists that don't overlap</h2>
+    <p>Hugging Face ranked models two ways: by all-time downloads, and by likes — a reasonable proxy for attention, buzz, the thing a "new model dropped" post is chasing. The two top-25 lists share exactly one repository. Benchmark-topping, high-engagement releases and heavily-downloaded, quietly-running-in-production models are, on this evidence, close to disjoint populations. all-MiniLM-L6-v2 sits at the extreme end of that split: enormous download volume, a rounding error of likes. Kimi-K3 — the 2.8-trillion-parameter model whose architecture landed in llama.cpp mainline this same week (see this edition's <a href="2026-08-17-slm-daily-13.html">SLM Daily</a>) — sits at the other end. Hugging Face's own framing: it "was pulled about 60 times per like it received." A frontier release generates conversation in proportion to its capability claims; it doesn't generate downloads in proportion to that conversation.</p>
+
+    <h2>Where the download volume actually goes</h2>
+    <p>The report breaks download share down by model size, and the shape is not close:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Model size</th><th style="padding:6px 0;">Share of all-time downloads</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Under 1B params</td><td style="padding:6px 0;"><strong>83%</strong></td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Over 100B params</td><td style="padding:6px 0;">1%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Over 70B params, 2026 downloads only</td><td style="padding:6px 0;">3% of 2026's volume</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: Hugging Face, "State of Open Models: Summer 2026," Aug 14, 2026.</p>
+
+    <p>And it's not evenly spread across the sub-1B tier either. Across the whole Hub — 2.96 million models as of this report, up from 2.43 million in January (+21.5% in seven months) — <strong>85.6% of models have fewer than 200 lifetime downloads</strong>, and <strong>1.5% of repositories account for 99.2% of all downloads</strong>. Almost everything anyone uploads goes almost entirely unused; almost all real usage concentrates in a tiny, mostly-boring, mostly-old set of repos. That's the actual shape of "the model comes to your data" in aggregate: a long tail of one-off fine-tunes nobody runs twice, sitting under a handful of load-bearing utility models that have been stable for years.</p>
+
+    <h2>The part that's closest to home: GGUF, specifically</h2>
+    <p>This blog's whole reason for existing is the on-device, llama.cpp-shaped corner of that chart, so the report's GGUF-specific numbers are the ones worth sitting with. Monthly GGUF download volume by source model family: Qwen 39.6 million, Gemma 20.8 million, Llama 7.5 million. And derivative counts — fine-tunes, merges, quantizations built on top of a base model — split even more lopsidedly: 151,448 Qwen derivatives on the Hub, 2.6x Meta's entire footprint, growing at roughly 180–210 new repositories a day; Google sits at 82,506. Our own catalog's composition tracks this almost exactly without us having planned it that way — Qwen shows up four times (Qwen2.5 1.5B, two Qwen2.5 Coder sizes, Qwen2.5 Math 7B), more than any other family, alongside older, un-hyped entries like Gemma 2 2B and DeepSeek Coder 6.7B that have been in the catalog for months with no benchmark story attached. The ecosystem's center of gravity and our own shelf turned out to be the same place.</p>
+
+    <h2>A Hub growing faster than anyone can check it</h2>
+    <p>The long tail isn't just idle — it's the majority of what's being built. Hugging Face's own repository counts grew from 2.43 million models to 2.96 million between January and August 2026 (+21.5% in seven months), datasets from 711,000 to 1 million, and Spaces from 1.00 million to 1.44 million. At roughly 180–210 new Qwen-derivative repositories alone landing every single day, no team — ours included — is watching the full firehose. That's not a knock on Hugging Face; a permissionless upload model is precisely why the platform has 151,448 Qwen derivatives to begin with. It's a scale problem for anyone trying to separate "worth a look" from "one of 2.5 million repos nobody will open twice," and it's the same problem this blog's daily research pass exists to solve on a much smaller, on-device-relevant slice of it.</p>
+
+    <h2>What this means for a blog that publishes "what's new" most days</h2>
+    <p>We're not going to pretend this doesn't land close to home. A digest built around "what dropped since last time" is, structurally, a likes-shaped product measuring a downloads-shaped world. The honest reading isn't "stop covering new releases" — someone has to check whether this week's benchmark-topper is real, and that's genuinely useful work; <a href="2026-08-15-slm-daily-12.html">SLM Daily #12</a>'s LFM2.5-1.2B swap was a real, dominant, verified upgrade over what shipped in privateSLM's catalog since launch. The honest reading is narrower: a benchmark win and a likes count are a signal that a model is worth *checking*, not evidence that anyone besides its own lab is running it yet. Our catalog's job is to have already done that checking by the time a model shows up here — engine-compatibility gate, HEAD-verified file size, license read in full — precisely because "trending" and "actually deployed" are, per Hugging Face's own numbers, close to two different lists.</p>
+
+    <h2>Checking a slice of this yourself</h2>
+    <p>Hugging Face's public API exposes per-model download counts directly — with one caveat worth stating up front: the <code>downloads</code> field it returns is a rolling 30-day count, not the lifetime figure the report computed from Hugging Face's internal logs. You can't reproduce "1.55 billion downloads in seven months" from this endpoint; you can watch the recent-usage gap between an old workhorse and a new release directly:</p>
+
+    <pre><code>curl -s https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2 \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['downloads'], d['likes'])"
+
+curl -s https://huggingface.co/api/models/bartowski/Qwen3.8-27B-GGUF \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['downloads'], d['likes'])"</code></pre>
+
+    <p>Run both and the 30-day snapshot alone tends to echo the report's shape: the long-established embedding model still moving serious volume every month, against a benchmark-topping release from this week pulling a fraction of that in downloads while carrying most of the week's conversation.</p>
+
+    <h2>The honest caveats</h2>
+    <p>Hugging Face's report states the "13 of 25 are from 2022" and "zero from 2026" claims directly but doesn't publish the full 25-model list or per-model download counts behind them, so we can't independently verify which thirteen models those are — we're citing Hugging Face's own aggregate claim, not a ranking we reproduced ourselves. The size-tier download shares (83% / 1% / 3%) and the concentration figures (85.6% / 1.5% / 99.2%) are quoted directly from the same post; we did not get access to Hugging Face's internal download logs to cross-check them against a second source, which is a real limitation given this blog's usual bar of triangulating every number. What we can say with confidence: the API spot-checks above are consistent with the direction the report claims, even without reproducing its exact figures.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — models we checked, not just models that trended</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
