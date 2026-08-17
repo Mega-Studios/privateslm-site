@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation — privateSLM blog</title>
+  <meta name="description" content="A fresh, reproducible llama.cpp server bug lets one finished conversation's content bleed into a different session under concurrent load — and the cached_tokens field that's supposed to flag cache reuse reads 0 every time it happens. We checked our own engine's code against it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-16-prompt-cache-session-bleed.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation</h1>
+    <div class="meta">August 16, 2026 · 9 min read</div>
+
+    <p>On August 15, a llama.cpp server operator posted a bug report with two test batches: 20 concurrent rounds, 20 corrupted; a second batch of 8, all 8 corrupted. In every corrupted reply, the model was answering from a completely different, already-finished conversation instead of the prompt it had just been sent — and the one API field that's supposed to tell a developer "this response reused cached content," <code>cached_tokens</code>, read 0 every single time. Not a small number. Zero. The server had no idea it had done anything wrong.</p>
+
+    <p>This isn't a cloud leak. Nothing left the machine. It's the opposite kind of failure, and arguably the more uncomfortable one for a category that markets itself on the promise that on-device automatically means isolated: two conversations, same box, same process, one bleeding into the other, with the server's own instrumentation reporting a clean bill of health.</p>
+
+    <h2>What the reproduction actually showed</h2>
+    <p>The report is <a href="https://github.com/ggml-org/llama.cpp/issues/27148" target="_blank" rel="noopener">ggml-org/llama.cpp#27148</a>, filed by GitHub user elchic00 against merge commit <code>a0e27a3e4</code> (base <code>adb55e514</code>, build tag b10450, dated August 15, 2026 — same day it was posted). The setup: an llama.cpp server running in multi-slot mode under concurrent load, with a pool of prior finished conversations seeded ahead of time. New requests come in, get assigned to whichever slot is free, and — under the conditions below — sometimes come back containing text and conversation markers from one of those earlier, unrelated sessions instead of a fresh answer. The reporter logged the same stale markers recurring across 19 consecutive concurrent requests in one run.</p>
+
+    <p>As of this writing the issue has no labels, no assignee, and no linked fix PR. It's a single external report, not a maintainer-confirmed defect — which matters, and which we come back to below. But the reporter didn't just describe symptoms; they read the source and named the exact function and condition responsible, which is why this is worth taking seriously rather than filing away as "someone's flaky test."</p>
+
+    <h2>The one-line bug</h2>
+    <p>Quoting the issue directly: the server's <code>prompt_load()</code> function is supposed to look through a shared, cross-slot cache pool for a prior prompt that matches the incoming one closely enough to reuse, and clear the slot otherwise. The reported defect is that <code>prompt_load()</code> returns <code>true</code> — a no-op success — whenever <code>it_best == states.end()</code>, i.e. whenever nothing in the cache pool is actually a good match. That return value is supposed to mean "loaded something," but it's also what the code gets when it loaded nothing. Either way, the caller reads "true" and skips the <code>prompt_clear()</code> call that would otherwise wipe the slot before it starts serving the new request. The old, unrelated conversation's tokens just stay resident, and the new prompt gets appended on top of them instead of starting clean.</p>
+
+    <p>The feature responsible for populating that shared pool in the first place is <code>--cache-idle-slots</code>: per the reporter, it "publishes a snapshot of any idle slot's current prompt into the shared, cross-slot <code>server_prompt_cache</code> pool on every task launch" — which is precisely why a finished conversation from Slot A can end up as candidate material for a completely different request landing on Slot B.</p>
+
+    <h2>The defaults nobody unchecked</h2>
+    <p>None of the flags involved here are exotic opt-in features. We pulled the current server flag descriptions straight from llama.cpp's own <code>tools/server/README.md</code>:</p>
+    <pre><code>--cache-ram N        set the maximum cache size in MiB (default: 8192, -1 = no limit, 0 = disable)
+--cache-idle-slots    save idle slots to the prompt cache on new task,
+                       and clear them when using unified KV (default: enabled, requires cache-ram)
+--parallel N / -np N  number of server slots (default: -1, -1 = auto)
+--kv-unified          use single unified KV buffer shared across all sequences
+                       (default: enabled if number of slots is auto)</code></pre>
+    <p>Read that as a sequence of defaults, not a checklist of things someone had to turn on: an 8 GiB RAM-backed cache, on by default; idle-slot snapshotting into that cache, on by default, as long as the cache itself is enabled; and a unified KV buffer — the setting that, per the reporter, is what actually triggers <code>prompt_clear()</code> to fire correctly — enabled only when slot count is left on auto. The moment you explicitly set <code>--parallel</code> to a fixed number above 1, which is the completely ordinary way to configure a server that's meant to hold more than one conversation at once, you're out of the auto-unified-KV default and into the code path this bug lives in. You don't have to misconfigure anything. You have to configure the server for its most basic multi-user use case.</p>
+
+    <p>On Apple Silicon specifically, that 8 GiB isn't even a separate pool physically sealed off from the live KV cache — unified memory means the RAM-backed prompt cache and the KV cache you're actively generating against draw from the same underlying memory, whatever backend is technically bookkeeping them (documented independently by <a href="https://jessequinn.info/blog/llama-cpp-cache-ram-prompt-caching" target="_blank" rel="noopener">jessequinn.info</a>, which also confirms this cache has been default-enabled since October 2025). The slot/cache/eviction logic itself lives in backend-agnostic C++ inside <code>tools/server</code>, so the same code path runs under CUDA, ROCm, Vulkan and Metal alike. The reporter's own hardware was an AMD Strix Halo dual-GPU box running ROCm (<code>gfx1151</code>), not Apple silicon — we have not independently reproduced this on Metal, and we want to be explicit that we haven't, rather than imply we did.</p>
+
+    <h2>Who this actually bites</h2>
+    <p>This is a server-mode bug, specifically. It requires running <code>llama-server</code> (or anything built on its multi-slot request handling) with more than one slot serving concurrent requests — the shape of deployment behind, for instance, the home-lab setup we covered a few weeks ago: a single Beelink GTR9 Pro serving 32 concurrent llama.cpp chat sessions off one Strix Halo box (<a href="2026-07-20-strix-halo-home-lab.html">2026-07-20</a>). We're not claiming that specific rig hit this bug — we have no evidence either way — but that's exactly the class of setup the code path in question was built for and exists to serve: one process, many slots, many people's conversations sharing memory by design. Any self-hosted llama.cpp server fronting more than one user or more than one concurrent chat session, and any desktop app that spins up <code>llama-server</code> internally to juggle a background task alongside an active chat, inherits this exposure until it's fixed.</p>
+
+    <p>It does not describe every way of running llama.cpp. An app that embeds the C API directly and gives every conversation its own freshly allocated context has no shared slot pool to leak from in the first place — there's nothing for <code>--cache-idle-slots</code> to snapshot, because that flag, and the server binary it belongs to, are never in the process.</p>
+
+    <h2>We checked our own code</h2>
+    <p>privateSLM doesn't run <code>llama-server</code>. It links llama.cpp's C API directly as a prebuilt xcframework and drives it from Swift, one context per conversation turn. This is the actual comment sitting above the relevant line in our own <code>LlamaEngine.swift</code>, unedited:</p>
+    <pre><code>// Fresh context + sampler per turn keeps KV bookkeeping trivial.
+var cparams = llama_context_default_params()
+cparams.n_ctx = UInt32(Self.safeContext(model: model, requested: Int(settings.contextTokens)))
+cparams.n_batch = 512
+cparams.n_ubatch = 512
+guard let ctx = llama_init_from_model(model, cparams) else {
+    continuation.finish(); return
+}
+defer { llama_free(ctx) }</code></pre>
+    <p>That comment was written for a completely different reason — simplicity and predictable memory behavior on a jetsam-constrained phone, not privacy engineering. But the practical effect is that we never set <code>--parallel</code>, never touch <code>--cache-ram</code> or <code>--cache-idle-slots</code>, and never run the server binary those flags belong to. There's no shared cross-slot pool for one conversation's tokens to end up sitting in when a different one starts, because there's no cross-slot anything: <code>llama_init_from_model</code> and <code>llama_free</code> bookend every single turn. We're not claiming credit for having anticipated this specific bug report — nobody had filed it yet when that architecture was written. We're saying the boundary a memory-management decision drew turns out to double as a privacy boundary, and that's worth stating plainly rather than assuming and never checking.</p>
+
+    <h2>What we don't know yet</h2>
+    <p>To be precise rather than alarmist: this is one bug report, less than 24 hours old at the time of our research, unconfirmed by any llama.cpp maintainer, with no reply, no triage label, and no fix in flight as of this writing. The reproduction numbers and the named function behavior (<code>prompt_load</code>, <code>prompt_clear</code>, the <code>it_best == states.end()</code> condition) read like someone who traced the code rather than guessed, which is why we're covering it rather than waiting — but "well-documented and reproducible" is not the same claim as "confirmed root cause, patched." If you run a multi-slot llama.cpp server for more than one person or more than one concurrent session, the honest move right now is to verify this yourself against your own build rather than take either the original report or this post's word for it, and to treat <code>cached_tokens</code> as informative rather than authoritative in the meantime — the whole finding here is that the number that's supposed to catch this doesn't.</p>
+
+    <p>If you're running a multi-slot server today and want a mitigation rather than a rewrite while this is unresolved: <code>--cache-ram 0</code> disables the RAM-backed cache outright, and pinning <code>--kv-unified</code> explicitly (rather than leaving slot count on <code>-1</code> auto) restores the path the reporter says triggers <code>prompt_clear()</code> correctly. Neither is free — you lose the prompt-reuse speedup the cache exists to provide — but that's a real trade to make consciously rather than a default you didn't know you'd accepted.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you run a multi-slot llama.cpp server and can reproduce or rule this out on your own hardware, we want to hear the numbers either way.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — one context per conversation, checked, not assumed</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

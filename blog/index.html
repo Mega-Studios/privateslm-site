@@ -27,6 +27,11 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-16-prompt-cache-session-bleed.html">
+          <div class="meta">August 16, 2026 · 9 min read</div>
+          <h3>20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation</h3>
+          <p>A fresh llama.cpp server bug lets one finished conversation's content bleed into a different session under concurrent load — and cached_tokens, the field built to flag cache reuse, reads 0 every time it happens. We checked our own engine's code against it.</p>
+        </a>
         <a class="post-card" href="2026-08-15-multilingual-quantization-tax.html">
           <div class="meta">August 15, 2026 · 10 min read</div>
           <h3>23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only</h3>
