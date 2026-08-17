@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #13: llama.cpp was silently zero-padding corrupted LoRA files. Nobody would have known. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #13: two llama.cpp fixes closed a silent-corruption path in GGUF array parsing and LoRA adapter loading — truncated LoRA files were loading with zero-padded weights and no error. Kimi-K3 architecture support landed too, but it's a 2.8T-parameter model. Zero catalog changes this edition.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-17-slm-daily-13.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #13: llama.cpp was silently zero-padding corrupted LoRA files. Nobody would have known.</h1>
+    <div class="meta">August 17, 2026 · 5 min read</div>
+
+    <p>A truncated or corrupted LoRA adapter file didn't error out in llama.cpp — it loaded anyway, with the missing tensor data silently zero-padded in, and told you nothing was wrong. That bug shipped a fix this edition, alongside a second, closely related one: metadata arrays inside a GGUF file were being read in some code paths without checking their declared type first. Ten engine builds landed since our last edition (b10441 through b10453). None of them, and nothing else we checked, changes what's in the catalog today.</p>
+
+    <h2>Two ways a bad file used to fail silently</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/27056" target="_blank" rel="noopener">PR #27056</a> (shipped as <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10451" target="_blank" rel="noopener">b10451</a>, Aug 16) fixes the LoRA case. In the PR's own words: "the LoRA adapter loading path reads tensor data without checking that the tensor offset + size falls within the file bounds. A truncated or corrupted LoRA file is silently loaded with zero-padded weights and no error is reported." The fix mirrors a bounds check that already existed for regular model loading in <code>llama-model-loader.h</code> — LoRA adapters just never inherited it. Now a bad file fails loudly, with "tensor data is not within the file bounds," instead of quietly generating with partially blank weights.</p>
+
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/27075" target="_blank" rel="noopener">PR #27075</a> (b10443, Aug 15) is the same class of bug one layer down: "many places forgot to check for GGUF metadata array type before reading it," per the PR description — a GGUF file's metadata array could be read as the wrong type across multiple code paths, risking corrupted metadata or unsafe reads rather than a clean failure. Neither bug is a benchmark story. Both are the unglamorous kind of fix that decides whether a bad download fails at load time or fails three tokens into your first reply.</p>
+
+    <h2>The one new architecture, and why it changes nothing here</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/26185" target="_blank" rel="noopener">PR #26185</a> (b10448, Aug 15) adds Kimi-K3 support — Moonshot AI's hybrid linear+full-attention mixture-of-experts model, 2.8T total parameters with roughly 104B active. It needed real engine work: <code>LLAMA_MAX_EXPERTS</code> jumped from 512 to 1024 to fit K3's 896 routed experts, plus lossless MXFP4 weight repacking so conversion doesn't round-trip through bf16. That expert-count ceiling is now permanent infrastructure — any future large-MoE architecture with a similarly high expert count benefits, whether or not it ever ships small enough for a phone. Kimi-K3 itself, obviously, doesn't.</p>
+
+    <h2>What we checked and skipped</h2>
+    <p>Two model releases landed just ahead of this edition's research window and hadn't been written up here yet: <strong>Qwen3.8-27B</strong> (Alibaba, Aug 14, Apache 2.0, 27.78B dense — bartowski's Q4_K_M GGUF alone is 17.77 GB, before you've loaded anything else) and <strong>LiquidAI LFM2.5-VL-3B</strong> (Aug 12–13, ~3.1B, vision-language). The first fails on size before anything else matters. The second fails the same gate we flagged in <a href="2026-08-13-slm-daily-11.html">SLM Daily #11</a>: our engine has no code path that ever hands a model a photo, so a vision-language model — however well it scores — has nowhere to run in privateSLM today. Zero catalog additions. Still 8 Generalists, 14 pre-cap specialists, unchanged.</p>
+
+    <h2>A coverage gap, stated plainly</h2>
+    <p>Reddit's r/LocalLLaMA and X were unreachable to our research tooling this edition — every fetch attempt came back blocked. If a release or a benchmark surfaced there in the last two days, we didn't see it, and we'd rather say that than imply a clean sweep. No Edge in the Wild spotlight either: one candidate project surfaced (a WiFi-based presence/breathing sensor on an ESP32 and a Pi), but it runs classical signal processing, not a language model — stretching the label to fit felt worse than skipping it.</p>
+
+    <p>Our deep-dive this edition looks at a Hugging Face download-stats report that cuts against the entire premise of a "what's new this week" digest: not one model released in 2026 has cracked Hugging Face's own download top 25. <a href="2026-08-17-hf-download-adoption-gap.html">Read it here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

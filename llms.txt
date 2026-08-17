@@ -37,6 +37,8 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- 1.55 billion downloads went to a model most people have never heard of: https://www.privateslm.dev/blog/2026-08-17-hf-download-adoption-gap.html
+- SLM Daily #13 (catalog digest): https://www.privateslm.dev/blog/2026-08-17-slm-daily-13.html
 - 20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation: https://www.privateslm.dev/blog/2026-08-16-prompt-cache-session-bleed.html
 - 23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only: https://www.privateslm.dev/blog/2026-08-15-multilingual-quantization-tax.html
 - SLM Daily #12 (catalog digest): https://www.privateslm.dev/blog/2026-08-15-slm-daily-12.html
