@@ -9,6 +9,33 @@
 - privateSLM (App Store): https://apps.apple.com/app/id6504996891
 - Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
 
+## Model pages (run these on iPhone/iPad/Mac, offline)
+- Full catalog: https://www.privateslm.dev/models/
+- LFM2.5 1.2B Instruct (Generalists): https://www.privateslm.dev/models/lfm2.5-1.2b-q4.html
+- Qwen2.5 1.5B Instruct (Generalists): https://www.privateslm.dev/models/qwen2.5-1.5b-instruct-q4.html
+- Gemma 2 2B Instruct (Generalists): https://www.privateslm.dev/models/gemma-2-2b-it-q4.html
+- Llama 3.2 3B Instruct (Generalists): https://www.privateslm.dev/models/llama-3.2-3b-instruct-q4.html
+- Phi-4 Mini 3.8B (Generalists): https://www.privateslm.dev/models/phi-4-mini-instruct-q4.html
+- G9v3 3B (Generalists): https://www.privateslm.dev/models/g9v3-3b-q4.html
+- Nanbeige4.2 3B (Generalists): https://www.privateslm.dev/models/nanbeige4.2-3b-q4.html
+- LFM2.5 2.6B (Generalists): https://www.privateslm.dev/models/lfm2.5-2.6b-q4.html
+- Qwen2.5 Coder 3B (Coding & SQL): https://www.privateslm.dev/models/qwen2.5-coder-3b-q4.html
+- Qwen2.5 Coder 7B (Coding & SQL): https://www.privateslm.dev/models/qwen2.5-coder-7b-q4.html
+- Qwen2.5 Math 7B (Math & STEM): https://www.privateslm.dev/models/qwen2.5-math-7b-q4.html
+- BioMistral 7B (Medical): https://www.privateslm.dev/models/biomistral-7b-q4.html
+- Finance LLM 7B (Finance): https://www.privateslm.dev/models/finance-llm-7b-q4.html
+- TowerInstruct 7B (Translation): https://www.privateslm.dev/models/towerinstruct-7b-q4.html
+- Llama Guard 3 8B (Cybersecurity): https://www.privateslm.dev/models/llama-guard-3-8b-q4.html
+- DeepSeek Coder 6.7B (Coding & SQL): https://www.privateslm.dev/models/deepseek-coder-6.7b-instruct-q4.html
+- NuminaMath 7B TIR (Math & STEM): https://www.privateslm.dev/models/numinamath-7b-tir-q4.html
+- Meditron 7B Chat (Medical): https://www.privateslm.dev/models/meditron-7b-chat-q4.html
+- Finance Chat 7B (Finance): https://www.privateslm.dev/models/finance-chat-7b-q4.html
+- SaulLM 7B (Legal) (Lawyer): https://www.privateslm.dev/models/saul-instruct-v1-q4.html
+- Law Chat 7B (Lawyer): https://www.privateslm.dev/models/law-chat-7b-q4.html
+- MentaLLaMA Chat 7B (Mental Health): https://www.privateslm.dev/models/mentallama-chat-7b-q4.html
+- Comparison: pocketpal ai vs privateslm: https://www.privateslm.dev/compare/pocketpal-ai-vs-privateslm.html
+- Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
+
 ## Blog
 - 23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only: https://www.privateslm.dev/blog/2026-08-15-multilingual-quantization-tax.html
 - SLM Daily #12 (catalog digest): https://www.privateslm.dev/blog/2026-08-15-slm-daily-12.html

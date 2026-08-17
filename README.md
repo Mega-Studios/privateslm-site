@@ -13,3 +13,17 @@ site (duplicate content is bad for SEO):
    the same Vercel account, it attaches without copying any DNS records.
 3. Once the Vercel deployment is confirmed working, disable the GitHub Pages
    deployment for this repo so `privateslm.dev` is the single canonical origin.
+
+## Model & compare pages (SEO)
+
+`models/*.html` are **generated** — never edit by hand. Regenerate whenever
+`models.json` changes:
+
+```
+python3 scripts/gen_model_pages.py
+```
+
+The script also appends any missing `/models/` and `/compare/` URLs to
+`sitemap.xml` and refreshes the "## Model pages" section of `llms.txt`.
+`compare/*.html` are hand-written; keep every competitor claim verifiable and
+update the "Updated <date>" line when facts change.
