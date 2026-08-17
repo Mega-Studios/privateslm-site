@@ -37,6 +37,11 @@
           <h3>SLM Daily #13: llama.cpp was silently zero-padding corrupted LoRA files. Nobody would have known.</h3>
           <p>Two llama.cpp fixes closed a silent-corruption path in LoRA adapter loading and GGUF array parsing. Kimi-K3 architecture support landed too, but it's a 2.8T-parameter model. Zero catalog changes this edition — what we checked and skipped, and why.</p>
         </a>
+        <a class="post-card" href="2026-08-16-prompt-cache-session-bleed.html">
+          <div class="meta">August 16, 2026 · 9 min read</div>
+          <h3>20 for 20, then 8 for 8: llama.cpp's own prompt cache can hand your reply to someone else's conversation</h3>
+          <p>A fresh llama.cpp server bug lets one finished conversation's content bleed into a different session under concurrent load — and cached_tokens, the field built to flag cache reuse, reads 0 every time it happens. We checked our own engine's code against it.</p>
+        </a>
         <a class="post-card" href="2026-08-15-multilingual-quantization-tax.html">
           <div class="meta">August 15, 2026 · 10 min read</div>
           <h3>23.6% to 7.5%: the same 4-bit quantization step that ships a model to your phone can push it below a coin flip — in Russian only</h3>
