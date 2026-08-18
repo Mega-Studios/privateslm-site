@@ -27,6 +27,21 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-18-quantization-scale-tax.html">
+          <div class="meta">August 18, 2026 · 12 min read</div>
+          <h3>70.8% vs 98.1%: the 4-bit quantization your whole phone-AI catalog ships as isn't one number</h3>
+          <p>A fresh signal-noise analysis of 800+ quantized evaluations shows 4-bit retention isn't flat — a 0.6B model keeps 70.8% of its full-precision score, a 14B model keeps 98.1%, and at 2-bit the protection model size buys collapses entirely. What that means for a catalog built almost entirely of sub-4B models shipped at exactly that bit-width.</p>
+        </a>
+        <a class="post-card" href="2026-08-18-needle2-esp32.html">
+          <div class="meta">August 18, 2026 · 7 min read · Edge in the Wild</div>
+          <h3>500 tokens/sec on a Raspberry Pi 5. 1.87 on a $5 chip with no OS at all.</h3>
+          <p>Andris Gauračs wrote his own ~3,700-line C99 inference engine from scratch to run Cactus Compute's 45M-parameter Needle 2 tool-calling model on a bare ESP32-S3 — no filesystem, no OS, no port of Cactus's own code. Grammar-guaranteed JSON tool calls, entirely offline.</p>
+        </a>
+        <a class="post-card" href="2026-08-18-slm-daily-14.html">
+          <div class="meta">August 18, 2026 · 4 min read</div>
+          <h3>SLM Daily #14: one line of SYCL code was under-launching GPU threads by 8x</h3>
+          <p>A one-line kernel-launch bug in llama.cpp's SYCL backend took an Intel Arc B70 from 20.21 GB/s to 158.19 GB/s once fixed. Three engine releases since our last edition, zero new architectures, zero catalog changes — the one new GGUF worth naming misses our size cap by nearly 2.5x.</p>
+        </a>
         <a class="post-card" href="2026-08-17-hf-download-adoption-gap.html">
           <div class="meta">August 17, 2026 · 7 min read</div>
           <h3>1.55 billion downloads went to a model most people have never heard of</h3>

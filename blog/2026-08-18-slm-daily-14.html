@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #14: one line of SYCL code was under-launching GPU threads by 8x — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #14: a one-line SYCL kernel-launch fix took quantized-copy throughput on an Intel Arc B70 from 20.21 GB/s to 158.19 GB/s. Three llama.cpp releases since our last edition, zero new architecture support, zero catalog changes — the one new GGUF worth flagging misses our size cap by nearly 2.5x.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-18-slm-daily-14.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #14: one line of SYCL code was under-launching GPU threads by 8x</h1>
+    <div class="meta">August 18, 2026 · 4 min read</div>
+
+    <p>A one-line thread/block-count bug in llama.cpp's SYCL backend was quietly leaving most of the GPU idle on every quantized-copy operation. Fixing it took throughput on an Intel Arc B70 from 20.21 GB/s to 158.19 GB/s — nearly 8x, for a change that touched kernel-launch math, not the model. It's one of three engine releases since our last edition, and — like the other two — it changes nothing about what's downloadable in the catalog today.</p>
+
+    <h2>What actually shipped in the engine</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10456" target="_blank" rel="noopener">b10456</a> (Aug 17) fixed a thread/block-count bug in SYCL's quantized-copy kernel launches — on Intel Arc B70, q4_0→f32 throughput went from 20.21 GB/s to 158.19 GB/s, a real fix if you're running GGUF quants on an Intel Arc GPU via SYCL, irrelevant to anyone else. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10472" target="_blank" rel="noopener">b10472</a> (Aug 17) fixed CUDA memory reporting on AMD APUs by using <code>hipMemGetInfo</code> instead of an over-promising estimate — relevant to Strix Halo-class home-lab users, not to iPhone or Mac. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10470" target="_blank" rel="noopener">b10470</a> was a CI-only change to how release tags get pushed. No new <code>llm_arch</code> entries in any of the three.</p>
+
+    <h2>The one GGUF worth naming, and why it still doesn't qualify</h2>
+    <p>bartowski published an official quant of <strong>Ling-3.0-tiny</strong> (inclusionAI, MIT license, <code>bailingmoe3</code> architecture — 7.9B total / 1.3B active MoE, hybrid fast+reasoning chat, 256K context via YaRN) on August 18. The base model itself shipped August 10 and llama.cpp only gained BailingMoE3 support around August 15 (<a href="https://github.com/ggml-org/llama.cpp/pull/26608" target="_blank" rel="noopener">PR #26608</a>), so this GGUF genuinely couldn't have existed before this window. It still doesn't clear our bar: bartowski's Q4_K_M build is 4.92 GB, just under double our 2.5 GB phone-friendly cap, and its Artificial Analysis scores (Intelligence Index 25, Agentic Index 16) aren't strong enough on their own to justify stretching the size rule. Everything else we found in the Hugging Face GGUF stream this window — fresh Qwen3.8-27B re-quants, new MXFP4/MXFP8 packs of GLM-5.2, another NVIDIA Nemotron-3.5-Lightning quant — was a new file of an old model, not new news. Catalog stays at 8 Generalists, 14 pre-cap specialists, unchanged.</p>
+
+    <h2>A coverage gap, stated plainly</h2>
+    <p>r/LocalLLaMA was unreachable to our research tooling again this edition, on both the standard and old.reddit.com domains — the same gap we flagged in SLM Daily #13. If something surfaced there in the last day, we didn't see it. Hacker News' front page had nothing SLM- or llama.cpp-relevant at check time, and X/Twitter remains unreachable from this environment.</p>
+
+    <h2>What's actually new today</h2>
+    <p>Two pieces, not one, this edition. Our deep-dive digs into a fresh signal-noise analysis of quantization damage across the entire Qwen3 size range — the retention gap between a 0.6B and a 14B model at identical 4-bit quantization is bigger than you'd expect, and it's directly relevant to a catalog built almost entirely of sub-4B models shipped at that exact bit-width. <a href="2026-08-18-quantization-scale-tax.html">Read it here</a>. Edge in the Wild profiles an independent engineer who wrote his own C99 inference engine from scratch to run a 45M-parameter tool-calling model on a bare ESP32-S3 microcontroller — no OS, no filesystem, 1.87 tokens/sec, and it still works. <a href="2026-08-18-needle2-esp32.html">Read it here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

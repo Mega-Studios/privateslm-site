@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 tokens/sec on a Raspberry Pi 5. 1.87 on a $5 chip with no OS at all. (Edge in the Wild) — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Andris Gauračs wrote his own ~3,700-line C99 inference engine from scratch to run Cactus Compute's 45M-parameter Needle 2 tool-calling model on a bare ESP32-S3 — no filesystem, no OS, no port of Cactus's own code. Grammar-guaranteed JSON tool calls, entirely offline, at 1.87 tokens/sec.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-18-needle2-esp32.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>500 tokens/sec on a Raspberry Pi 5. 1.87 on a $5 chip with no OS at all.</h1>
+    <div class="meta">August 18, 2026 · 7 min read</div>
+
+    <p>Cactus Compute's own engine runs their Needle 2 tool-calling model at up to 500 tokens/sec on a Raspberry Pi 5 — a real computer, with an OS, a filesystem, and gigabytes of RAM to spare. An independent engineer just got the same 45M-parameter model running at 1.87 tokens/sec on an ESP32-S3 microcontroller: no OS, no filesystem, no port of Cactus's own code, and a from-scratch inference engine he wrote himself in about 3,700 lines of C99.</p>
+
+    <p><strong>Source &amp; credit:</strong> the project is the independent work of <strong>Andris Gauračs</strong> (GitHub <a href="https://github.com/andrisgauracs" target="_blank" rel="noopener">@andrisgauracs</a>, a Toronto-based developer whose other public repos include a Granite-based coding assistant). The underlying model, Needle 2, and its <code>.cact</code> weight format are the work of <a href="https://cactuscompute.com/needle" target="_blank" rel="noopener">Cactus Compute</a>, released Apache 2.0 and described in <a href="https://arxiv.org/abs/2607.18363" target="_blank" rel="noopener">arXiv:2607.18363</a>. Gauračs's port is a separate, independent implementation, also Apache 2.0: <a href="https://github.com/andrisgauracs/needle-2-esp32" target="_blank" rel="noopener">github.com/andrisgauracs/needle-2-esp32</a>.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/needle2-esp32-demo.gif" alt="Terminal demo of two back-to-back requests to Needle 2 running on an ESP32-S3, streaming reasoning tokens and driving an onboard RGB LED, captured over a UART serial console" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The builder's own demo capture, sped up from real ~40-second-per-response runs. Via <a href="https://github.com/andrisgauracs/needle-2-esp32" target="_blank" rel="noopener">Andris Gauračs on GitHub</a>.</figcaption>
+    </figure>
+
+    <h2>What Needle 2 actually is, and why it's a strange thing to shrink further</h2>
+    <p>Needle 2 is not a chatbot. Cactus built it as a dedicated tool-calling model: 45 million parameters, a 14 MB binary, CQ2-bit quantization baked into training itself rather than applied afterward, and a job description that's narrower than a general assistant's — take a plain-English request and a JSON schema, and emit a schema-valid tool call, or the empty call <code>[]</code> if nothing in the schema fits. Cactus's own numbers put it at 500 tok/s on a Raspberry Pi 5, 400–1,500 tok/s on a Meta Quest 3S or Apple Vision Pro, and 300–700 tok/s on sub-$200 phones — already a small, fast, purpose-built model by the standards of anything in our own catalog.</p>
+
+    <p>Gauračs's project asks a different question than "how fast can this go on real hardware." It asks how far down the hardware ladder a real transformer forward pass — grammar constraints and all — can go before it stops being practical at all. An ESP32-S3 has no operating system to speak of, no filesystem, no dynamic memory allocator anything like a phone's, and a dual-core Xtensa LX7 running at 240 MHz. Cactus's own C++ engine, per the port's README, "has no ESP32 build" — there was nothing to simply recompile for the target. Getting Needle 2 running there meant writing a new engine, not porting an old one.</p>
+
+    <h2>Five modules, one register-starved chip</h2>
+    <p>The engine Gauračs built breaks into five pieces, each doing one job: <code>nd_cact.c</code> reads the <code>.cact</code> container format; <code>nd_quant.c</code> implements the quantization kernels, including pair-LUT GEMV (a lookup-table matrix-vector multiply that avoids repeating the same low-bit multiplication) and a fast Walsh–Hadamard transform; <code>nd_tokenizer.c</code> is a from-scratch SentencePiece BPE tokenizer; <code>nd_model.c</code> runs the forward pass through what Cactus calls a Simple Attention Network; and <code>nd_grammar.c</code> plus <code>nd_sample.c</code> compile a JSON schema into a byte-level grammar at runtime and constrain sampling to only ever emit tokens that keep the output inside that grammar — the mechanism that makes "grammar-guaranteed" a literal claim rather than a marketing one, since an invalid tool call is structurally unreachable rather than just unlikely.</p>
+
+    <p>The 13.1 MB model sits in the ESP32-S3's 16 MB of flash; an 8 MB octal PSRAM module ("N16R8"-class) holds the 3.5 MB KV cache and working memory. The README reports something that runs against the usual embedded-systems intuition: reading weights from PSRAM versus flash performs about the same, because the workload is compute-bound rather than memory-bound — the chip spends more time doing the pair-LUT arithmetic on each weight than it spends waiting for that weight to arrive. That's a different bottleneck than the flash-bandwidth-limited ESP32 language models we've covered previously on this blog, where halving the model's byte footprint roughly doubled its speed.</p>
+
+    <h2>The numbers, and what a 256-token window actually buys you</h2>
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Measurement</th><th style="padding:6px 0;">Value</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Per-token latency</td><td style="padding:6px 0;">534 ms</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Throughput</td><td style="padding:6px 0;">1.87 tok/s (240 MHz)</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Request, reasoning off</td><td style="padding:6px 0;">~25 s</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Request, reasoning on</td><td style="padding:6px 0;">~47 s</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Boot / model prime time</td><td style="padding:6px 0;">~51 s</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: andrisgauracs/needle-2-esp32 README, "Performance."</p>
+
+    <p>256 tokens is the model's entire context window — the README notes a single-tool schema costs about 104 tokens of that budget before the user's actual request is even added, and a second tool pushes it to 182. That's not a limitation of the ESP32 port specifically; it's the ceiling Needle 2 was trained with. Every constraint here compounds: a tiny model, trained for a narrow job, quantized aggressively, running on a chip with no OS, answering inside a context window that fits maybe two tool definitions and a short instruction. And it still works — the demo shows two real, back-to-back requests, each one streaming its reasoning tokens live and driving an onboard WS2812 RGB LED as a physical side effect of a real tool call, with — the author is explicit about this in the README caption — nothing touching a network at any point.</p>
+
+    <h2>Why it matters here</h2>
+    <p>This is the fourth ESP32-class microcontroller language model we've covered this month, after slvDev's flash-embedding trick, Carloscodix's on-chip-trained Qapla', and Salman Farsi's fully dense NanoMind-S3 — worth naming plainly rather than pretending it's a coincidence. What's different this time is the shape of the constraint: those three were about how small a model's parameters or training loop could get and still generate free text. This one is about taking an already-tiny, already-quantized, already-purpose-built model and finding out whether its narrowest possible job — schema-constrained tool calling, not conversation — still survives a further 267x throughput cut against the same model's best-case hardware. It does, at a genuinely usable pace for a background sensor task, not a chat session. Every one of these projects is independently mapping the same territory from a different angle: not "can a small model run here," but "how much smaller does the target hardware make the job before something finally breaks," and so far the answer keeps being "further than you'd guess, if the job is narrow enough."</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — running tool-calling models on hardware this small yourself? Point us at the repo.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

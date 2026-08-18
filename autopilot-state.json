@@ -1,5 +1,5 @@
 {
-  "digestCounter": 13,
+  "digestCounter": 14,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -133,6 +133,12 @@
       "slug": "hf-download-adoption-gap",
       "summary": "Hugging Face's own 'State of Open Models: Summer 2026' report (Aug 14, 2026): not one model released in 2026 reaches the Hub's own download top 25, and 13 of those 25 date from 2022; the top-25-by-downloads and top-25-by-likes lists share exactly one repository. sentence-transformers/all-MiniLM-L6-v2 (22M params, an embedding model, not a chatbot) was pulled 1.55 billion times in seven months against 5,156 likes; Kimi-K3 (2.8T params, architecture landed in llama.cpp this same edition) was pulled about 60 times per like it received. 83% of all-time downloads go to sub-1B-param models, 85.6% of all Hub models have under 200 lifetime downloads, and 1.5% of repos account for 99.2% of downloads. Self-aware angle: applies the finding against this blog's own 'new model every few days' format and privateSLM's own catalog composition (Qwen-family-heavy, matching the report's Qwen-derivative dominance numbers). Honest caveat: HF's post doesn't publish the full top-25 list or per-model figures behind the '13 of 25' claim, so that specific figure isn't independently reproduced, only cited.",
       "post": "blog/2026-08-17-hf-download-adoption-gap.html"
+    },
+    {
+      "date": "2026-08-18",
+      "slug": "quantization-scale-tax",
+      "summary": "arXiv:2608.08188 (Zhou et al., Institute of Automation CAS, submitted Aug 8, 2026) runs GPTQ quantization across the full Qwen3 family (0.6B-14B) at 2/3/4-bit over 800+ evaluations. At W4 (the bit-width our own catalog ships as), retention climbs from 70.8% at 0.6B to 98.1% at 14B -- a 27.3pp gap from scale alone. At W3, the gap widens to 57.3pp (30.6% vs 87.9%). At W2, the scale-protects-you pattern collapses entirely and stops being monotonic (0.6B 6.3%, 8B 2.2%, 14B 8.4% -- all functionally destroyed). Cross-checked against a second, independent Aug 14 paper (arXiv:2608.13966, QUASAR) which finds its own fix's largest gains specifically at 2-bit (29% KL-divergence reduction, 3.5-4.3pp accuracy), corroborating 2-bit as the collapse zone from the opposite direction (a proposed fix, not a damage measurement). Third corroboration: MLPerf Inference v6.1's new Edge Agentic track picked Qwen3.6-27B at Q4_K_M as its reference config -- independently landing well above the sub-4B range where the CASIA table shows quantization still costs the most. Self-aware angle: applied directly against privateSLM's own Generalists tier (all sub-4B, all Q4_K_M or nearest equivalent), with honest caveats that this is GPTQ not GGUF K-quants and Qwen3-specific, not tested against LFM2.5/Gemma/Llama/Phi-4's architectures.",
+      "post": "blog/2026-08-18-quantization-scale-tax.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -227,6 +233,13 @@
       "date": "2026-08-14",
       "post": "blog/2026-08-14-nanomind-s3-esp32.html",
       "note": "Verified via the Hackster.io page (Jina-reader proxy workaround for the 403) and the linked GitHub repo (github.com/imFARSI/NanoMind-S3, MIT). Real hero photo pulled from the builder's own Hackster upload (hackster.imgix.net), resized/compressed, committed to assets/blogimg/nanomind-s3-hero.jpg. Do not re-feature without a materially new update."
+    },
+    {
+      "name": "Andris Gauračs's needle-2-esp32 — an independent from-scratch C99 inference engine (~3,700 lines, no dependencies) running Cactus Compute's 45M-parameter Needle 2 grammar-constrained tool-calling model on a bare ESP32-S3, no OS, no filesystem, not a port of Cactus's own C++ engine",
+      "sourceUrl": "https://github.com/andrisgauracs/needle-2-esp32",
+      "date": "2026-08-18",
+      "post": "blog/2026-08-18-needle2-esp32.html",
+      "note": "Fourth ESP32-S3-class microcontroller LLM project featured this month (after slvDev's esp32-ai 2026-08-01, Carloscodix's Qapla' 2026-08-10, Salman Farsi's NanoMind-S3 2026-08-14) -- flagged explicitly in the post itself rather than hidden, and genuinely distinct in mechanism (grammar-constrained JSON tool-calling for a purpose-built agentic model vs free-text generation, and a from-scratch engine for someone else's model rather than a self-trained one). Repo created 2026-08-13 with live commits on 2026-08-18 (within this run's research window). Demo gif verified via HTTP HEAD/GET at raw.githubusercontent.com/andrisgauracs/needle-2-esp32/main/needle_demo.gif (200, image/gif, 524KB), downloaded and committed to assets/blogimg/needle2-esp32-demo.gif. Base model Needle 2 (Cactus Compute, Apache 2.0, arXiv:2607.18363) itself launched 2026-08-10/13, outside window -- only the independent ESP32 port is the news."
     }
   ],
   "discussionsCreated": [
@@ -322,9 +335,19 @@
       "date": "2026-08-17",
       "event": "published-slm-daily-13-and-hf-download-adoption-deepdive-no-catalog-no-diy",
       "reason": "Research window: since lastRunAt 2026-08-15T04:45:00Z through 2026-08-17, plus the standard 14-day catalog lookback, run via two parallel research sweeps (model/engine news; DIY edge projects). Also discovered and corrected file-path drift in this run: the top-level task prompt's file paths (lib/llm/model_catalog.dart, packages/maid_llm/src/llama_cpp) refer to the pre-2026-07-10 Flutter app; privateslm's main branch is now a native SwiftUI app (Sources/*.swift) that vendors llama.cpp as a prebuilt Frameworks/llama.xcframework fetched at build time from ggml-org/llama.cpp's latest GitHub release (scripts/fetch-llama.sh) rather than a pinned vendored source tree -- so the ENGINE COMPATIBILITY gate this run means checking llama.cpp's current upstream release/PRs directly, not grepping a pinned llm_arch enum in-repo. The app's bundled Sources/ModelInfo.swift fallback catalog is a minimal 2-entry offline stub (unrelated to the full managed catalog); the live catalog the app actually fetches at runtime is privateslm-site's models.json, confirmed unchanged in this respect from prior runs' understanding. Also noted: privateslm's docs/models.json (the app repo's nominal 'canonical' source per scripts/sync-catalog.py) has drifted out of sync with the site's live models.json since the 2026-08-15 LFM2.5-1.2B/Llama-3.2-1B swap was applied directly to the site only -- not fixed this run since no catalog change was made here either; flagging for a future run that does touch the catalog to resync both files.\n\nCATALOG: zero qualifying candidates, a normal outcome. No vendor (Qwen, Gemma, Phi, Mistral, Meta, LiquidAI, Apple) shipped a new sub-4B model strictly inside the window. Two releases landed just before the window and were checked anyway since neither had been written up yet: Qwen3.8-27B (Alibaba, Aug 14, Apache 2.0, 27.78B dense -- bartowski Q4_K_M is 17.77GB, far over the phone-size cap) and LiquidAI LFM2.5-VL-3B (Aug 12-13, ~3.1B, vision-language -- fails the same no-image-code-path gate first flagged in SLM Daily #11). 'G9v3-3B topping a new leaderboard' lead from the research agent was explicitly NOT used -- that model is already in our own catalog since 2026-07-25/27, so it would not have been a new candidate regardless, and the specific new-leaderboard-topping claim triggering it could not be corroborated against a second source. Kimi-K3's architecture landed in llama.cpp (b10448, PR #26185) but the model itself is 2.8T total/~104B active, not remotely phone-sized.\n\nENGINE: llama.cpp advanced b10436 (Aug 15) -> b10453 (Aug 16), ~10-17 tags. Two genuine correctness/hardening fixes verified directly against their PRs (not just changelog one-liners): PR #27075/b10443 (GGUF metadata array type not checked before reading in multiple code paths -- risked corrupted-metadata reads) and PR #27056/b10451 (LoRA adapter loading had no file-bounds check, so a truncated/corrupted LoRA file silently loaded with zero-padded weights and no error -- fix mirrors the bounds check llama-model-loader.h already had for regular models). Used both as the digest's hook since they're the closest thing to 'your app could have loaded something silently wrong' in the window. Kimi-K3 support (b10448) also raised LLAMA_MAX_EXPERTS 512->1024 -- noted as permanent infrastructure for future high-expert-count MoE models, not claimed as catalog-relevant itself.\n\nDEEP-DIVE: published blog/2026-08-17-hf-download-adoption-gap.html. Thesis verified via direct WebFetch of Hugging Face's own 'State of Open Models: Summer 2026' post (Aug 14, 2026) rather than trusting the research agent's summary secondhand -- confirmed exact wording of every quoted figure (83%/1%/3% size-tier download shares, 85.6%/1.5%/99.2% concentration figures, all-MiniLM-L6-v2's 1.55B-downloads/5,156-likes figure, Kimi-K3's ~60-downloads-per-like figure, the '13 of 25 date from 2022, zero from 2026' claim, Hub growth 2.43M->2.96M models). One caveat surfaced during verification and included honestly in the piece: HF's post states the top-25 claims directly but does not publish the actual 25-model list or per-model counts behind them, so that specific figure is cited, not independently reproduced -- flagged explicitly rather than presented as fully triangulated, consistent with the quality bar's 'can't source it, cut it' standard applied to the parts that couldn't be sourced. Distinct from all 20 prior theses (none address download/adoption telemetry vs. benchmark/release-cadence hype). Self-aware angle deliberately applied against this blog's own format and catalog composition rather than treated as purely external news.\n\nDIY SPOTLIGHT: none published. Dedicated research sweep found exactly one project dated in-window (The-Masked-Bear's wifisense-pi, Aug 15, ESP32+Pi WiFi-CSI presence/breathing sensor) but it runs classical DSP (subcarrier covariance, harmonic-sum peak picking), not a language model of any kind -- excluded rather than stretch the 'SLM' framing to fit. Several other real, well-documented builder projects surfaced (a Habr Pi Zero W clock running Qwen 3.6-35B-A3B via MCP; Cactus Compute's Needle2 45M-param on-device agentic model) but both released 1-2 days before lastRunAt and don't represent new information since the last edition. Genuine coverage gap flagged rather than silently absorbed: Reddit (r/LocalLLaMA) and X were unreachable to this run's research tooling across every fetch attempt (403 on direct, old.reddit.com, and r.jina.ai-proxied requests) -- stated plainly in the published digest rather than implying a clean sweep of those channels.\n\nBoth published pieces' titles+openings self-graded 9/10 against the established hook rubric (concrete numbers within the first two sentences: the LoRA silent-corruption bug for the digest, 1.55 billion downloads vs 5,156 likes for the deep-dive) since no /post-grader skill exists in this session (reconfirmed via the skills listing this run) -- same stopgap used in every prior run.\n\nThis run's harness explicitly assigns a designated development branch (claude/brave-brown-p4apbi) and requires opening a draft PR rather than pushing directly to main -- followed that instruction even though several 2026-08 notes above describe direct-to-main pushes as a workaround for repeated draft-PR-rot (PRs opened, correctly documented, then left unmerged for days/weeks). Flagging this tension explicitly for whoever reviews the PR: if it sits unmerged past the next run or two, a future run should treat it exactly like the prior draft-PR-rot incidents and either merge it or consolidate it into a fresh PR rather than silently re-doing the same research. No repo access issues, no git failures encountered opening the branch; Pages build + 200-check to be confirmed after merge, not before, since this run does not merge its own PR."
+    },
+    {
+      "date": "2026-08-18",
+      "event": "app-repo-catalog-drift-observed",
+      "reason": "No catalog change this run (nothing cleared the bar -- bartowski/Ling-3.0-tiny-GGUF is 4.92GB Q4_K_M, well over the 2.5GB cap), so not fixed here, but worth flagging: privateslm's docs/models.json (the app repo's canonical source per scripts/sync-catalog.py) is stale relative to the site's own models.json -- it still lists llama-3.2-1b-instruct-q4 (replaced 2026-08-15 per SLM Daily #12) and is missing g9v3-3b-q4, nanbeige4.2-3b-q4, lfm2.5-2.6b-q4 and lfm2.5-1.2b-q4 entirely. The site (what the app actually fetches live) is correct and ahead; the app repo's own record of the catalog is not. Should be reconciled the next time a real catalog change touches the app repo, per scripts/sync-catalog.py's documented release flow."
+    },
+    {
+      "date": "2026-08-18",
+      "event": "reddit-access-gap-continues",
+      "reason": "r/LocalLLaMA (both reddit.com and old.reddit.com) unreachable to research tooling again this run, same gap noted in SLM Daily #13. Two independent research passes this run hit the same block. Flagged plainly in SLM Daily #14 rather than implying a clean sweep."
     }
   ],
-  "lastRunAt": "2026-08-17T05:30:00Z",
+  "lastRunAt": "2026-08-18T04:30:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -607,6 +630,24 @@
       "type": "deepdive",
       "publishedAt": "2026-08-17T05:30:00Z",
       "post": "blog/2026-08-17-hf-download-adoption-gap.html"
+    },
+    {
+      "slug": "2026-08-18-quantization-scale-tax",
+      "type": "deepdive",
+      "publishedAt": "2026-08-18T04:30:00Z",
+      "post": "blog/2026-08-18-quantization-scale-tax.html"
+    },
+    {
+      "slug": "2026-08-18-needle2-esp32",
+      "type": "diy",
+      "publishedAt": "2026-08-18T04:30:00Z",
+      "post": "blog/2026-08-18-needle2-esp32.html"
+    },
+    {
+      "slug": "2026-08-18-slm-daily-14",
+      "type": "digest",
+      "publishedAt": "2026-08-18T04:30:00Z",
+      "post": "blog/2026-08-18-slm-daily-14.html"
     }
   ]
 }
