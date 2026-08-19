@@ -37,6 +37,7 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- The most expensive machine scored 10/10 — and got Mercury's size wrong by 40% (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-19-unihiker-m10-ram-ladder.html
 - 70.8% vs 98.1%: the 4-bit quantization your whole phone-AI catalog ships as isn't one number: https://www.privateslm.dev/blog/2026-08-18-quantization-scale-tax.html
 - 500 tokens/sec on a Raspberry Pi 5. 1.87 on a $5 chip with no OS at all. (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-18-needle2-esp32.html
 - SLM Daily #14 (catalog digest): https://www.privateslm.dev/blog/2026-08-18-slm-daily-14.html

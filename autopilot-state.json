@@ -240,6 +240,13 @@
       "date": "2026-08-18",
       "post": "blog/2026-08-18-needle2-esp32.html",
       "note": "Fourth ESP32-S3-class microcontroller LLM project featured this month (after slvDev's esp32-ai 2026-08-01, Carloscodix's Qapla' 2026-08-10, Salman Farsi's NanoMind-S3 2026-08-14) -- flagged explicitly in the post itself rather than hidden, and genuinely distinct in mechanism (grammar-constrained JSON tool-calling for a purpose-built agentic model vs free-text generation, and a from-scratch engine for someone else's model rather than a self-trained one). Repo created 2026-08-13 with live commits on 2026-08-18 (within this run's research window). Demo gif verified via HTTP HEAD/GET at raw.githubusercontent.com/andrisgauracs/needle-2-esp32/main/needle_demo.gif (200, image/gif, 524KB), downloaded and committed to assets/blogimg/needle2-esp32-demo.gif. Base model Needle 2 (Cactus Compute, Apache 2.0, arXiv:2607.18363) itself launched 2026-08-10/13, outside window -- only the independent ESP32 port is the news."
+    },
+    {
+      "name": "Mayukh's UNIHIKER M10 offline-AI RAM ladder — a $90 handheld board running LFM2.5-350M in 267MB RAM, benchmarked against a Raspberry Pi 5 and a $1,000 Beelink mini PC on an identical 10-question test",
+      "sourceUrl": "https://github.com/mayukh4/unihiker-offline-ai",
+      "date": "2026-08-19",
+      "post": "blog/2026-08-19-unihiker-m10-ram-ladder.html",
+      "note": "MIT licensed. Repo README + RESULTS.md independently fetched and cross-checked (byte-exact GGUF size 219,309,792 confirmed, peak RAM via VmHWM across 3 runs, Mercury/Moon diameter error verified against real astronomical figures: Mercury 4,879km vs Moon 3,475km, ~40% larger not smaller). YouTube video (D5aTJU5-AoU, channel Mayukh Builds) confirmed real via oembed; embedded via youtube-nocookie, no autoplay, paired with a plain-text link to the video and channel. DFRobot's own product page quoted for the UNIHIKER M10's $89.90 price after an initial web-search snippet claiming $40 (and a second claiming $59.90) did not match the live product page — used the direct fetch, not the search summary. Note: repo's creation timestamp (2026-08-18T01:40:23Z) is ~2.5h before the strict 2026-08-18T04:30:00Z research-window cutoff but well inside the routine's 'roughly last 24-36h' framing; flagged here for transparency."
     }
   ],
   "discussionsCreated": [
@@ -345,9 +352,14 @@
       "date": "2026-08-18",
       "event": "reddit-access-gap-continues",
       "reason": "r/LocalLLaMA (both reddit.com and old.reddit.com) unreachable to research tooling again this run, same gap noted in SLM Daily #13. Two independent research passes this run hit the same block. Flagged plainly in SLM Daily #14 rather than implying a clean sweep."
+    },
+    {
+      "date": "2026-08-19",
+      "event": "published-diy-only-no-digest-no-catalog-no-deepdive",
+      "reason": "Research window: since lastRunAt 2026-08-18T04:30:00Z (PR #58, unmerged draft on branch claude/brave-brown-i58o7t at run start -- stacked this run's branch on top of its tip commit rather than main, per the 2026-08-15 draft-PR-consolidation precedent, so this content doesn't duplicate it and both stay mergeable independently) through 2026-08-19, run via three parallel research sweeps (model/engine news, DIY edge projects, deep-dive thesis candidates). CATALOG: no qualifying candidate -- HF/bartowski sweep of the window found only re-quantizations/finetunes of the already-known Qwen3.8-27B base (grug-27b, UI-Mate-27B/9B, several abliterated variants) and new bailingmoe3-arch GGUFs (Ling-3.0-flash/tiny) with no Q4-class build under the 2.5GB cap; nothing qualifies. DIGEST: no qualifying edition -- the four llama.cpp releases since Daily #14 (b10483/85/86/88) are pure build/CI/OpenVINO-bump changes with zero new llm_arch entries, not enough genuinely new material to justify SLM Daily #15 on its own. DEEP-DIVE: three candidate arXiv papers found (2608.13756 INT8 cross-kernel divergence in vLLM, 2608.17938 grading-rubric-vs-judge-intelligence, 2608.18033 SBERT-beats-LLM invoice classification) -- all rejected after verification. The strongest candidate (2608.13756) was checked directly against privateSLM's own engine by searching llama.cpp's own GitHub issues for backend-determinism reports (#2838, #7228): both show Metal -- the backend privateSLM actually uses on Apple hardware -- as the *unaffected* backend, with CUDA multi-slot batching as the actual root cause, undermining rather than supporting a direct on-device connection; the other two papers are single uncorroborated preprints in domains (cloud LLM-as-judge, cloud/server invoice classification) too far from on-device SLM chat to responsibly extend. Published only the one piece that cleared the bar cleanly: 2026-08-19-unihiker-m10-ram-ladder.html (DIY spotlight). No /post-grader skill available in this session (checked the full available-skills list; not present) -- self-graded the title+opening paragraph against the HOOK SCORE GATE rubric (concrete numbers up front: $1,000, 10/10, 4,879km, 3,475km, 40%; no overclaiming; no generic filler) at 9/10, stated explicitly per the documented fallback rather than silently skipping the gate. Live-URL 200-check not performed -- this run pushes to a draft PR branch rather than main directly, consistent with PR #58's own precedent; verify after merge."
     }
   ],
-  "lastRunAt": "2026-08-18T04:30:00Z",
+  "lastRunAt": "2026-08-19T05:10:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -648,6 +660,12 @@
       "type": "digest",
       "publishedAt": "2026-08-18T04:30:00Z",
       "post": "blog/2026-08-18-slm-daily-14.html"
+    },
+    {
+      "slug": "2026-08-19-unihiker-m10-ram-ladder",
+      "type": "diy",
+      "publishedAt": "2026-08-19T05:10:00Z",
+      "post": "blog/2026-08-19-unihiker-m10-ram-ladder.html"
     }
   ]
 }
