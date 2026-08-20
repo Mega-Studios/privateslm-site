@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The most expensive machine scored 10/10 — and got Mercury's size wrong by 40% (Edge in the Wild) — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Mayukh Builds ran the same 10-question offline-AI test on a $90 UNIHIKER M10, a Raspberry Pi 5 and a $1,000 Ryzen mini PC. The cheapest board used 14.6x less RAM than the Pi for a 3-point-lower score — and the priciest machine's 'perfect' 10/10 hid a confidently wrong answer the grading rubric never caught.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-19-unihiker-m10-ram-ladder.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>The most expensive machine scored 10/10 — and got Mercury's size wrong by 40%</h1>
+    <div class="meta">August 19, 2026 · 8 min read · Edge in the Wild</div>
+
+    <p>A $1,000 mini PC just aced a 10-question offline-AI benchmark — 10 out of 10 — while stating, in the same breath as its correct diameter figure, that Mercury is smaller than the Moon. It isn't: Mercury's 4,879 km diameter is about 40% <em>larger</em> than the Moon's 3,475 km. The grading rubric only checked whether the model named the right planet, so the false comparison rode along inside a perfect score, undetected. That's the twist inside a much bigger project: an independent builder ran the identical offline test — same ten questions, same temperature-zero determinism, same MD5-verified prompts — across three tiers of hardware, from a $90 handheld board to that $1,000 machine, to find out what running AI locally actually costs in memory, not just in dollars.</p>
+
+    <p><strong>Source &amp; credit:</strong> the project, code and writeup are the independent work of <strong>Mayukh</strong> (GitHub <a href="https://github.com/mayukh4" target="_blank" rel="noopener">@mayukh4</a>, YouTube <a href="https://www.youtube.com/@MayukhBuilds" target="_blank" rel="noopener">Mayukh Builds</a>). Full repo, MIT licensed: <a href="https://github.com/mayukh4/unihiker-offline-ai" target="_blank" rel="noopener">github.com/mayukh4/unihiker-offline-ai</a>.</p>
+
+    <div class="video-embed" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:2rem 0;">
+      <iframe src="https://www.youtube-nocookie.com/embed/D5aTJU5-AoU" title="How Little RAM Does Local AI Actually Need? — Mayukh Builds" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+    </div>
+    <p><a href="https://www.youtube.com/watch?v=D5aTJU5-AoU" target="_blank" rel="noopener">Watch "How Little RAM Does Local AI Actually Need?" on YouTube →</a> — channel <a href="https://www.youtube.com/@MayukhBuilds" target="_blank" rel="noopener">Mayukh Builds</a>.</p>
+
+    <h2>Three rungs, one identical test</h2>
+    <p>The ladder runs from a $90 handheld board to a four-figure mini PC, with a Raspberry Pi 5 in between as the "normal person's" reference point. Every rung ran the same ten fixed questions — general knowledge, arithmetic, a telemetry-to-JSON structuring task, a two-turn dialogue memory check — at temperature 0, with prompts MD5-hashed to confirm no drift between runs.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Rung</th><th style="padding:6px 10px 6px 0;">Model</th><th style="padding:6px 10px 6px 0;">Disk</th><th style="padding:6px 10px 6px 0;">Peak RAM</th><th style="padding:6px 10px 6px 0;">Speed</th><th style="padding:6px 0;">Score</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">UNIHIKER M10 ($89.90, DFRobot)</td><td style="padding:6px 10px 6px 0;">LFM2.5-350M-GGUF, Q4_0</td><td style="padding:6px 10px 6px 0;">209 MB</td><td style="padding:6px 10px 6px 0;">267 MB</td><td style="padding:6px 10px 6px 0;">~4.7 tok/s</td><td style="padding:6px 0;">7/10</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Raspberry Pi 5 (8 GB)</td><td style="padding:6px 10px 6px 0;">Gemma 4 E2B-it QAT GGUF</td><td style="padding:6px 10px 6px 0;">2.44 GB</td><td style="padding:6px 10px 6px 0;">3,906 MB</td><td style="padding:6px 10px 6px 0;">~5.4 tok/s</td><td style="padding:6px 0;">10/10</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Beelink SER9 Pro (~$1,000)</td><td style="padding:6px 10px 6px 0;">Qwopus3.6-35B-A3B-Coder-MTP, IQ4_XS</td><td style="padding:6px 10px 6px 0;">18.1 GB</td><td style="padding:6px 10px 6px 0;">~18.2 GB</td><td style="padding:6px 10px 6px 0;">~21 tok/s</td><td style="padding:6px 0;">10/10*</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: mayukh4/unihiker-offline-ai, README.md and RESULTS.md. *See "the wrong answer inside a perfect score," below — one of the Beelink's ten correct-per-rubric answers contained a false claim the scoring didn't catch. DFRobot lists the UNIHIKER M10 at $89.90 on its own product page.</p>
+
+    <h2>Getting llama.cpp onto a board that predates it</h2>
+    <p>The UNIHIKER M10 is a $90 handheld from DFRobot built for classrooms — a 2.8" touchscreen, a quad-core Cortex-A35 (the builder identifies the SoC as a Rockchip RK3308) at 1.2 GHz, and 512 MB of RAM, of which about 423 MB is actually usable after the OS takes its cut. It ships Debian 10, with glibc 2.28 and cmake 3.13.4 — a standard llama.cpp build wants glibc 2.35 or newer and cmake 3.14 or newer, and the board doesn't have enough RAM to compile anything itself anyway. So compiling on the board wasn't an option, and neither was compiling normally and copying the binary over.</p>
+
+    <p>The workaround: cross-compile a fully static musl binary — no dependency on the board's outdated glibc at all — inside an Alpine Linux ARM64 Docker container on a separate machine, then transfer it over. It's the kind of unglamorous systems work that decides whether "run an LLM on this" is even possible before a single token gets generated, and it's why this project is really two things at once: a build recipe for hardware most on-device-AI coverage skips over, and a benchmark once that recipe works.</p>
+
+    <h2>14.6x the memory for 15% more speed</h2>
+    <p>Once both boards could run something, the comparison that matters most for anyone deciding how much hardware "local AI" actually requires is the Pi 5 versus the M10, not the Beelink versus either. The Pi's Gemma 4 E2B model used 3,906 MB of peak RAM against the M10's 267 MB — 14.6x more memory — to generate at ~5.4 tok/s against the M10's ~4.7 tok/s, roughly 15% faster. Memory bought almost nothing in raw generation speed.</p>
+
+    <p>Where the Pi actually earns its extra RAM is prompt processing, not generation: it reads and encodes an incoming prompt about 7.3x faster than the M10, per the builder's own measurements. That's the real practical gap between the two boards — how long you wait before the model starts answering, not how fast it types once it starts — and it's the opposite of what a single "tokens per second" headline number would tell you.</p>
+
+    <h2>The wrong answer inside a perfect score</h2>
+    <p>The Beelink's 35B-parameter MoE model (Qwopus3.6-35B-A3B, a community coder-tuned build quantized to IQ4_XS by Jackrong, running via an MTP-enabled llama.cpp build for self-speculative decoding) generated at roughly 4x the Pi's throughput and answered every one of the ten questions in a way the grading rubric marked correct — including the one about the solar system's smallest planet. Its full answer named Mercury correctly, gave its diameter as 4,879 km — also correct — and then added, in the same sentence, that this makes Mercury "slightly smaller than Earth's moon." The Moon's diameter is 3,475 km. Mercury is the larger of the two by roughly 40%, not the smaller.</p>
+
+    <p>Because the scoring rule for that question only checked whether the model named the right planet, the fabricated comparison attached to an otherwise-accurate figure went straight through as a correct answer, on the single most capable, most expensive machine in the test. The builder's own line on it, from RESULTS.md: "Bigger models do not stop being wrong; they get better at sounding right." Neither the $90 board nor the Pi made this specific mistake, if only because neither elaborated with an unprompted comparison in the first place — a smaller, more literal model has less room to confidently invent something adjacent to a right answer.</p>
+
+    <h2>Why it matters here</h2>
+    <p>Two separate lessons sit inside one project, and they cut in opposite directions for anyone deciding how to run AI without shipping their data to a server. The memory number argues for going small: a $90 board that fits in a pocket can hold a working, if limited, offline model in a quarter-gigabyte of RAM, for a real but modest accuracy cost against a $1,000 machine 20x its price. The Mercury answer argues against trusting any single benchmark score, small model or large: a rubric that checks the named answer and nothing else will wave through a confident, fluent, wrong elaboration every time, on any tier of hardware, and the more capable the model, the more convincingly that elaboration reads. Neither finding is an argument this blog gets to make about its own catalog for free — "10/10" and "beats the incumbent on every published benchmark" are exactly the kind of claims this same failure mode can hide inside, which is the whole reason we cite the underlying number and the source, not just the score.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — run your own offline-AI benchmark on hardware this small? Tell us what broke first.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
