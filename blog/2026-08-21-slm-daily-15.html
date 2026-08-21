@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #15: the wrong crossover point between two GPU kernels was costing up to 49% of an RTX 5090's decode speed — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #15: llama.cpp retuned when CUDA switches from one decode kernel to another — up to 49% faster on an RTX 5090. Real Metal and Vulkan correctness fixes shipped too. Zero catalog changes, zero new architectures, and our own engine is still three months behind all of it.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-21-slm-daily-15.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #15: the wrong crossover point between two GPU kernels was costing up to 49% of an RTX 5090's decode speed</h1>
+    <div class="meta">August 21, 2026 · 4 min read</div>
+
+    <p>llama.cpp's CUDA backend has always switched from its <code>mul_mat_vec_q</code> decode kernel to its int8-tensor-core MMQ path at one fixed batch size, no matter which GPU or which quantization format was actually running. Retuning that switch point per hardware and per quant type is worth up to 49% more decode speed at batch size 8 on an RTX 5090, and up to 45% on an RTX 4090 — free performance from picking the right kernel sooner, not a new one. It's the headline entry in a batch of llama.cpp releases since our last edition that also closes two real correctness bugs in backends our own catalog actually touches on Mac and Android hardware — and, again, changes nothing about what's downloadable inside privateSLM today.</p>
+
+    <h2>What actually shipped in the engine</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/26079" target="_blank" rel="noopener">PR #26079</a> (merged August 20 by ORippler, shipped in release <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10534" target="_blank" rel="noopener">b10534</a>) replaces that single compile-time crossover with hardware- and quant-specific switch points. On an RTX 5090 (Blackwell) at batch size 8: Q2_K gains 25–49%, Q3_K 23–44%, Q4_K 22–48%, Q5_K 14–38%, Q6_K 6–17%. On an RTX 4090 (Ada): Q2_K 23–45%, Q3_K 11–25%, Q4_K 8–19%, Q5_K 5–14%. Legacy formats (Q4_0, Q8_0, IQ2_XS) saw no change and kept their old threshold. Every model in privateSLM's catalog ships as a K-quant, so this is exactly the format the fix targets — on a self-hosted llama.cpp server with an NVIDIA GPU, not inside our own app, which links Metal on Apple hardware and never touches CUDA.</p>
+
+    <p>Two same-day fixes land closer to home. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10545" target="_blank" rel="noopener">b10545</a> clamps the K-dimension extent in Metal's mat-mat kernel so it stops reading out of bounds when K isn't a multiple of 32 — a memory-safety fix, not a speed one. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10532" target="_blank" rel="noopener">b10532</a> and <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10538" target="_blank" rel="noopener">b10538</a> add, then gate, dequantization of a quantized KV cache (Q8_0, Q4_0/1, Q5_0/1) to F16 before flash attention on Metal — limited to large batches so small ones skip the extra work. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10539" target="_blank" rel="noopener">b10539</a> fixes a separate overflow/denorm bug in Vulkan's flash-attention MMQ path by forcing fp32 for the quantization step, relevant to Android and Linux devices running llama.cpp over Vulkan.</p>
+
+    <p>None of it reaches privateSLM yet regardless of relevance. <code>scripts/fetch-llama.sh</code> still pins <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10488" target="_blank" rel="noopener">b10488</a> deliberately — the pin exists because llama.cpp's C API breaks between releases without warning (that's exactly how <code>llama_sampler_init_penalties</code> broke a past build), so an upgrade only happens with a build that proves the new API still matches. b10488 predates every release named above; the four releases immediately after our own pin (b10502, b10505, b10506, b10507, Aug 19–20) were backend and CI plumbing only, with no new architecture support.</p>
+
+    <h2>What we checked for the catalog, and why nothing qualified</h2>
+    <p>Hugging Face's trending GGUF list skewed entirely large this window: Ornith-1.5 (image-text, up to 397B), tencent's UI-Mate (27B and 9B), Ling-3.0-flash (127B), TheDrummer's Behemoth-128B-v3, and fresh Unsloth Dynamic v3.0 requants of Qwen3.8-27B — all at least 4x over our 2.5GB phone cap, and none of them the kind of near-miss Nanbeige4.2 or Ling-3.0-tiny were in past editions. A handful of sub-3B community quants did surface — mradermacher's tenorio-0.6B, an uncensored Gemma 2 2B repack, a Qwen3.8-2B distill — but none come from bartowski, unsloth, lmstudio-community, ggml-org, or the model vendor itself, so our reputable-quantizer rule rules them out before size even matters. Catalog stays at 8 Generalists plus 14 pre-cap specialists, unchanged since LFM2.5-2.6B on August 6.</p>
+
+    <h2>A coverage gap, stated plainly</h2>
+    <p>r/LocalLLaMA stayed unreachable to our research tooling again this edition — the same gap flagged in SLM Daily #13 and #14. GitHub's public API also rate-limited an unauthenticated check we wanted to run across the full release history between our b10488 pin and today's batch, so we can't rule out a new architecture landing somewhere in that gap with total confidence; nothing in the release notes we could actually read mentions one.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

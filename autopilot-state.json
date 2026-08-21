@@ -1,5 +1,5 @@
 {
-  "digestCounter": 14,
+  "digestCounter": 15,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -362,9 +362,14 @@
       "date": "2026-08-20",
       "event": "stale-draft-pr-consolidation-plus-no-publish",
       "reason": "Run start found autopilot-state.json on main stuck at lastRunAt 2026-08-17T05:30:00Z even though two later runs had already executed and produced content sitting in unmerged draft PRs: #58 (2026-08-17->18 window: SLM Daily #14, quantization-scale-tax deep-dive, needle2-esp32 spotlight) and #60 (2026-08-18->19 window: UNIHIKER M10 RAM-ladder spotlight), with #60 branched from #58's tip and a strict superset of it. Verified #60's content directly (read the full unihiker-m10-ram-ladder.html post and its state-file diff) before acting -- real builder (mayukh4), real numbers, correct site format, mergeable_state clean, Vercel preview green. Marked #60 ready-for-review and merged it into main, then closed #58 as superseded (same consolidation pattern used on 2026-07-13 and 2026-08-11). This brought digestCounter to 14 and lastRunAt to 2026-08-19T05:10:00Z on main. Fresh research sweep for the remaining window (2026-08-19T05:10 -> 2026-08-20T04:14, ~23h) across llama.cpp releases (b10502/10505/10506/10507, all backend/CI-only, zero new llm_arch entries), HF/bartowski trending GGUFs (unchanged top list: Ornith-1.5-9B/35B-A3B, Ling-3.0-flash/-tiny, UI-Mate, grug-27b -- all either re-quantizations of already-checked bases or over the 2.5GB phone cap), vendor blogs (Liquid AI, Qwen, Mistral, Google, IBM Granite -- no new sub-4B releases since LFM2.5-VL-3B on 08-12, already logged as skipped), Hacker News newest, and DIY sources (Hackster, Habr, OOMWOO -- not yet buildable per its own GitHub checklist; esp32-ai/needle2-esp32/qapla' all already featured) found nothing that clears the novelty or quality bar. No catalog change, no digest, no deep-dive, no DIY spotlight this run -- correct fail-safe/no-publish outcome per QUALITY BAR #10 and the IDEMPOTENCY rules, not a failure."
+    },
+    {
+      "date": "2026-08-21",
+      "event": "published-digest-only-no-catalog-no-deepdive-no-diy",
+      "reason": "Research window: since lastRunAt 2026-08-20T04:14:00Z through 2026-08-21T04:18Z (~24h), run via two parallel research sweeps (model/engine news, DIY edge projects). CATALOG: no qualifying candidate -- HF trending GGUF list skewed entirely large this window (Ornith-1.5 up to 397B, tencent UI-Mate 27B/9B, Ling-3.0-flash 127B, TheDrummer Behemoth-128B-v3, fresh Unsloth Dynamic v3.0 Qwen3.8-27B requants), all at least 4x over the 2.5GB cap; a handful of sub-3B community quants (mradermacher tenorio-0.6B, an uncensored Gemma-2-2B repack, a Qwen3.8-2B distill) failed the reputable-quantizer rule before size even mattered. DIY: zero verifiable new/updated builds -- Hackster, raspberrypi.com, exo/exolabs, NetworkChuck, Habr, HN and GitHub search (created:>2026-08-18, Jetson/LLM keywords) all checked; three GitHub repos surfaced by keyword search (drwjkirkpatrick-web/local-llm-transmission and siblings, Ait0u5hi/jetson-llm-benchoff) were fetched and read directly, then rejected as likely fabricated/bulk-generated (0 stars/forks/watchers, the same author account has 93 unrelated repos created in rapid succession, zero real photos/screenshots, and jetson-llm-benchoff cites a model-size combination -- 'Qwen3.8-27B' benchmarked at implausible specs -- that doesn't match any known release). DIGEST: qualified -- independently verified via WebFetch against github.com/ggml-org/llama.cpp/pull/26079 and the releases page (not just the research subagent's report) three genuinely new, sourced datapoints since Daily #14: (1) PR #26079/release b10534 (merged Aug 20 by ORippler) retunes the CUDA mul_mat_vec_q-to-MMQ decode crossover per-hardware/per-quant -- RTX 5090 Q2_K-Q6_K gains of 6-49%, RTX 4090 gains of 5-45%, confirmed directly against the PR page; (2) b10545 Metal mat-mat K-dimension out-of-bounds clamp (memory-safety fix, not perf); (3) b10532/b10538 Metal KV-cache dequantization-to-F16-before-flash-attention work, gated to large batches; plus b10539 Vulkan FA MMQ fp32 precision fix. All four confirmed directly against the ggml-org/llama.cpp releases page, not taken on the research subagent's word alone. Framed honestly against our own b10488 pin (scripts/fetch-llama.sh, privateslm main) -- none of this reaches the app regardless of relevance, and our own engine links Metal on Apple hardware, never CUDA. Attempted to also check the b10489-b10530 range for a new llm_arch entry between our pin and the covered batch; GitHub's public API 403'd the unauthenticated request, so that specific sub-range is stated as an open gap in the post rather than silently assumed clean. Published SLM Daily #15 only -- no deep-dive (only candidate datapoint, the same CUDA PR, is GPU/home-lab-specific rather than phone/edge and thematically adjacent to the already-published 07-23 cuda-embedding-tax and Aug-18 SYCL-kernel-launch digests; judged too thin and too repetitive in shape to justify a full 1200-2500 word contrarian deep-dive on its own, so it stayed in the digest instead) and no DIY spotlight (nothing cleared QUALITY BAR #8/#9 verification). No /post-grader skill available in this session (checked the full available-skills list; not present) -- self-graded the title+opening paragraph against the HOOK SCORE GATE rubric (concrete number in the first two sentences: 49%, RTX 5090, batch size 8; no overclaiming; no generic filler) at 9/10, stated explicitly per the documented fallback. Also found and merged PR #61 (a prior run's clean, verified lastRunAt-only consolidation covering the 2026-08-19T05:10-2026-08-20T04:14 sub-window with the same no-publish outcome) into main before starting this run's own research, to keep state linear."
     }
   ],
-  "lastRunAt": "2026-08-20T04:14:00Z",
+  "lastRunAt": "2026-08-21T04:18:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -671,6 +676,12 @@
       "type": "diy",
       "publishedAt": "2026-08-19T05:10:00Z",
       "post": "blog/2026-08-19-unihiker-m10-ram-ladder.html"
+    },
+    {
+      "slug": "2026-08-21-slm-daily-15",
+      "type": "digest",
+      "publishedAt": "2026-08-21T04:18:00Z",
+      "post": "blog/2026-08-21-slm-daily-15.html"
     }
   ]
 }
