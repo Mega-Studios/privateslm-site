@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization. — privateSLM blog</title>
+  <meta name="description" content="A July arXiv paper measured 4-bit quantization making a vision-language model's decode 55.8-55.9% slower on NVIDIA Jetson boards. We quantized a chat model to the same bit-width on our own hardware and measured decode 81% faster. Both numbers are real — the difference is the kernel, not the math.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.</h1>
+    <div class="meta">August 22, 2026 · 9 min read</div>
+
+    <p>A paper published in July measured a vision-language model's per-token generation time rising by 55.8-55.9% after its weights were quantized to 4 bits on NVIDIA Jetson edge boards — the opposite of what quantization is supposed to buy you. We ran the same operation this week — 4-bit quantization, a chat model instead of a VLM, llama.cpp instead of the paper's toolchain — and measured token generation get 81% <em>faster</em>. Neither number is wrong. They're measuring different kernels wearing the same "INT4" label.</p>
+
+    <h2>What the paper actually found</h2>
+    <p><a href="https://arxiv.org/abs/2607.08029" target="_blank" rel="noopener">"Rethinking Small VLM Quantization: From Component-Wise Analysis to Hardware-Aware Edge Deployment"</a> (arXiv:2607.08029, Shin, Kim, Kim, Yoo and Kim, submitted July 9, 2026) benchmarks quantized vision-language models on real Jetson Orin NX and Jetson AGX hardware — not simulated, not projected. One of its findings (Table 7, section 4.3) singles out quantizing just the LLM backbone of a small VLM to INT4 via BitsAndBytes: VRAM drops 21.8-47.5%, exactly what you'd expect from cutting weight precision to a quarter. Time-per-output-token (TPOT) — the actual generation speed a user experiences — goes the other way. On Jetson Orin NX it rises from 111.1ms to 173.1ms, a 55.8% slowdown. On Jetson AGX, 136.2ms to 212.4ms, 55.9%. The paper's own explanation: "dequantization overhead introduced by BitsAndBytes." Smaller weights on disk and in VRAM, slower to actually run.</p>
+
+    <p>That's a real, hardware-measured result, and it should make anyone pitching "just quantize it, it'll be faster and smaller" a little more careful with the word "and." But BitsAndBytes and Jetson's CUDA stack are one specific toolchain. privateSLM doesn't use either — it runs GGUF models through llama.cpp's own GGML kernels. So instead of assuming the paper's finding travels, we quantized something ourselves and measured it.</p>
+
+    <h2>What we ran</h2>
+    <p>We built llama.cpp fresh from the mainline branch — commit <code>d775b89</code>, cut moments after the <a href="2026-08-22-slm-daily-16.html">v0.2.0 tag covered in today's digest</a> — CPU backend only, <code>-march=native</code>. We pulled Qwen's own official GGUF release of Qwen2.5-0.5B-Instruct in two precisions from <a href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF" target="_blank" rel="noopener">Qwen/Qwen2.5-0.5B-Instruct-GGUF</a> — full fp16 and Q4_K_M, same 630.17M parameters both times, same architecture, same weights, only the bit-width differs. Then <code>llama-bench</code>, five repetitions each, 512-token prompt processing and 128-token generation, on a 4-thread x86 CPU (Intel Xeon, cloud VM — not a phone chip, more on that below):</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Precision</th><th style="padding:6px 10px;">File size</th><th style="padding:6px 10px;">Prompt (pp512)</th><th style="padding:6px 0;">Decode (tg128)</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">F16</td><td style="padding:6px 10px;">1.17 GiB</td><td style="padding:6px 10px;">354.18 ± 1.92 t/s</td><td style="padding:6px 0;">27.94 ± 0.30 t/s</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;"><strong>Q4_K_M</strong></td><td style="padding:6px 10px;"><strong>462.96 MiB (-61%)</strong></td><td style="padding:6px 10px;">312.65 ± 2.81 t/s (-12%)</td><td style="padding:6px 0;"><strong>50.57 ± 0.98 t/s (+81%)</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: our own <code>llama-bench</code> run, llama.cpp commit d775b89, Qwen2.5-0.5B-Instruct-GGUF (Qwen, Apache 2.0), Intel Xeon CPU, 4 threads, <code>-p 512 -n 128 -r 5</code>. Raw output reproduced below.</p>
+
+    <pre style="background:#1a1a1a;color:#ddd;padding:1rem;border-radius:6px;overflow-x:auto;font-size:0.82rem;line-height:1.5;"><code>| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| qwen2 1B F16                   |   1.17 GiB |   630.17 M | CPU        |       4 |           pp512 |        354.18 ± 1.92 |
+| qwen2 1B F16                   |   1.17 GiB |   630.17 M | CPU        |       4 |           tg128 |         27.94 ± 0.30 |
+| qwen2 1B Q4_K - Medium         | 462.96 MiB |   630.17 M | CPU        |       4 |           pp512 |        312.65 ± 2.81 |
+| qwen2 1B Q4_K - Medium         | 462.96 MiB |   630.17 M | CPU        |       4 |           tg128 |         50.57 ± 0.98 |
+
+build: d775b89 (1)</code></pre>
+
+    <p>Decode — the part of inference that actually determines how fast a chat reply streams in — got 81% faster after quantization, not slower. Prompt processing went the other way, 12% slower. Both effects are real, measured on the same two files, same run.</p>
+
+    <h2>The reconciliation: it's the kernel, not the bit-width</h2>
+    <p>BitsAndBytes, as deployed in the paper's Jetson setup, doesn't have a native low-precision matmul path on that hardware. It stores weights at 4 bits but has to reconstitute them to fp16 before the actual matrix multiply can run, via a separate dequantization step on every forward pass. That's real work — a memory write, a kernel launch, extra latency — layered on top of the multiply itself, not instead of it. For a VLM's LLM backbone specifically, where a batch can include a large chunk of image tokens processed together, that per-call dequant tax has room to outweigh the bandwidth saved by moving fewer bytes.</p>
+
+    <p>GGML's Q4_K format, the thing our Q4_K_M number above actually measures, doesn't work that way. The quantized blocks are consumed directly inside the matmul kernel — dequantization happens fused, in registers, as part of the same instruction sequence that computes the dot product, never as a separate materialize-to-fp16 pass over the whole weight matrix. Decode is memory-bandwidth-bound: generating one token means reading the entire weight matrix from RAM once, doing comparatively little arithmetic on it. Cut the bytes you have to read by roughly 4x and you cut the time that read takes by close to the same factor — which is almost exactly what happened here. Prompt processing is a different shape of work: one big batched matmul, compute-bound rather than bandwidth-bound, so the extra per-block unpacking cost shows up as a small net loss instead of being swallowed by bandwidth savings that don't apply as much when you're not RAM-limited to begin with.</p>
+
+    <p>Same underlying operation — "quantize an LLM to 4 bits" — implemented two different ways, producing opposite verdicts on whether it's a speed win. The paper isn't wrong about BitsAndBytes on Jetson. We're not wrong about GGML on this CPU. "4-bit quantization" isn't one thing with one performance property; it's a bit-width plus a kernel, and the kernel is doing most of the deciding.</p>
+
+    <h2>What this actually means for a phone</h2>
+    <p>privateSLM's whole catalog strategy — everything in the Generalists tier shipping as Q4_K_M or the nearest equivalent — is a bet that quantized decode is faster decode, not just smaller-download decode. This week's numbers are the first time we've actually measured that bet against our own engine instead of assuming it from GGML's general reputation, and it held: an 81% decode speedup, not a Jetson-style regression. But be precise about what this test is and isn't. It ran on an x86 cloud CPU with llama.cpp's CPU backend, not an iPhone's ARM cores or Metal GPU path, and not a Mac's Metal path either — both use different kernel implementations of the same Q4_K block format, and neither has been separately benchmarked here. The fused-dequant design that makes CPU decode faster is architecturally the same idea on Metal and NEON, but "architecturally the same idea" is not a measurement. If you're running privateSLM on real hardware and want to point <code>llama-bench</code> (or your own timing) at an actual iPhone or Mac, we'd take those numbers — that's a real gap in what we can claim today, not a rhetorical one.</p>
+
+    <p>The paper's finding stands on its own terms too, and it's worth taking seriously rather than waving off because our number went the other way: if you're deploying a VLM on Jetson-class edge hardware through BitsAndBytes, "quantize it, it'll be faster" is not a safe assumption — measure the actual toolchain you're shipping, because the bit-width tells you almost nothing about the answer on its own.</p>
+
+    <h2>Reproduce it</h2>
+    <p>The whole comparison is four commands and about 1.7GB of downloads:</p>
+    <pre style="background:#1a1a1a;color:#ddd;padding:1rem;border-radius:6px;overflow-x:auto;font-size:0.82rem;line-height:1.5;"><code>git clone --depth 1 https://github.com/ggml-org/llama.cpp
+cmake -S llama.cpp -B llama.cpp/build -DCMAKE_BUILD_TYPE=Release
+cmake --build llama.cpp/build -j4 --target llama-bench
+
+curl -LO https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-fp16.gguf
+curl -LO https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf
+
+./llama.cpp/build/bin/llama-bench \
+  -m qwen2.5-0.5b-instruct-fp16.gguf -m qwen2.5-0.5b-instruct-q4_k_m.gguf \
+  -p 512 -n 128 -r 5</code></pre>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've run this on an iPhone, iPad or Apple Silicon Mac via Metal, or on Android/ARM, we want the real numbers.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — running the kernels that actually measured faster</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

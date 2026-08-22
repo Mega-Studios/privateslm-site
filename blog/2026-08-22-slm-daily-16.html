@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #16: llama.cpp's first real GitHub Release landed with a 280B-parameter model — and nothing phone-sized — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #16: llama.cpp shipped v0.2.0, its first tag to get an actual GitHub Release page instead of a bare pre-release tag — carrying a new 280B/16B-active MoE architecture nowhere near phone-sized. Zero catalog changes; one candidate checked and skipped, and why.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-22-slm-daily-16.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #16: llama.cpp's first real GitHub Release landed with a 280B-parameter model — and nothing phone-sized</h1>
+    <div class="meta">August 22, 2026 · 5 min read</div>
+
+    <p>llama.cpp cut <a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.2.0" target="_blank" rel="noopener">v0.2.0</a> on August 21 — the first <code>v0.x.x</code> tag to appear on the project's Releases page marked "Latest" rather than as a bare pre-release. Per the project's own <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/release.md" target="_blank" rel="noopener">release docs</a>, semver tags have existed for a while (v0.1.2 shipped August 18), but historically "releases are not published to github releases, only nightly/development builds are available there" — the tag itself was the artifact, with no Release entry behind it. v0.2.0 is the first one to actually get that page. We're not calling this "llama.cpp's first stable release" — a maintainer thread from earlier this year (<a href="https://github.com/ggml-org/llama.cpp/discussions/16111" target="_blank" rel="noopener">discussion #16111</a>) has ggerganov stating flatly there's no stable-release notion for the project — but it's a real, verifiable step toward one.</p>
+
+    <h2>What's actually in it</h2>
+    <p>The changelog claims "100+ commits since v0.1.2," and the two most-cited additions — Granite SWA and LFM2/LFM2MOE support — aren't new to this window; they're accumulated work folded into the version bump, not something that landed since our last edition. What is new since our last check (2026-08-21T04:18 UTC): <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10549" target="_blank" rel="noopener">b10549</a> enabled tensor-split (multi-GPU) support specifically for LFM2/LFM2MOE — relevant to two of our own catalog entries in principle, useless on a single phone in practice. <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10568" target="_blank" rel="noopener">b10568</a> partially reworked Metal's RoPE handling for DeepSeek-2-family models; no before/after numbers were published, so we're not inventing one. And <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10569" target="_blank" rel="noopener">b10569</a> added a genuinely new architecture, <code>dots3-note</code> — except it's rednote's dots3-note-prev, a 280B-parameter, 16B-active multimodal MoE with a separate 7B vision encoder and 800M audio encoder. Server-class, not phone-class, by a wide margin.</p>
+
+    <h2>One catalog candidate, checked and skipped</h2>
+    <p>The only sub-2.5GB chat GGUF we found worth naming this window was <a href="https://huggingface.co/openbmb/MiniCPM5-1B-GGUF" target="_blank" rel="noopener">openbmb/MiniCPM5-1B-GGUF</a> — vendor-quantized, Apache-2.0, Q4_K_M at 688MB, comfortably under our size cap. It doesn't clear the freshness bar: it shipped roughly three months ago, well outside our 14-day window, and it only qualifies under the alternate "tops a leaderboard this week" clause if a tie for the top of Artificial Analysis's sub-4B "Tiny" category counts as topping it — we couldn't independently confirm that exact standing from the leaderboard itself, only from a secondary summary, so we're not stretching the rule on an unverified number. Everything else in Hugging Face's trending-GGUF stream this window was 27B and up. Catalog stays unchanged: 8 Generalists, 14 pre-cap specialists.</p>
+
+    <h2>Edge in the Wild, skipped this edition</h2>
+    <p>We scouted for a new DIY spotlight this run and came up short on a strong pick, not an absent one. The best lead — an ESP32-S3 project targeting zero external PSRAM, real measured numbers (20 tok/s, 161KB peak SRAM, a 24-hour soak test) — has no photos or video anywhere in its own repo, by the builder's own documentation. That's a real gap against our "real footage first" bar, and it would also be the fifth ESP32-class microcontroller project we've featured since August 1. The memory-engineering angle is genuinely distinct from the previous four, but between the missing visuals and the repetition, it's not a confident yes today. Skipping beats forcing it.</p>
+
+    <h2>What's actually new today</h2>
+    <p>One piece instead of two, and it's the more interesting of the pair this edition: a July arXiv paper measured 4-bit quantization making a vision-language model's decode 55.8-55.9% <em>slower</em> on real Jetson hardware. We quantized a chat model the same way, on our own engine, and measured decode 81% faster. Both numbers are real — <a href="2026-08-22-int4-kernel-tax.html">the full breakdown, with our own reproducible benchmark, is here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

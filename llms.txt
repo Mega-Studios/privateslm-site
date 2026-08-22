@@ -37,6 +37,8 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- 56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.: https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html
+- SLM Daily #16 (catalog digest): https://www.privateslm.dev/blog/2026-08-22-slm-daily-16.html
 - SLM Daily #15 (catalog digest): https://www.privateslm.dev/blog/2026-08-21-slm-daily-15.html
 - The most expensive machine scored 10/10 — and got Mercury's size wrong by 40% (Edge in the Wild): https://www.privateslm.dev/blog/2026-08-19-unihiker-m10-ram-ladder.html
 - 70.8% vs 98.1%: the 4-bit quantization your whole phone-AI catalog ships as isn't one number: https://www.privateslm.dev/blog/2026-08-18-quantization-scale-tax.html

@@ -27,6 +27,16 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-22-int4-kernel-tax.html">
+          <div class="meta">August 22, 2026 · 9 min read</div>
+          <h3>56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.</h3>
+          <p>A July arXiv paper measured 4-bit quantization making a vision-language model's decode 55.8-55.9% slower on NVIDIA Jetson boards. We quantized a chat model to the same bit-width on our own engine and measured decode 81% faster. Both numbers are real — the difference is the kernel, not the math.</p>
+        </a>
+        <a class="post-card" href="2026-08-22-slm-daily-16.html">
+          <div class="meta">August 22, 2026 · 5 min read</div>
+          <h3>SLM Daily #16: llama.cpp's first real GitHub Release landed with a 280B-parameter model — and nothing phone-sized</h3>
+          <p>llama.cpp shipped v0.2.0, its first tag to get an actual GitHub Release page instead of a bare pre-release tag — carrying a new 280B/16B-active MoE architecture nowhere near phone-sized. Zero catalog changes; one candidate checked and skipped, and why.</p>
+        </a>
         <a class="post-card" href="2026-08-21-slm-daily-15.html">
           <div class="meta">August 21, 2026 · 4 min read</div>
           <h3>SLM Daily #15: the wrong crossover point between two GPU kernels was costing up to 49% of an RTX 5090's decode speed</h3>
