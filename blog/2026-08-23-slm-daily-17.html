@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #17: our own catalog's source of truth still listed a model we replaced 8 days ago — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #17: 11 llama.cpp tags shipped since our last check, zero new architectures. Zero catalog additions — two candidates checked and skipped, why. Plus a real bug we found in our own pipeline: the app repo's canonical catalog file never got the LFM2.5 replacement from 8 days ago.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-23-slm-daily-17.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #17: our own catalog's source of truth still listed a model we replaced 8 days ago</h1>
+    <div class="meta">August 23, 2026 · 6 min read</div>
+
+    <p>llama.cpp cut 11 tags since our last check (2026-08-22T04:45 UTC) — <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10577" target="_blank" rel="noopener">b10577</a> through <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10588" target="_blank" rel="noopener">b10588</a> — and zero new architectures landed in that window. Zero catalog additions today too. The more interesting find wasn't out there in the ecosystem; it was in our own repo, and we're reporting it the same way we'd report anyone else's bug.</p>
+
+    <h2>The engine: eleven tags, nothing phone-relevant</h2>
+    <p>Both architectures added around this stretch — Granite SWA (IBM's 2B dense / 3B-MoE family, genuinely phone-sized) and dots3-note (a 280B-parameter MoE, not remotely phone-sized) — landed before our checkpoint and were already noted in <a href="2026-08-22-slm-daily-16.html">Daily #16</a>. Nothing new architecture-wise since then. Of the eleven tags in this window, most are backend/multimodal work with no benchmark numbers attached (a JSON abstraction layer refactor, ROCm build restoration, BailingMoE3/dots3-note multimodal plumbing, draft-model memory fitting). One is worth naming: <a href="https://github.com/ggml-org/llama.cpp/pull/24575" target="_blank" rel="noopener">PR #24575</a> rewrote a concat operation from per-element to row-level memory copies, and the author's own Apple M1 Air benchmark (200 runs, a [4096×1×16×1] concat — the shape a KV-cache append actually looks like) measured warm-cache time drop from 1.61ms to 0.012ms, a 133x speedup; cold-cache from 1.59ms to 0.019ms, 83x. It's a micro-benchmark on one operation, not an end-to-end tokens/sec number, and we haven't reproduced it ourselves — but it's Apple Silicon-relevant, which most engine PRs this window weren't.</p>
+
+    <h2>Catalog: two checked, two skipped</h2>
+    <p>We checked every fresh upload from bartowski, unsloth, lmstudio-community and ggml-org since our last edition. Nothing chat/instruct and freshly released clears our 2.5GB Q4_K_M cap. Two near-misses worth naming, both rejected on size alone:</p>
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Candidate</th><th style="padding:6px 10px;">Smallest available quant</th><th style="padding:6px 0;">Why it's out</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;"><a href="https://huggingface.co/bartowski/google_gemma-4-E2B-it-GGUF" target="_blank" rel="noopener">Gemma 4 E2B-it</a></td><td style="padding:6px 10px;">3.32 GB (IQ4_XS)</td><td style="padding:6px 0;">~800MB over cap even at the smallest quant offered</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;"><a href="https://huggingface.co/unsloth/NVIDIA-Nemotron-3-Nano-4B-GGUF" target="_blank" rel="noopener">NVIDIA Nemotron-3-Nano-4B</a></td><td style="padding:6px 10px;">2.53 GB (Q4_0)</td><td style="padding:6px 0;">Misses the cap by ~30MB, and Q4_0 is a lower-quality quant than the K-quants everything else in our catalog ships as</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Gemma 4 E2B-it is Google's own successor to our catalogued Gemma 2 2B Instruct — Apache 2.0, strong benchmarks — but every published quant is too large. Nemotron-3-Nano-4B scores well (AIME25 78.5, MATH500 95.4 per NVIDIA's own model card) but neither released within our 14-day window nor fits at usable quality. Neither is a hard "never" — a lower-bit quant of Gemma 4 E2B or a future Nemotron variant could still clear the bar.</p>
+
+    <h2>Edge in the Wild: skipped again</h2>
+    <p>The strongest DIY candidate we found this window is <a href="https://github.com/cyfrit/p-for-llm" target="_blank" rel="noopener">cyfrit's PFor</a> — a from-scratch 180.9M-parameter MoE transformer with per-layer embeddings, running at roughly 9 tokens/sec in ~44MB on a $6-10 ESP32-P4 board, MIT licensed, real architecture diagram and hardware photo in the repo. Genuinely clever work, and honest about its own limits (the author calls the output "often little more than nonsense"). We're not running it: it published August 5, which puts it before four of the ESP32-class projects we've already featured this month. A spotlight is supposed to surface something we found, not something we should have already found — running it now would read as backfilling a miss rather than reporting news. Skipping beats forcing it.</p>
+
+    <h2>The bug in our own pipeline</h2>
+    <p><a href="2026-08-15-slm-daily-12.html">Eight days ago</a>, in Daily #12, we made our first straight catalog replacement — swapping Llama 3.2 1B Instruct for LFM2.5 1.2B Instruct, which beats it on every benchmark Liquid AI published. That change landed correctly on the live site: <code>models.json</code> at privateslm.dev has served <code>lfm2.5-1.2b-q4</code> ever since, and it's what the app actually downloads. What we found today: the app repo's own <code>docs/models.json</code> — documented in our sync scripts as the <em>canonical</em> source that <code>mirror-to-r2.py</code> and <code>sync-catalog.py</code> read from to push catalog changes to the live site — still had the old <code>llama-3.2-1b-instruct-q4</code> entry. The live catalog was never wrong. But the file our own tooling treats as ground truth was, silently, for eight days — and the next time anyone ran <code>sync-catalog.py</code> without checking first, it would have pushed the stale entry back out and un-done the replacement. We've corrected the app repo's file to match what's actually live. No user impact happened; the exposure was to future runs of our own scripts, not to anyone's phone.</p>
+
+    <h2>What's actually new today</h2>
+    <p>A new preprint tested eleven ways to compress chat models one size class above our own catalog, and found that when compression breaks an answer, the model's confidence doesn't budge 85-99% of the time — and it's most confidently wrong on exactly the well-known facts you'd trust it on. <a href="2026-08-23-asymmetric-compression-harms.html">Full breakdown here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

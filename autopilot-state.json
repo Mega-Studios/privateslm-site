@@ -1,5 +1,5 @@
 {
-  "digestCounter": 16,
+  "digestCounter": 17,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -145,6 +145,12 @@
       "slug": "int4-kernel-tax",
       "summary": "arXiv:2607.08029 (Jetson Orin NX/AGX, BitsAndBytes INT4 on small VLM backbones) measured decode time-per-token rising 55.8-55.9% under 4-bit quantization -- the opposite of the expected speedup. Our own llama-bench run (llama.cpp commit d775b89, Qwen2.5-0.5B-Instruct F16 vs Q4_K_M, CPU) measured decode 81% faster under the same bit-width. Reconciled via kernel design: BitsAndBytes dequantizes to fp16 in a separate pass before matmul; GGML Q4_K fuses dequant into the matmul kernel, so bandwidth-bound decode benefits from the 4x-smaller weight read while compute-bound prefill sees a small regression (-12%). Explicit caveat in the post: tested on x86 CPU, not iPhone ARM/Metal.",
       "post": "blog/2026-08-22-int4-kernel-tax.html"
+    },
+    {
+      "date": "2026-08-23",
+      "slug": "asymmetric-compression-harms",
+      "summary": "arXiv:2608.19670 (Wu, Li, Semenova, Zhong -- Rice/UNC Chapel Hill/Rutgers, submitted Aug 20 2026, read directly from the primary PDF, no secondary coverage exists yet) compresses Llama-3.1-8B-Instruct, Qwen-3-8B and Gemma-2-9B-it (one size class above privateSLM's own sub-4B catalog) across 11 methods (GPTQ/AWQ/OmniQuant quantization at 2/3/4-bit; WANDA/SparseGPT/N:M pruning; ShortGPT layer-dropping). Two findings: (1) confidence calibration -- at aggressive compression, 85-99% of newly-wrong answers keep confidence unchanged (median 0.4-0.6), and under 4-bit GPTQ the model is up to 1.20x MORE confident when wrong about head-of-distribution (well-known) facts than tail facts; (2) knowledge-popularity inversion -- under moderate N:M pruning (10-15% sparsity), tail-knowledge retention runs 22.7-39.5pp ABOVE the model's own baseline while head-knowledge retention runs 3.6-14.4pp BELOW it (gap 42.4-52.7pp), the reverse of the 'compression forgets rare facts first' assumption; quantization shows the same direction but within 5.3pp, much smaller than pruning. A third result (WinoBias subgroup divergence hidden by near-zero aggregate shifts, e.g. -53.1pp in one occupation category under SparseGPT 2:4 vs -2.2pp reported overall) used as supporting texture. Distinct from theses #19 (multilingual quantization tax, language axis) and #22 (quantization scale tax, model-size axis) -- this is a knowledge-popularity/confidence-calibration/bias-subgroup axis, none touched before. Honest caveats included: single 3-day-old unreviewed preprint zero citations; GPTQ/AWQ/OmniQuant are not GGUF K-quants (same caveat pattern as prior quantization posts); tested models (8-9B) are one size class above privateSLM's own catalog; effect is non-monotonic and partially narrows at the most extreme pruning setting tested (25% ShortGPT); benchmarks (PopQA, Head-to-Tail, WinoBias, BBQ) are English-only.",
+      "post": "blog/2026-08-23-asymmetric-compression-harms.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -375,7 +381,7 @@
       "reason": "Research window: since lastRunAt 2026-08-20T04:14:00Z through 2026-08-21T04:18Z (~24h), run via two parallel research sweeps (model/engine news, DIY edge projects). CATALOG: no qualifying candidate -- HF trending GGUF list skewed entirely large this window (Ornith-1.5 up to 397B, tencent UI-Mate 27B/9B, Ling-3.0-flash 127B, TheDrummer Behemoth-128B-v3, fresh Unsloth Dynamic v3.0 Qwen3.8-27B requants), all at least 4x over the 2.5GB cap; a handful of sub-3B community quants (mradermacher tenorio-0.6B, an uncensored Gemma-2-2B repack, a Qwen3.8-2B distill) failed the reputable-quantizer rule before size even mattered. DIY: zero verifiable new/updated builds -- Hackster, raspberrypi.com, exo/exolabs, NetworkChuck, Habr, HN and GitHub search (created:>2026-08-18, Jetson/LLM keywords) all checked; three GitHub repos surfaced by keyword search (drwjkirkpatrick-web/local-llm-transmission and siblings, Ait0u5hi/jetson-llm-benchoff) were fetched and read directly, then rejected as likely fabricated/bulk-generated (0 stars/forks/watchers, the same author account has 93 unrelated repos created in rapid succession, zero real photos/screenshots, and jetson-llm-benchoff cites a model-size combination -- 'Qwen3.8-27B' benchmarked at implausible specs -- that doesn't match any known release). DIGEST: qualified -- independently verified via WebFetch against github.com/ggml-org/llama.cpp/pull/26079 and the releases page (not just the research subagent's report) three genuinely new, sourced datapoints since Daily #14: (1) PR #26079/release b10534 (merged Aug 20 by ORippler) retunes the CUDA mul_mat_vec_q-to-MMQ decode crossover per-hardware/per-quant -- RTX 5090 Q2_K-Q6_K gains of 6-49%, RTX 4090 gains of 5-45%, confirmed directly against the PR page; (2) b10545 Metal mat-mat K-dimension out-of-bounds clamp (memory-safety fix, not perf); (3) b10532/b10538 Metal KV-cache dequantization-to-F16-before-flash-attention work, gated to large batches; plus b10539 Vulkan FA MMQ fp32 precision fix. All four confirmed directly against the ggml-org/llama.cpp releases page, not taken on the research subagent's word alone. Framed honestly against our own b10488 pin (scripts/fetch-llama.sh, privateslm main) -- none of this reaches the app regardless of relevance, and our own engine links Metal on Apple hardware, never CUDA. Attempted to also check the b10489-b10530 range for a new llm_arch entry between our pin and the covered batch; GitHub's public API 403'd the unauthenticated request, so that specific sub-range is stated as an open gap in the post rather than silently assumed clean. Published SLM Daily #15 only -- no deep-dive (only candidate datapoint, the same CUDA PR, is GPU/home-lab-specific rather than phone/edge and thematically adjacent to the already-published 07-23 cuda-embedding-tax and Aug-18 SYCL-kernel-launch digests; judged too thin and too repetitive in shape to justify a full 1200-2500 word contrarian deep-dive on its own, so it stayed in the digest instead) and no DIY spotlight (nothing cleared QUALITY BAR #8/#9 verification). No /post-grader skill available in this session (checked the full available-skills list; not present) -- self-graded the title+opening paragraph against the HOOK SCORE GATE rubric (concrete number in the first two sentences: 49%, RTX 5090, batch size 8; no overclaiming; no generic filler) at 9/10, stated explicitly per the documented fallback. Also found and merged PR #61 (a prior run's clean, verified lastRunAt-only consolidation covering the 2026-08-19T05:10-2026-08-20T04:14 sub-window with the same no-publish outcome) into main before starting this run's own research, to keep state linear."
     }
   ],
-  "lastRunAt": "2026-08-22T04:45:00Z",
+  "lastRunAt": "2026-08-23T04:20:00Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -700,6 +706,18 @@
       "type": "digest",
       "publishedAt": "2026-08-22T04:45:00Z",
       "post": "blog/2026-08-22-slm-daily-16.html"
+    },
+    {
+      "slug": "2026-08-23-asymmetric-compression-harms",
+      "type": "deepdive",
+      "publishedAt": "2026-08-23T04:20:00Z",
+      "post": "blog/2026-08-23-asymmetric-compression-harms.html"
+    },
+    {
+      "slug": "2026-08-23-slm-daily-17",
+      "type": "digest",
+      "publishedAt": "2026-08-23T04:20:00Z",
+      "post": "blog/2026-08-23-slm-daily-17.html"
     }
   ]
 }

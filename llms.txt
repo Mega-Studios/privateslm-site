@@ -37,6 +37,8 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- Compress a small model and it doesn't get less sure when it's wrong — 85 to 99% of the time, confidence never moves: https://www.privateslm.dev/blog/2026-08-23-asymmetric-compression-harms.html
+- SLM Daily #17 (catalog digest): https://www.privateslm.dev/blog/2026-08-23-slm-daily-17.html
 - 56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.: https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html
 - SLM Daily #16 (catalog digest): https://www.privateslm.dev/blog/2026-08-22-slm-daily-16.html
 - SLM Daily #15 (catalog digest): https://www.privateslm.dev/blog/2026-08-21-slm-daily-15.html
