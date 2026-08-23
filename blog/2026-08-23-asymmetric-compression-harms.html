@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compress a small model and it doesn't get less sure when it's wrong — 85 to 99% of the time, confidence never moves — privateSLM blog</title>
+  <meta name="description" content="A new preprint compressing 8-9B chat models (Llama 3.1, Qwen 3, Gemma 2 — privateSLM's size class) finds that when quantization or pruning breaks an answer, confidence barely notices. Worse: pruning erodes well-known facts faster than trivia, the opposite of the usual assumption.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-23-asymmetric-compression-harms.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Compress a small model and it doesn't get less sure when it's wrong — 85 to 99% of the time, confidence never moves</h1>
+    <div class="meta">August 23, 2026 · 10 min read</div>
+
+    <p>A preprint posted three days ago compressed three chat models in the 8-to-9-billion-parameter class — Llama-3.1-8B-Instruct, Qwen-3-8B, Gemma-2-9B-it, the size tier one step up from everything in our own catalog — eleven different ways, and measured what happens when compression breaks an answer. Across quantization and pruning alike, 85 to 99% of newly-wrong answers at aggressive compression settings come back exactly as confident as the model used to be when it was right. And under moderate structural pruning, accuracy on rare trivia can climb <em>relative to the model's own baseline</em> while accuracy on famous, well-known facts falls — the reverse of the assumption "compression forgets the obscure stuff first" that most of us, us included, have been carrying around unexamined.</p>
+
+    <h2>What was actually tested</h2>
+    <p>The paper is <a href="https://arxiv.org/abs/2608.19670" target="_blank" rel="noopener">"The Asymmetric Harms of LLM Compression"</a> (arXiv:2608.19670, Yuan Wu, Mairui Li, Lesia Semenova, Chudi Zhong — Rice University, UNC Chapel Hill, Rutgers; submitted August 20, 2026). We read the full PDF directly — there's no secondary coverage of this yet to triangulate against, so treat this as a fresh, unreplicated finding, not settled science. It compresses three instruction-tuned chat models across eleven methods: GPTQ, AWQ and OmniQuant at 2/3/4-bit quantization, plus WANDA, SparseGPT and N:M structured pruning, plus ShortGPT layer-dropping. Three research questions, each with its own benchmark: knowledge popularity (PopQA, Head-to-Tail), answer confidence (the model's own reported probability), and bias (WinoBias, BBQ).</p>
+
+    <h2>The wrongness doesn't announce itself</h2>
+    <p>The most immediately actionable finding is the confidence one. When a compressed model gets a question wrong that the uncompressed model got right, you'd hope it at least sounds less sure — that's the signal a user, or a downstream system, could act on. It mostly doesn't happen. At aggressive compression settings, 85 to 99% of these newly-wrong answers arrive with confidence that hasn't meaningfully dropped — median reported confidence sits at 0.4–0.6, nowhere near the collapse-toward-uncertainty you'd want to see. And the miscalibration isn't evenly spread: under 4-bit GPTQ, the model is <strong>up to 1.20x more confident</strong> when it's wrong about a well-known (head-of-distribution) fact than when it's wrong about an obscure one — confidently wrong is concentrated exactly on the facts a user would be most likely to trust without checking.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Setting</th><th style="padding:6px 10px;">Confidence unchanged on newly-wrong answers</th><th style="padding:6px 0;">Detail</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Aggressive compression, all 11 methods pooled</td><td style="padding:6px 10px;"><strong>85–99%</strong></td><td style="padding:6px 0;">Median confidence 0.4–0.6 — no drop toward uncertainty</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">4-bit GPTQ, head-knowledge vs. tail-knowledge wrong answers</td><td style="padding:6px 10px;"><strong>up to 1.20×</strong> more confident on head</td><td style="padding:6px 0;">Model is most sure exactly where damage concentrates</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2608.19670, "The Asymmetric Harms of LLM Compression," §RQ2 (Wu, Li, Semenova, Zhong, Aug 20 2026).</p>
+
+    <h2>Compression forgets backwards</h2>
+    <p>The paper's second finding inverts a specific, common assumption: that shrinking a model trims the long tail first — the rare facts, the niche trivia — while the popular, well-represented knowledge survives because it was reinforced more during training. Under moderate N:M structured pruning (10–15% sparsity), the opposite happens. Normalized to each model's own baseline accuracy, tail-knowledge retention runs <strong>22.7 to 39.5 percentage points above</strong> the model's overall retention, while head-knowledge retention runs <strong>3.6 to 14.4 points below</strong> it — a gap that reaches <strong>42.4 to 52.7 percentage points</strong> across the three tested models. Quantization (4-bit GPTQ/AWQ/OmniQuant) shows the same direction, but far smaller: within 5.3 points, not 40-plus.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Compression method</th><th style="padding:6px 10px;">Head-knowledge Δ vs. own baseline</th><th style="padding:6px 10px;">Tail-knowledge Δ vs. own baseline</th><th style="padding:6px 0;">Gap</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">N:M structured pruning (10–15% sparsity)</td><td style="padding:6px 10px;">3.6–14.4 pts <em>below</em></td><td style="padding:6px 10px;">22.7–39.5 pts <em>above</em></td><td style="padding:6px 0;"><strong>42.4–52.7 pts</strong></td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">4-bit quantization (GPTQ / AWQ / OmniQuant)</td><td style="padding:6px 10px;">same direction</td><td style="padding:6px 10px;">same direction</td><td style="padding:6px 0;">within 5.3 pts</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: arXiv:2608.19670, §RQ1 (PopQA / Head-to-Tail knowledge-popularity benchmarks), all three models (Llama-3.1-8B-Instruct, Qwen-3-8B, Gemma-2-9B-it).</p>
+
+    <p>Worth being precise about scale here: the dramatic 40-plus-point swing is a <em>pruning</em> result — deleting weights or entire layers, not what any GGUF quantization does. Quantization's version of the same effect is real but an order of magnitude smaller. That distinction matters for what comes next.</p>
+
+    <h2>The bias number the aggregate hides</h2>
+    <p>A third result, included here because it's the kind of thing an "overall change looks fine" summary would miss: aggregate WinoBias bias scores stay close to zero after compression in most settings — which sounds reassuring until you look at subgroups. Under 3-bit OmniQuant, stereotypical-preference scores move +6 points for the male group and −4 points for the female group — a net shift near zero that's actually two real, opposite-signed shifts cancelling in the average. Under SparseGPT 2:4 structured pruning, one single occupation category swings <strong>−53.1 points</strong> (95% CI [−77.7, −14.1]) while the paper's reported overall bias change for that run is only −2.2 points. An aggregate metric can report "nothing changed" while a specific subgroup or category takes a large, real hit.</p>
+
+    <h2>What this means — and doesn't — for a Q4_K_M catalog</h2>
+    <p>privateSLM's entire catalog philosophy rests on Q4_K_M GGUF quantization: everything in the Generalists tier ships at that bit-width or the nearest equivalent. This paper doesn't test GGUF K-quants — GPTQ, AWQ and OmniQuant are different quantization algorithms with different error-distribution properties, the same honest caveat we've made every time we've cited a GPTQ or bitsandbytes paper against our own GGML-based engine. The tested models (8–9B) are also one size class above everything we ship (sub-4B). Neither caveat makes the finding irrelevant — it makes it a hypothesis worth taking seriously about our own tier, not a measurement of it.</p>
+
+    <p>What we can say without hedging: the paper's quantization results (not just pruning) show the same-direction head/tail inversion and the same confident-when-wrong pattern, just smaller in magnitude. That's the more troubling half of the paper for an app built on the promise that a private, offline model is trustworthy precisely because nothing about it is hidden from the user — a model that's confidently wrong about well-known facts, with no drop in stated certainty to flag it, undercuts that promise in a way that has nothing to do with privacy and everything to do with whether the answer in front of you deserves the confidence it's presented with.</p>
+
+    <h2>Caveats, so we're not the ones being overconfident</h2>
+    <p>This is a single preprint, three days old, zero citations, not peer reviewed, with no independent replication yet — treat the exact percentages as this-paper's-numbers, not settled constants. The effect is also non-monotonic: it partially narrows at the most extreme compression setting tested (25% ShortGPT layer-dropping), so "more compression, more inversion" isn't a clean linear rule. The benchmarks (PopQA, Head-to-Tail, WinoBias, BBQ) are English-only, with no multilingual cross-check — a gap we've flagged before is relevant here too, given what we found about non-English quantization damage in <a href="2026-08-15-multilingual-quantization-tax.html">an earlier piece</a>. And the models tested are larger than what we actually ship, so the magnitude at true phone-class sub-4B scale is, honestly, unknown until someone runs it.</p>
+
+    <p>What we're taking from this isn't "stop shipping Q4_K_M" — the paper doesn't test our quantization scheme and we're not going to overclaim what it didn't measure. It's that "the model still sounds just as sure" is not evidence the model is still right, at any compression level, and that's worth knowing before you trust a confident-sounding answer from a compressed model — including ours.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — private AI that stays on your device</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
