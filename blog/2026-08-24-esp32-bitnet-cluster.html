@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seven computers, 1.53 watts, and a builder who tells you upfront it outputs gibberish — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Low-Zi-Hong split a 24-layer 0.5B transformer across seven ESP32-S3 microcontrollers over an SPI daisy-chain — 1.53 W for the whole cluster, 1.3 s per node per token. The pipeline works. The weights, by the builder's own disclaimer, do not.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-24-esp32-bitnet-cluster.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Seven computers, 1.53 watts, and a builder who tells you upfront it outputs gibberish</h1>
+    <div class="meta">August 24, 2026 · 8 min read · Edge in the Wild</div>
+
+    <p>A 24-layer transformer is running across seven separate computers wired in a ring, and the whole cluster draws 1.53 watts — roughly a four-hundredth of one datacenter GPU. Every part of that pipeline works: the tokenizer, the ternary matrix kernels in hand-written assembly, the KV cache, the SPI hand-off, the sampler. And the model at the end produces nonsense — which the builder states plainly in his own setup guide, before you've flashed a single board: "This script just partially train, the loss will hit somekind of 8.0. It will be just spitting out random tokens."</p>
+
+    <p>That gap — a finished distributed inference engine wrapped around admittedly untrained weights — is a distinction most on-device AI coverage collapses.</p>
+
+    <p><strong>Source &amp; credit:</strong> the project, firmware, quantization tooling and photo are the work of <strong>Low-Zi-Hong</strong>. Full repo, MIT licensed: <a href="https://github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster" target="_blank" rel="noopener">github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster</a>. All figures below are the builder's own, from the repo's <a href="https://github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster/blob/main/README.md" target="_blank" rel="noopener">README</a> and <a href="https://github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster/blob/main/workflow.md" target="_blank" rel="noopener">workflow guide</a>, except where we say otherwise.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/esp32-cluster-hero.jpg" alt="Seven ESP32-S3 development boards laid out across two breadboards, wired together with red and black jumper wires, power LEDs lit red and status LEDs green" loading="lazy" style="width:100%;max-width:1000px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">The actual cluster: one master and six compute nodes on two breadboards. Photo by the builder, <a href="https://github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster" target="_blank" rel="noopener">Low-Zi-Hong</a> (EXIF: Canon EOS R50, 22 August 2026). Two of the modules are legibly marked <code>ESP32-S3-N16R8</code> — the 16 MB flash / 8 MB PSRAM variant, which is what makes the per-node budget below fit.</figcaption>
+    </figure>
+
+    <h2>Yes, this is another ESP32 post. No, it isn't the same one.</h2>
+    <p>We should say this first, because we've noticed it too: this is the fifth ESP32-S3 language-model project we've covered since August 1. The previous four — <a href="2026-08-01-esp32-tinystories-ple.html">slvDev's flash-resident 28.9M model</a>, <a href="2026-08-10-qapla-esp32-onchip-training.html">Carloscodix's on-chip training run</a>, <a href="2026-08-14-nanomind-s3-esp32.html">Salman Farsi's fully dense 15.2M transformer</a>, and <a href="2026-08-18-needle2-esp32.html">Andris Gauračs's from-scratch C99 engine</a> — were all <em>single-board</em> builds, asking how much model you can cram into one chip.</p>
+
+    <p>This one asks the opposite question. Instead of shrinking a model until it fits one microcontroller, it splits a model too big for any of them across seven and pays in wires — the first distributed build in the group, closer conceptually to <a href="2026-07-18-strix-halo-cluster.html">Tim Schupp's two-node Strix Halo cluster</a> than to any of the ESP32 projects, but assembled from single-digit-dollar parts.</p>
+
+    <h2>How you cut a transformer into seven pieces</h2>
+    <p>The model is a 0.5B-parameter Qwen2 architecture: hidden size 896, 24 transformer blocks, 14 query heads against 2 key/value heads in grouped-query attention, head dimension 64. The split follows the layer boundaries exactly.</p>
+
+    <p>The master board holds the BPE tokenizer, the embedding table and the LM head, and does the sampling. Each of the six compute nodes holds four consecutive blocks — node 1 gets layers 0–3, node 2 layers 4–7, on to node 6 with layers 20–23. A token's hidden-state vector enters the master, walks the chain over SPI, and returns to the master to become the next token. It's pipeline parallelism in the textbook sense, on $5 parts over jumper wire.</p>
+
+    <p>Each board carries two SPI channels — one master, one slave — making it a true daisy-chain rather than a shared bus, with the last node's line running back to the master's GPIO 3 to signal readiness.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Quantity</th><th style="padding:6px 10px 6px 0;">Figure</th><th style="padding:6px 0;">Note</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Boards</td><td style="padding:6px 10px 6px 0;">7 (1 master + 6 nodes)</td><td style="padding:6px 0;">ESP32-S3-N16R8, per the photo's legible module markings</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Weight precision</td><td style="padding:6px 10px 6px 0;">1.58-bit ternary</td><td style="padding:6px 0;">BitNet {−1, 0, 1}; 4 weights packed per byte</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Embedding precision</td><td style="padding:6px 10px 6px 0;">INT4</td><td style="padding:6px 0;">LM head tied to the same table</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Per-layer footprint</td><td style="padding:6px 10px 6px 0;">~3.82 MB</td><td style="padding:6px 0;">packed ternary weights + FP16 scales &amp; norms</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Per-node flash</td><td style="padding:6px 10px 6px 0;">~15.3 MB (4 layers)</td><td style="padding:6px 0;">against a 16 MB partition — 95% full</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Master flash</td><td style="padding:6px 10px 6px 0;">~14.0 MB + 64 KB</td><td style="padding:6px 0;">INT4 embeddings; final RMS norm in its own partition</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Vocabulary</td><td style="padding:6px 10px 6px 0;">pruned to 32K tokens</td><td style="padding:6px 0;">the builder's stated ceiling for 16 MB of flash</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Context window</td><td style="padding:6px 10px 6px 0;">512 tokens</td><td style="padding:6px 0;">KV cache lives in each node's PSRAM</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Per-node latency</td><td style="padding:6px 10px 6px 0;">1.3 s</td><td style="padding:6px 0;">builder's measurement</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Power, idle</td><td style="padding:6px 10px 6px 0;">~1.17 W</td><td style="padding:6px 0;">measured at 5 V, 0.23 A</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Power, inferencing</td><td style="padding:6px 10px 6px 0;">~1.53 W</td><td style="padding:6px 0;">0.3 A; see note on the stated voltage below</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: <a href="https://github.com/Low-Zi-Hong/ESP32s3-LLM-Cluster/blob/main/workflow.md" target="_blank" rel="noopener">workflow.md</a>, "Model Specification" and "Powering" sections. The active-power line reads "0.5V and 0.3A around 1.53W" — 0.5 V × 0.3 A is 0.15 W, not 1.53 W, so the stated voltage is evidently a typo for 5 V, consistent with both the arithmetic and the idle measurement on the line above it. We're quoting the wattage the builder reports, not re-deriving one.</p>
+
+    <h2>The number that matters: 1.3 seconds, six times over</h2>
+    <p>The builder gives one latency figure — "currently each node spent 1.3s to inference" — while explaining that the architecture is unbounded: "if u have 100 of them then it will be 400 layers of model. Just that the time of inference will linearly growth while u scale up."</p>
+
+    <p>That last clause is the whole story, and it runs exactly backwards from how clustering usually works. Adding machines to a normal cluster buys throughput. Adding boards to <em>this</em> one buys model capacity and <strong>costs</strong> latency, linearly, because the boards sit in series, not parallel — each node must finish its four layers before the next can start. Six nodes at 1.3 seconds each puts a token on the order of eight seconds to cross the chain. That arithmetic is ours, not the builder's, and it excludes the master's own work and every SPI transfer, so treat it as a floor, not a benchmark. The repo ships a <code>/bench</code> command, so the real end-to-end figure is measurable by anyone who builds one — it just isn't published, and we won't invent it.</p>
+
+    <h2>Why 1.53 watts is the figure worth stealing</h2>
+    <p>Set the speed aside and look at the power, because that's where this build generalizes. Seven microcontrollers, all awake and computing, come to about 1.53 watts — and the gap between idling and actively running a transformer is roughly 0.36 W. Inference here is nearly free relative to just having the hardware switched on.</p>
+
+    <p>Phones don't get that ratio. On a phone the marginal cost of running a model is enormous against idle — the reason we've written about <a href="2026-08-13-thermal-cliff.html">an iPhone 16 Pro losing 44% of its throughput by the eighth reply</a> and <a href="2026-07-20-energy-cost-of-open-models.html">llama.cpp costing 2.3x the energy per token of Apple's own path</a>. Ternary weights on microcontrollers invert it: there is no thermal cliff to fall off, because there was never enough heat to matter. The trade is eight seconds a token.</p>
+
+    <h2>The honesty is the feature</h2>
+    <p>Most projects at this stage would ship a cherry-picked screenshot of one good completion and let you assume the rest. This repo's setup guide does the opposite, in three places.</p>
+
+    <p>It tells you the fine-tune in <code>qat_158.py</code> is partial, that loss plateaus around 8.0, and that output will be random tokens — and points you at a verification script so you can confirm it before flashing seven boards. It warns that the 2-bit ternary packing order in the Python tooling must match the unpacking logic in the C and assembly exactly, because a mismatch "won't crash anything — it'll silently corrupt every weight and produce degenerate/repetitive output." And it warns that flashing the wrong layer range to the wrong position in the chain "won't throw an error — it will silently produce garbage output," because nothing in the protocol knows which layers a board should hold.</p>
+
+    <p>Those last two are the same class of bug we keep finding in production engines, at a fraction of the scale: <a href="2026-08-17-slm-daily-13.html">llama.cpp silently zero-padding corrupted LoRA files</a>, <a href="2026-08-12-slm-daily-10.html">an ordering bug disabling sliding-window attention</a>, <a href="2026-08-16-prompt-cache-session-bleed.html">a prompt cache handing one session's content to another</a>. Wrong-but-fluent output with no error anywhere is this field's characteristic failure mode, and a hobbyist documenting it before you hit it is doing something a lot of shipping software doesn't. The repo also credits its lineage properly — a <a href="https://github.com/harmansingh4163-ai/ESP-32-s3-Story-maker-LLM" target="_blank" rel="noopener">single-node ESP32-S3 story generator</a>, <a href="https://github.com/wladimiravila/esp32s3-distributed-ai" target="_blank" rel="noopener">esp32s3-distributed-ai</a> for the multi-node design, and <a href="https://github.com/microsoft/BitNet" target="_blank" rel="noopener">Microsoft's BitNet</a> for the ternary scheme.</p>
+
+    <h2>Why it matters here</h2>
+    <p>The wedge this blog keeps returning to is that the model should come to your data rather than the reverse, and the usual objection is that the hardware near your data isn't good enough. This build cuts both ways at once.</p>
+
+    <p>One way, it's an existence proof with the ceiling removed: model capacity on microcontrollers isn't bounded by any single chip's flash, and the power budget barely moves as you add chips. The other way, it's a reminder that a working runtime and a working product are different achievements. Everything hard about the engineering is finished; the thing a user actually wants — a model that answers — needs training compute this build never had. We ship a catalog of other people's trained weights for exactly that reason.</p>
+
+    <p>Anyone with seven boards, jumper wire and a GPU good enough to finish the fine-tune could close that gap. The instructions are all there, MIT licensed — including the part that tells you what will go wrong.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you build this chain and run <code>/bench</code>, we'd genuinely like the end-to-end number.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

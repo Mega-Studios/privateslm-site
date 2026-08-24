@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three models in our catalog open a &lt;think&gt; block. Our engine deletes it before the model sees a token. — privateSLM blog</title>
+  <meta name="description" content="llama.cpp ships two chat-template systems in one repo: a real Jinja engine, and a C function that pattern-matches your template against 55 hardcoded approximations. Apps that link libllama directly get the second one — and exactly one of those 55 ever writes a <think> tag.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-24-chat-template-lookalike.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Three models in our catalog open a <code>&lt;think&gt;</code> block. Our engine deletes it before the model sees a token.</h1>
+    <div class="meta">August 24, 2026 · 11 min read</div>
+
+    <p>Liquid AI documents LFM2.5-2.6B as "a pure reasoning model that always thinks before it answers," and its chat template backs that up in the bluntest possible way: line 124 ends every prompt with a literal <code>&lt;think&gt;</code> tag, unconditionally, with no flag to turn it off. Our app ships that model. It reads that exact template out of the GGUF. And then it hands the model a prompt ending in <code>&lt;|im_start|&gt;assistant\n</code> — with no <code>&lt;think&gt;</code> anywhere in it.</p>
+
+    <p>That isn't a bug in our code. The llama.cpp C function we call to render chat templates does not render chat templates. It reads yours, compares it against 55 hardcoded C++ emitters, picks whichever one looks closest, and emits that instead. Exactly one of those 55 ever writes a <code>&lt;think&gt;</code> tag, and it belongs to a model family we don't ship.</p>
+
+    <h2>The function whose own header tells you</h2>
+    <p>The API is <code>llama_chat_apply_template()</code>, and to its credit it does not hide this. From <code>include/llama.h</code> at our pinned release, <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10488" target="_blank" rel="noopener">b10488</a>, line 1206:</p>
+
+    <pre><code>/// Apply chat template. Inspired by hf apply_chat_template() on python.
+///
+/// NOTE: This function does not use a jinja parser. It only support a
+/// pre-defined list of template. See more: ...Templates-supported-by-llama_chat_apply_template</code></pre>
+
+    <p>And the signature, at line 1214:</p>
+
+    <pre><code>LLAMA_API int32_t llama_chat_apply_template(
+                          const char * tmpl,
+        const struct llama_chat_message * chat,
+                              size_t   n_msg,
+                                bool   add_ass,
+                                char * buf,
+                             int32_t   length);</code></pre>
+
+    <p>Six parameters. There is no seventh for template variables, which means there is no way — none, at any call site, in any app — to pass <code>enable_thinking</code>, <code>reasoning_effort</code>, or any other keyword argument the model's real template branches on. The information simply has nowhere to go.</p>
+
+    <h2>What our app actually calls</h2>
+    <p>Our engine wrapper, <code>Sources/LlamaEngine.swift</code>, pulls the template string out of the model file and passes it straight in. Line 231:</p>
+
+    <pre><code>rendered = Self.render(cMessages, tmpl: llama_model_chat_template(model, nil))</code></pre>
+
+    <p>and <code>render</code>, at line 241, calls the function above. So we are doing the ordinary, documented thing that a native app linking <code>libllama</code> does. We fetch the model's own template and ask llama.cpp to apply it. The gap opens inside that second step.</p>
+
+    <h2>The 55-way guess</h2>
+    <p>Inside <code>src/llama-chat.cpp</code>, the template string is first looked up as a <em>name</em> — "chatml", "gemma", "deepseek3" and 51 others (54 are addressable by name; one more, <code>dots1</code>, is reachable only by content detection, for 55 emitters in total). We don't pass a name; we pass several kilobytes of Jinja source, so that lookup misses and the code falls through to a chain of substring tests. The very first one, at line 101, decides the outcome for most modern models:</p>
+
+    <pre><code>if (tmpl_contains("&lt;|im_start|&gt;")) {
+    return tmpl_contains("&lt;|im_sep|&gt;")
+        ? LLM_CHAT_TEMPLATE_PHI_4
+        : tmpl_contains("&lt;end_of_utterance&gt;")
+            ? LLM_CHAT_TEMPLATE_SMOLVLM
+            : LLM_CHAT_TEMPLATE_CHATML;
+}</code></pre>
+
+    <p>That branch is a one-way door. Any template mentioning <code>&lt;|im_start|&gt;</code> resolves to ChatML (or Phi-4, or SmolVLM) right there, and none of the remaining rules ever run. LFM2.5-2.6B's template mentions <code>&lt;|im_start|&gt;</code> three times, <code>&lt;|im_sep|&gt;</code> zero times and <code>&lt;end_of_utterance&gt;</code> zero times — we checked the raw file — so it lands on plain ChatML. There is no LFM2 emitter in the list to land on anyway; we grepped every name in that table and every enum member beside it, and LFM2 is in neither, despite <code>lfm2</code> being a fully supported <em>architecture</em> in the same build.</p>
+
+    <p>And here is the ChatML emitter it gets instead, line 250:</p>
+
+    <pre><code>if (tmpl == LLM_CHAT_TEMPLATE_CHATML) {
+    for (auto message : chat) {
+        ss &lt;&lt; "&lt;|im_start|&gt;" &lt;&lt; message-&gt;role &lt;&lt; "\n"
+           &lt;&lt; message-&gt;content &lt;&lt; "&lt;|im_end|&gt;\n";
+    }
+    if (add_ass) {
+        ss &lt;&lt; "&lt;|im_start|&gt;assistant\n";
+    }
+}</code></pre>
+
+    <p>Nine lines, no <code>&lt;think&gt;</code>, no conditionals, no knowledge that the model it's formatting for was trained to expect one. Searching the whole file for a <code>&lt;think&gt;</code> emission returns a single hit, at line 741, guarded by <code>LLM_CHAT_TEMPLATE_BAILING_THINK</code> — Ant Group's Ling family. Every other reasoning model in the world, routed through this API, gets its thinking prefill silently dropped.</p>
+
+    <h2>What it costs us, model by model</h2>
+    <p>We ran the same check across our eight Generalist catalog entries against the templates their vendors publish. Every one of the five readable templates below contains <code>&lt;|im_start|&gt;</code>, so every one resolves through that first branch.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Catalog model</th><th style="padding:6px 10px 6px 0;">What its own template does</th><th style="padding:6px 0;">What our engine sends</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LFM2.5 2.6B</td><td style="padding:6px 10px 6px 0;">opens <code>&lt;think&gt;</code> unconditionally (line 124)</td><td style="padding:6px 0;"><strong>prefill dropped</strong></td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Nanbeige4.2 3B</td><td style="padding:6px 10px 6px 0;">opens <code>&lt;think&gt;</code> unless <code>enable_thinking</code> is false — and it defaults on</td><td style="padding:6px 0;"><strong>prefill dropped</strong></td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">G9v3 3B</td><td style="padding:6px 10px 6px 0;">emits a think marker only if <code>enable_thinking</code> is explicitly passed</td><td style="padding:6px 0;">same as its template — by luck, see below</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LFM2.5 1.2B Instruct</td><td style="padding:6px 10px 6px 0;">no thinking prefill; reasoning is a separate checkpoint</td><td style="padding:6px 0;">no loss</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Qwen2.5 1.5B Instruct</td><td style="padding:6px 10px 6px 0;">plain ChatML, no thinking</td><td style="padding:6px 0;">no loss</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Sources: each vendor's own <code>chat_template.jinja</code> or <code>tokenizer_config.json</code> on Hugging Face, fetched 2026-08-24; template resolution traced against <code>src/llama-chat.cpp</code> at b10488. Gemma 2 2B and Llama 3.2 3B are omitted because their template files sit behind a gated licence our fetch can't read — not because they were checked and cleared. Phi-4 Mini's template contains no <code>&lt;|im_start|&gt;</code> and takes a different path we haven't traced.</p>
+
+    <p>G9v3-3B deserves the asterisk. Its template only writes a think marker when <code>enable_thinking</code> is explicitly set either way; omit it and the template writes nothing. Since our API physically cannot pass that variable, the "correct" Jinja output and our ChatML approximation happen to agree. We get the right prompt for the wrong reason, and if AI9Stars ever changes that default we'd never notice.</p>
+
+    <h2>The other template engine, in the same repository</h2>
+    <p>Here's the part that turns this from a limitation into a choice. llama.cpp <em>does</em> ship a real Jinja engine. It lives in <code>common/jinja</code>, it's used by <code>llama-server</code> and <code>llama-cli</code> through <code>common/chat.cpp</code>, and it handles exactly the things the C API cannot:</p>
+
+    <pre><code>bool common_chat_templates_support_enable_thinking(...)   // chat.cpp:357
+const std::map&lt;std::string, std::string&gt; &amp; chat_template_kwargs  // chat.cpp:685
+{"enable_thinking", inputs.enable_thinking},              // chat.cpp:946</code></pre>
+
+    <p>There is even a <code>--chat-template-kwargs</code> command-line flag, and <code>common/arg.cpp</code> carries a deprecation warning telling you to use <code>--reasoning-budget</code> instead — a whole feature surface built around the variable our path can't carry. The repo ships <code>models/templates/LFM2.5-Instruct.jinja</code> as a test fixture, so the project is explicitly testing LFM2.5's real template through the Jinja path while the C path has no LFM2 entry at all.</p>
+
+    <p>So one binary contains two chat-template systems: a correct one in <code>libcommon</code>, and a 55-entry lookalike in <code>libllama</code>. Which one you get depends entirely on which library you linked, and nothing at runtime tells you which you're using or which of the 55 guesses your model landed on. That's the real finding. It isn't that llama.cpp is wrong — it's that the fast, obvious integration path for a native app is the lossy one, and it fails silently by design.</p>
+
+    <h2>The failure mode we have to own separately</h2>
+    <p>Dropping the prefill is one half. The other half is what happens if a model emits <code>&lt;think&gt;</code> on its own anyway — which a reasoning model trained to do so will often do, prefill or not.</p>
+
+    <p>Our reply-length default is 512 tokens (<code>LlamaSettings.swift</code>, line 12), and that cap covers the whole generation, thinking included (<code>LlamaEngine.swift</code>, line 55). Our UI parser, <code>ChatView.parseThink</code> at line 211, splits a reply on <code>&lt;think&gt;</code> … <code>&lt;/think&gt;</code>. If the closing tag never arrives because the cap cut generation off mid-thought, it returns the thinking text and an <em>empty</em> answer string — and the view at line 188 renders a collapsed "Thinking…" disclosure with nothing beside it. No answer, no error, no hint that a length limit is responsible. The user gets a permanently thoughtful, permanently silent assistant.</p>
+
+    <p>This is not hypothetical elsewhere either. Ollama has an open issue, <a href="https://github.com/ollama/ollama/issues/17561" target="_blank" rel="noopener">#17561</a> (mann1x, 4 August 2026), proposing exactly the fix this needs — a separate thinking budget. It restates the problem from a linked issue, #16583: "thinking mode consumes the entire <code>num_predict</code> token budget with internal reasoning, leaving no tokens for the actual response." In the reporter's own test, <code>think: true</code> returned 7,208 characters of reasoning and zero characters of content, while capping thinking at 256 tokens returned 614 characters of reasoning plus 6,186 characters of usable answer. Same budget, useful answer, because the reasoning was bounded instead of the reply.</p>
+
+    <h2>Why this bites hardest on a phone</h2>
+    <p>Reasoning defaults are set by people benchmarking on datacenter hardware. Qwen3.8-27B's model card lists <code>xhigh</code> as its default <code>reasoning_effort</code> — "for complex tasks demanding thorough analysis" — and states the model "operate[s] in thinking mode by default." Simon Willison <a href="https://simonwillison.net/2026/Aug/16/qwen-38-27b/" target="_blank" rel="noopener">measured what that costs locally</a>: 22,276 reasoning tokens to produce 3,223 tokens of output on a draw-me-an-SVG prompt, 21 minutes end to end on a 128 GB M5 Max at LM Studio's 15–30 tokens a second. The same prompt with reasoning off finished in 137 seconds. He calls the default "absolutely not a good way to run the model, especially on consumer hardware."</p>
+
+    <p>Now scale the hardware down to what our users actually hold. The <a href="https://arxiv.org/abs/2603.23640" target="_blank" rel="noopener">sustained-load study</a> behind <a href="2026-08-13-thermal-cliff.html">our thermal-cliff post</a> measured Qwen 2.5 1.5B at 4-bit on an iPhone 16 Pro peaking at 40.49 tok/s and settling to a Hot-state 23.67 ± 0.28 tok/s, and a Galaxy S24 Ultra averaging 10.83 tok/s (CV 6.9%). At the iPhone's sustained rate, every 1,000 tokens of thinking is 42 seconds of staring at a blank bubble before the answer starts. On the Galaxy, 92 seconds. That's the arithmetic, and it's ours — we do not have a measured thinking-token distribution for the specific 3B models in our catalog on phone hardware, and we're not going to borrow Qwen3.8-27B's 22,276 and pretend it transfers to a 2.6B model.</p>
+
+    <h2>What we can't claim</h2>
+    <p>Three honest limits on all of the above.</p>
+
+    <p>We have verified the prompt our engine constructs by reading the code paths end to end. We have <em>not</em> instrumented a device to dump the final prompt string, and we have not measured whether LFM2.5-2.6B and Nanbeige4.2-3B recover on their own — emitting <code>&lt;think&gt;</code> unprompted because that's what they were trained to do — or whether the missing prefill degrades their answers measurably. Both are plausible. Neither is established, and "the vendor's specified prompt is not what we send" is a defect regardless of how gracefully the model copes.</p>
+
+    <p>Second, two of our eight Generalists sit behind gated licences our automated fetch can't read, so that table has holes we've marked rather than filled.</p>
+
+    <p>Third, this is a template-layer problem, not the architecture-support problem we <a href="architecture-gate.html">wrote about in July</a>. Those models load and run fine. This is the layer above: the model loads, the architecture is supported, generation works, and the prompt is quietly not the one the model was trained on.</p>
+
+    <h2>What we're doing about it</h2>
+    <p>The fix is to stop calling <code>llama_chat_apply_template</code> and render the model's real template through the Jinja path that already exists in the same source tree — which for a Swift app means linking or bridging <code>libcommon</code> rather than <code>libllama</code> alone, a heavier build than the xcframework we currently fetch. That's a real piece of work, not a one-line patch, and we're not going to announce a ship date we haven't scoped.</p>
+
+    <p>The smaller, immediate change is the reply cap. A 512-token default that silently swallows a reasoning model's entire output is indefensible now that we've traced it, and bounding thinking separately from the reply — the thing Ollama's issue asks for — is the correct shape of the fix.</p>
+
+    <p>The reason to publish this before either lands is that no user could have discovered it. There is no log line, no warning, no setting, and no observable difference except answers that are slightly worse than the model can produce. If you're building on <code>libllama</code> directly, you have this too, and you can check it in about a minute: grep your model's template for <code>&lt;|im_start|&gt;</code>, and if it's there, you're getting ChatML no matter what else that template says.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — if you've dumped the actual rendered prompt from a llama.cpp-based app and compared it against the model's Jinja, we'd like to see it.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
