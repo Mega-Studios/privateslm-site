@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #17: one tensor op was making 65,536 memcpy calls of four bytes each — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #17: a tensor concat in llama.cpp went from 1.61 ms to 0.012 ms once someone replaced per-element memcpy with row copies. Plus a silent image-resize accuracy bug across 22 vision models. Zero catalog changes; three candidates checked and skipped, and why.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-24-slm-daily-17.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #17: one tensor op was making 65,536 memcpy calls of four bytes each</h1>
+    <div class="meta">August 24, 2026 · 5 min read</div>
+
+    <p>A single tensor operation in llama.cpp was issuing 65,536 separate <code>memcpy</code> calls of four bytes each. Someone replaced them with row copies on August 22, and the same operation dropped from 1.61 ms to 0.012 ms — 133x. That's the good news since our last edition (2026-08-22T04:45 UTC), spanning build tags b10570 through <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10603" target="_blank" rel="noopener">b10603</a>. The less good news landed the next day: twenty-two vision models turned out to have been preprocessing images the wrong way for months.</p>
+
+    <h2>The concat that was copying four bytes at a time</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/24575" target="_blank" rel="noopener">PR #24575</a>, merged August 22, rewrote ggml's <code>concat</code> operation. The old code walked the tensor element by element, issuing one <code>memcpy</code> per element — 65,536 calls of four bytes each on the shape the author benchmarked. The new code collapses the innermost loop and copies whole rows.</p>
+
+    <p>On a [4096 × 1 × 16 × 1] fp32 concat along dim 2, measured on an M1 Air over 200 runs:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Condition</th><th style="padding:6px 10px 6px 0;">Before</th><th style="padding:6px 10px 6px 0;">After</th><th style="padding:6px 0;">Speedup</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Warm cache</td><td style="padding:6px 10px 6px 0;">1.61 ms/call</td><td style="padding:6px 10px 6px 0;">0.012 ms/call</td><td style="padding:6px 0;">133x</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Cold cache</td><td style="padding:6px 10px 6px 0;">1.59 ms/call</td><td style="padding:6px 10px 6px 0;">0.019 ms/call</td><td style="padding:6px 0;">83x</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: <a href="https://github.com/ggml-org/llama.cpp/pull/24575" target="_blank" rel="noopener">ggml-org/llama.cpp#24575</a>, author's own microbenchmark. Note this is an isolated op benchmark, not end-to-end generation — the PR makes no claim about tokens/sec, and neither do we.</p>
+
+    <p>The caveat matters: a 133x win on one operator is not a 133x win on inference. How much you feel depends on how much wall-clock that operator owned to begin with, and nobody has published that split — not the PR, and not us.</p>
+
+    <h2>22 vision models were being resized wrong</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/27594" target="_blank" rel="noopener">PR #27594</a>, merged August 23 (tag b10598), fixed something more interesting than a speedup: llama.cpp's multimodal path had been using the wrong image-resize algorithm for more than twenty models, relative to the Pillow-based preprocessing those models were actually trained with.</p>
+
+    <p>LLaVA 1.5/1.6, MobileVLM, CogVLM2, Qwen2-VL, GLM-4.xV, Pixtral and Janus Pro were resizing BILINEAR where Hugging Face uses BICUBIC. Idefics3/SmolVLM and HunyuanOCR should have been LANCZOS. The images still loaded, the models still answered, and the embeddings quietly diverged from what training produced. No error, no warning — the exact failure signature we keep writing about, most recently in <a href="2026-08-17-slm-daily-13.html">#13's zero-padded LoRA files</a>. The corrected BICUBIC path is also faster: 4.8x on a 4032×3024 → 1024×1024 downscale, and 53x on a 336×336 → 3072×3072 upscale, both against the legacy implementation.</p>
+
+    <p>This doesn't touch our own users — privateSLM has no code path that hands a model an image, which is <a href="2026-08-13-slm-daily-11.html">the same reason we skipped LFM2.5-VL-3B back in #11</a>. We're flagging it because "silently trained one way, silently run another" is a category of bug worth recognizing on sight.</p>
+
+    <p>A third fix, <a href="https://github.com/ggml-org/llama.cpp/pull/26756" target="_blank" rel="noopener">PR #26756</a> (b10593), repaired multi-sequence rollback for DeepSeek-V4, where parallel decoding plus speculation corrupted compressed KV state across ubatches: "occasional segfault during state-restore at second rollback" before, "clean across 30+ prefill rounds" after. Server-class model; the bug class isn't.</p>
+
+    <h2>New architectures: none you can hold</h2>
+    <p>Follow-up work landed for <code>bailingmoe3</code> (Ant Group's Ling 3.0) including DSpark speculative decoding, which took prediction throughput from 44.20 to 55.73 tok/s on a DGX Spark. Even Ling-3.0-tiny is 7.9B total parameters with 1.3B active — a mixture-of-experts model whose full weights still have to live in memory, so "tiny" here isn't phone-tiny. <code>dots3-note</code>, whose text architecture we covered in <a href="2026-08-22-slm-daily-16.html">#16</a>, picked up vision and audio support; it remains 280B parameters. GLM-4.5-Air gained multi-token prediction at 106B. Nothing sub-4B arrived.</p>
+
+    <h2>Three candidates checked, zero added</h2>
+    <p>Liquid AI published quantization-aware distillation builds of its two smallest models on August 19. We verified both by HTTP HEAD against the vendor's own repo: <code>LFM2.5-350M-QAD-Q4_0.gguf</code> is 219,312,832 bytes (209 MB) and <code>LFM2.5-230M-QAD-Q4_0.gguf</code> is 149,081,056 bytes (142 MB). Both are vendor-quantized, both carry the LFM Open License v1.0 we already accept, and both run on the <code>lfm2</code> architecture our engine supports.</p>
+
+    <p>The numbers are interesting. Liquid's <a href="https://www.liquid.ai/blog/qad" target="_blank" rel="noopener">QAD write-up</a> reports the 350M build retaining 96.5% of its BF16 baseline across seven evals, and the 230M build 97.1% — which sits awkwardly beside <a href="2026-08-18-quantization-scale-tax.html">the retention curve we published six days ago</a>, where a 0.6B model kept 70.8% at 4-bit. Different eval set, and crucially a quantization method applied during training rather than after it. We're noting the tension, not resolving it.</p>
+
+    <p>Neither enters the catalog today. Our Generalists tier is full at eight, and our rules only allow a replacement when a newcomer <em>strictly dominates</em> an incumbent. A 350M model doesn't — it's a different tier of capability, aimed at hardware well below an iPhone. Adding it would mean breaking our own cap or evicting a better model.</p>
+
+    <p>Also checked and out on size: Qwen3.8-27B, Nemotron 3.5 Lightning 30B-A3B and GLM-5.2, all far past our 2.5 GB ceiling even before quantization tricks. Catalog stays at 8 Generalists and 14 specialists.</p>
+
+    <h2>Also today</h2>
+    <p>Two other pieces went up alongside this one: why <a href="2026-08-24-chat-template-lookalike.html">three models in our own catalog ask for a <code>&lt;think&gt;</code> block our engine deletes before the model sees it</a>, and an Edge in the Wild on <a href="2026-08-24-esp32-bitnet-cluster.html">a 24-layer transformer split across seven ESP32-S3 boards drawing 1.53 watts</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

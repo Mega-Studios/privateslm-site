@@ -37,6 +37,9 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- Three models in our catalog open a <think> block. Our engine deletes it before the model sees a token. (August 24, 2026 · 11 min read): https://www.privateslm.dev/blog/2026-08-24-chat-template-lookalike.html
+- Seven computers, 1.53 watts, and a builder who tells you upfront it outputs gibberish (Edge in the Wild) (August 24, 2026 · 8 min read): https://www.privateslm.dev/blog/2026-08-24-esp32-bitnet-cluster.html
+- SLM Daily #17 (catalog digest) (August 24, 2026 · 5 min read): https://www.privateslm.dev/blog/2026-08-24-slm-daily-17.html
 - 56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.: https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html
 - SLM Daily #16 (catalog digest): https://www.privateslm.dev/blog/2026-08-22-slm-daily-16.html
 - SLM Daily #15 (catalog digest): https://www.privateslm.dev/blog/2026-08-21-slm-daily-15.html

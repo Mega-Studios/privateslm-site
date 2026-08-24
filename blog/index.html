@@ -27,6 +27,21 @@
       <p class="lead">Small language models, Apple Intelligence, private machine learning — explained for humans.</p>
 
       <div class="post-list">
+        <a class="post-card" href="2026-08-24-chat-template-lookalike.html">
+          <div class="meta">August 24, 2026 · 11 min read</div>
+          <h3>Three models in our catalog open a &lt;think&gt; block. Our engine deletes it before the model sees a token.</h3>
+          <p>llama.cpp ships two chat-template systems in one repository: a real Jinja engine, and a C function that pattern-matches your model's template against 55 hardcoded approximations. Apps that link libllama directly get the second one — and exactly one of those 55 ever writes a &lt;think&gt; tag.</p>
+        </a>
+        <a class="post-card" href="2026-08-24-esp32-bitnet-cluster.html">
+          <div class="meta">August 24, 2026 · 8 min read · Edge in the Wild</div>
+          <h3>Seven computers, 1.53 watts, and a builder who tells you upfront it outputs gibberish</h3>
+          <p>Low-Zi-Hong split a 24-layer 0.5B transformer across seven ESP32-S3 microcontrollers over an SPI daisy-chain — 1.53 W for the whole cluster, 1.3 s per node per token. Every part of the pipeline works. The weights, by the builder's own disclaimer, do not.</p>
+        </a>
+        <a class="post-card" href="2026-08-24-slm-daily-17.html">
+          <div class="meta">August 24, 2026 · 5 min read</div>
+          <h3>SLM Daily #17: one tensor op was making 65,536 memcpy calls of four bytes each</h3>
+          <p>A tensor concat in llama.cpp went from 1.61 ms to 0.012 ms once someone replaced per-element memcpy with row copies. Plus a silent image-resize accuracy bug across 22 vision models. Zero catalog changes; three candidates checked and skipped, and why.</p>
+        </a>
         <a class="post-card" href="2026-08-22-int4-kernel-tax.html">
           <div class="meta">August 22, 2026 · 9 min read</div>
           <h3>56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.</h3>
