@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>63 unconstrained, 18 with a stopwatch: the "best small model" changes with how long you'll wait — privateSLM blog</title>
+  <meta name="description" content="Artificial Analysis and Liquid AI's new phone benchmark scores 33 quantized models on a real iPhone 17 Pro under a realistic one-minute reply budget instead of unlimited output length. Nanbeige4.2-3B ties for #1 untimed at 63 — then scores 18, worst in its class, once the clock is real. It's also the model privateSLM added to its own catalog three weeks ago for beating models three times its size.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-25-timed-benchmark-reranking.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>63 unconstrained, 18 with a stopwatch: the "best small model" is a different model depending on how long you'll wait</h1>
+    <div class="meta">August 25, 2026 · 9 min read</div>
+
+    <p>63 and 18 are the same number, from the same model, on the same test, sixty seconds apart. Nanbeige4.2-3B ties for #1 on the small-model leaderboard Artificial Analysis and Liquid AI published August 24, scored on an iPhone 17 Pro with no limit on reply length. Give it the one real minute an actual phone user would wait instead, and its score falls to 18 — a two-thirds collapse that lets another model it just beat pass it. No small-model leaderboard has published a number this way before. Every existing ranking has been quietly measuring the wrong question — and the model that just got exposed by the new one is sitting in privateSLM's own catalog.</p>
+
+    <h2>A benchmark built because everything else measures the wrong class of model</h2>
+    <p>The article, <a href="https://artificialanalysis.ai/articles/mobile-phone-intelligence-inference" target="_blank" rel="noopener">"Intelligence at pocket scale"</a> (Artificial Analysis, August 24, 2026), is explicit about why it exists: "most headline benchmarks were built to separate frontier models, and small models cluster near the floor on them" — GDPval-AA v2 and Terminal-Bench v2.1, the tests that rank Claude and GPT-class models, produce near-zero scores for anything phone-sized, which tells you nothing about which 3B model is actually better than which other 3B model. So Artificial Analysis built a five-benchmark intelligence index sized for this class specifically — BFCL (a 640-task tool-calling subset), IFBench, AA-Omniscience, GPQA Diamond and MATH-500 — and had Liquid AI run the actual device side: 41 quantized builds, 4-bit or smaller, served through llama.cpp, timed on a real iPhone 17 Pro rather than estimated from a spec sheet. Only 33 of the 41 successfully ran at all. That's roughly a 20% real-device failure rate before a single accuracy number gets produced — worth sitting with on its own, since every other leaderboard implicitly assumes the models it's ranking actually load.</p>
+
+    <h2>Three leaderboards, same models, three different winners</h2>
+    <p>The headline finding isn't a single ranking — it's that the ranking itself doesn't survive changing one variable: how much time or context you allow. Here's what happens to five of the tested models across three cuts of the exact same intelligence index:</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Model</th><th style="padding:6px 10px;">Unconstrained (16K)</th><th style="padding:6px 10px;">64K context</th><th style="padding:6px 0;">Real 1-minute budget</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Nanbeige4.2-3B</td><td style="padding:6px 10px;"><strong>63</strong> (tied #1)</td><td style="padding:6px 10px;">65</td><td style="padding:6px 0;"><strong>18</strong></td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LFM2.5-2.6B</td><td style="padding:6px 10px;"><strong>63</strong> (tied #1)</td><td style="padding:6px 10px;">64</td><td style="padding:6px 0;">38</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Qwen3.5 9B (Reasoning)</td><td style="padding:6px 10px;">61</td><td style="padding:6px 10px;">64</td><td style="padding:6px 0;">14</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Gemma 4 E4B (Reasoning)</td><td style="padding:6px 10px;">~59</td><td style="padding:6px 10px;">—</td><td style="padding:6px 0;"><strong>44</strong> (new #1)</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Ling 3.0 Tiny</td><td style="padding:6px 10px;">59</td><td style="padding:6px 10px;"><strong>66</strong> (new #1)</td><td style="padding:6px 0;">—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: Artificial Analysis / Liquid AI, "Intelligence at pocket scale" (Aug 24, 2026), Intelligence Index scores on iPhone 17 Pro. "—" marks a figure not reported for that model at that cut.</p>
+
+    <p>Read across any single row and the story looks stable. Read down any single column and it isn't: the untimed #1 (a tie between Nanbeige4.2-3B and LFM2.5-2.6B) is not the 64K-context #1 (Ling 3.0 Tiny) and is nowhere near the real-time-budget #1 (Gemma 4 E4B, Reasoning). Three different axes, three different winners, from the same five models on the same five-benchmark suite.</p>
+
+    <h2>Where the 45 points go: tokens, not intelligence</h2>
+    <p>The collapse isn't a reasoning failure — it's an arithmetic one. The article's own end-to-end timing (a 1,024-token prompt, 256-token reply) already shows the gap building before any clock is applied: LFM2.5-2.6B answers in 8.0 seconds at 2.3GB peak memory, Nanbeige4.2-3B takes 21.4 seconds at 4.0GB, and Qwen3.5 9B needs more than 25 seconds at 6.9GB for a similarly-scored reply. Nanbeige4.2-3B decodes at roughly 14 tokens per second — the article's own math for the one-minute cut is blunt about what that means: "at 14 output tokens per second it gets about 850 tokens per answer." A model that reasons well but reasons at length runs out of tokens before it runs out of thought, and every one of those unfinished tokens scores as a wrong or missing answer, not a partial-credit one.</p>
+
+    <p>Qwen3.5 9B (Reasoning) shows the same failure mode from a different angle: across one full pass of the benchmark suite it consumes 74.5 million output tokens against Gemma 4 E4B (Reasoning)'s 5.2 million for a comparable overall score — a 14.3x gap in token spend for models within two points of each other untimed. And 29% of Qwen3.5 9B's individual generations hit the run's 16K output cap outright, meaning almost a third of its answers are being cut off mid-reasoning under the benchmark's own standard test condition, before anyone even applies a real-world time budget on top.</p>
+
+    <h2>A second flip: more context room doesn't lift every model the same amount</h2>
+    <p>Time isn't the only axis where the ranking moves. Widen the context window from 16K to 64K and Ling 3.0 Tiny — mid-pack untimed at 59 — jumps to 66 and takes over first place, while Nanbeige4.2-3B and LFM2.5-2.6B barely move (63→65 and 63→64). Same models, same benchmarks, and the size of the gain from "more room to think" isn't uniform across architectures — some models use the extra space, others don't. The article puts a number on why nobody should actually want the 64K version on a phone regardless of the score: "at 55 output tokens per second on an iPhone 17 Pro, generating 64K output tokens could mean a wait of more than twenty minutes." A ranking that only looks good at a context length nobody would sit through isn't wrong, exactly — it's just answering a question a phone user never asks.</p>
+
+    <h2>Who built the ruler</h2>
+    <p>One disclosure the article makes plainly, and that's worth repeating rather than skating past: "intelligence benchmarking [was] administered by Artificial Analysis, and inference benchmarking [was] developed and run by Liquid AI." Liquid AI supplied the physical device-testing harness the whole benchmark runs on. Liquid AI's own LFM2.5 models also happen to be the most consistently strong performers across all three cuts in the table above — tied for #1 untimed, second at 64K, second on the real-time budget. That doesn't make the numbers wrong; both organizations' methodology is published and the device-level timings are independently reproducible by anyone with the same phone and the same GGUFs. But a benchmark whose physical test rig was built by one of the labs whose models it ranks well is exactly the kind of detail that belongs in the room, not a footnote — especially on a blog that exists to check other people's benchmark claims before repeating them.</p>
+
+    <h2>Turning this on our own catalog</h2>
+    <p>Nanbeige4.2-3B isn't a name we picked up from this benchmark — it's already privateSLM's own catalog entry, added <a href="nanbeige-looped-transformer-gate.html">three weeks ago</a> specifically because it beat models three to four times its size on Nanbeige's own published benchmarks. Nothing in this new data contradicts that: the model's raw knowledge and reasoning, given room to work, are real. What this benchmark adds is the piece our own coverage hadn't measured — what happens to that same model the moment a real person is holding the phone and waiting. On this data, it's the single worst-performing model of the five under a realistic one-minute budget, worse than a 9B reasoning model it beats comfortably with no clock running.</p>
+
+    <p>That's not a reason to pull it from the catalog — a user who wants the most capable answer and doesn't mind a 20-second wait is still well served. It's a reason the catalog copy shouldn't describe a model's quality with one number that only holds under conditions nobody's phone actually offers. "Best on the leaderboard" and "best for the thirty seconds you'll actually wait" have just been shown, with real numbers, to be two different claims — and until app-level UI can surface which one a model is optimized for, that distinction is the buyer's own homework to do, not something a single Intelligence Index score tells you.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — pick the model that fits how long you'll wait</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
