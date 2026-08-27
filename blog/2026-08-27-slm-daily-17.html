@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #17: A newcomer beats our day-one catalog pick by 22 points on GPQA. We're not swapping it in. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #17: IBM's new Granite 4.2 3B beats Llama 3.2 3B Instruct by 22 points on GPQA — but every other benchmark on its card uses a different test version than the one we can check it against. Plus what's new in llama.cpp since our last edition, and four DIY candidates checked and skipped.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-27-slm-daily-17.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #17: A newcomer beats our day-one catalog pick by 22 points on GPQA. We're not swapping it in.</h1>
+    <div class="meta">August 27, 2026 · 5 min read</div>
+
+    <p>Five days since our last edition (2026-08-22T04:45 UTC). One clean catalog candidate, one real benchmark gap, and a version mismatch that keeps us from acting on it. No catalog changes, no new DIY spotlight — here's the full accounting.</p>
+
+    <h2>The candidate: IBM Granite 4.2 3B</h2>
+    <p>IBM released <a href="https://research.ibm.com/blog/introducing-granite-4-2" target="_blank" rel="noopener">Granite 4.2</a> on August 25; <a href="https://huggingface.co/bartowski/granite-4.2-3b-GGUF" target="_blank" rel="noopener">bartowski's Q4_K_M GGUF</a> of the 3B variant followed a day later. We verified the direct download ourselves: 2,317,126,048 bytes (2.32GB), HTTP 200, Apache-2.0 license, plain dense <code>GraniteForCausalLM</code> architecture — no engine gate issue, that architecture has been in llama.cpp since well before our current pin. Mechanically, it clears every rule we check.</p>
+    <p>On <a href="https://huggingface.co/ibm-granite/granite-4.2-3b" target="_blank" rel="noopener">IBM's own model card</a>, it scores 54.80 on GPQA. Our day-one catalog entry closest in size, Llama 3.2 3B Instruct, scores 32.8 on the same-named benchmark per <a href="https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct" target="_blank" rel="noopener">Meta's own card</a> — a 22-point gap, both cards checked directly rather than taken from a summary.</p>
+
+    <h2>Why we're not swapping it in anyway</h2>
+    <p>GPQA is the only benchmark named identically on both cards. Everywhere else, the two vendors ran different test suites: Granite reports IFBench (74.33) where Llama reports IFEval (77.4) — related instruction-following evals, not the same one. Granite reports BFCL v4 (52.41) where Llama reports BFCL V2 (67.0) — v4 is a materially harder revision of the same benchmark family, so a lower raw number doesn't mean a worse model. Granite reports MMLU-Pro (67.84), a deliberately harder successor to the MMLU that Llama reports (63.4). None of those three pairs can be read as a head-to-head result; only GPQA can, and one clean win on one axis isn't the "strictly dominates" bar our own catalog rules ask for before a swap. Our Generalists tier is also sitting at its 8-model cap, so adding Granite would mean displacing something — and we're not doing that on a single comparable data point, however real that 22-point gap is. Filed, not shipped.</p>
+
+    <h2>Engine: still pinned at b10488, and still no reason to move</h2>
+    <p>llama.cpp cut roughly 155 tagged builds since our pin, including two more stable-series tags — <a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.2.0" target="_blank" rel="noopener">v0.2.0</a> (Aug 21) and <a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.3.0" target="_blank" rel="noopener">v0.3.0</a> (Aug 25). Three new architectures landed in that window — GraniteSWA/GraniteMoeSWA (<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10514" target="_blank" rel="noopener">b10514</a>), the dots3-note multimodal MoE (<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10569" target="_blank" rel="noopener">b10569</a>), and GLM-4.5-Air multi-token prediction (<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10603" target="_blank" rel="noopener">b10603</a>) — none of them phone-sized or relevant to anything in our catalog. The one fix worth flagging on its own: <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10622" target="_blank" rel="noopener">b10622</a> null-checks <code>ggml_metal_buffer_init</code> before dereferencing it, so a failed Metal allocation now surfaces as a logged error instead of a hard crash — the exact failure mode a memory-constrained iOS device would hit. Not a reason to move off b10488 by itself, but the first thing we'd pull forward if we do.</p>
+
+    <h2>Edge in the Wild: four checked, zero featured</h2>
+    <p>We scouted four DIY candidates this window and skipped all of them, for four different reasons. A dual-microcontroller build splits a 28.9M-parameter model's inference (on an ESP32-S3) from its display (on a separate RP2040) — a genuinely different hardware split, but the builder's own README states no tokens/sec, RAM, or cost numbers, and we don't publish a spotlight without the concrete figures the format promises. A fully offline Halloween prop pairs a Raspberry Pi 5 with real, verified builder photos and video — but the actual language model runs on a home-LAN RTX 4090, not the edge device itself, which is a different claim than "on-device," and a near-identical repo under a second account raised an authorship question we couldn't resolve either way. A distilled 14M-parameter "virtual pet" model for an ESP32 touchscreen board is a clever idea with honest documentation — honest enough to state plainly that every performance number so far comes from QEMU emulation, not the physical board. And a second, independent from-scratch engine for Cactus Compute's Needle 2 model is real work, but it's the same base model we already featured on August 18 running on the same class of chip — a new engine, not a new project. Nothing here clears attribution, on-device, or non-duplicate cleanly enough to publish; we'll keep watching two of these (the dual-MCU split and the pet-tank distillation) for when real hardware numbers exist.</p>
+
+    <h2>What we did publish today</h2>
+    <p>One piece instead of a second digest item: Artificial Analysis and Liquid AI put two small models — one of them already in our own catalog — through a real iPhone 17 Pro benchmark this week. They tied for first place. The reason they tied is not the reason you'd guess — <a href="2026-08-27-hallucination-tie-benchmark.html">the full breakdown is here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
