@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>63 to 63: two on-device models tied for first. One admits it doesn't know 79% of the time. The other guesses. — privateSLM blog</title>
+  <meta name="description" content="Artificial Analysis and Liquid AI's new mobile-intelligence benchmark ties Nanbeige4.2-3B and LFM2.5-2.6B for first place on a real iPhone 17 Pro. The tie hides a real gap: when neither model can answer correctly, one stays quiet 79% of the time and the other confidently guesses wrong 67% of the time.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-27-hallucination-tie-benchmark.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>63 to 63: two on-device models tied for first. One admits it doesn't know 79% of the time. The other guesses.</h1>
+    <div class="meta">August 27, 2026 · 9 min read</div>
+
+    <p>Nanbeige4.2-3B and LFM2.5-2.6B just tied for first place on a new benchmark that runs small models directly on an iPhone 17 Pro — both scored 63 out of a possible 100. Nanbeige4.2-3B is already in privateSLM's own catalog. Look at the one sub-score that produced the tie, though, and the two models aren't close: when either model doesn't actually know an answer, LFM2.5-2.6B stays quiet 79% of the time. Nanbeige4.2-3B confidently guesses wrong about 67% of the time. Same rank, very different behavior when the model is out of its depth — which, on a phone with no cloud fallback, is exactly the moment that matters most.</p>
+
+    <h2>What the benchmark actually measures</h2>
+    <p>The source is Artificial Analysis's <a href="https://artificialanalysis.ai/articles/mobile-phone-intelligence-inference" target="_blank" rel="noopener">"Intelligence at pocket scale: Benchmarking small models and mobile phones"</a>, published August 24, 2026. Forty-one quantized model builds were tested; 33 ran successfully on a real iPhone 17 Pro (the other eight failed to load or run at all — a result worth remembering on its own). Each surviving model got a composite score built from five evaluations, capped at a realistic 16K-token context window: BFCL (tool calling), IFBench (instruction following), AA-Omniscience (knowledge, with a built-in hallucination check), GPQA Diamond (scientific reasoning), and MATH-500 (quantitative reasoning). At that cap, Nanbeige4.2-3B and LFM2.5-2.6B both land on 63. Ornith-1.0-9B is one point behind at 62, and Qwen3.5 9B (Reasoning) — a model three times the parameter count of either leader — trails at 61.</p>
+
+    <h2>The tie is real. The reason for it is not evenly split</h2>
+    <p>Artificial Analysis says this outright, not something we're inferring: on AA-Omniscience specifically, LFM2.5-2.6B scores 79% non-hallucination against 33% for Nanbeige4.2-3B. Their own framing: "that component is what lifts [LFM2.5-2.6B] level with Nanbeige4.2-3B; on the other four evaluations alone, Nanbeige4.2-3B, Ornith-1.0-9B and Qwen3.5 9B (Reasoning) would all rank above it." Strip out the one axis where LFM2.5-2.6B pulls dramatically ahead, and it drops out of the tie. The #1 spot both models share isn't two models being equally good — it's one model being weaker everywhere else and unusually honest about what it doesn't know, and that trade happening to land on the same total.</p>
+
+    <h2>What "79% vs 33%" actually means</h2>
+    <p>It's worth being precise here instead of reaching for "hallucinates X% of the time," because <a href="https://artificialanalysis.ai/evaluations/omniscience" target="_blank" rel="noopener">AA-Omniscience's own methodology</a> defines the number more narrowly than that. The benchmark tracks three outcomes per question: a correct answer (rewarded), a confidently wrong answer — a hallucination (penalized), and a refusal to answer or a partial answer (no penalty either way). The hallucination rate is defined as <em>incorrect ÷ (incorrect + partial + not-attempted)</em> — in other words, of all the times a model didn't nail the correct answer, what fraction of those misses were a confident fabrication rather than an honest "I don't know" or a partial attempt? The 79%/33% figures the mobile study reports are the non-hallucination side of that same ratio.</p>
+    <p>Read correctly: when LFM2.5-2.6B can't answer a question correctly, 79% of the time it does something other than confidently make something up — declining, hedging, or partially answering. Nanbeige4.2-3B does that only 33% of the time; the other 67% of its misses are the model stating a wrong answer with the same confidence it would state a right one. Neither model's raw accuracy is being measured here — this is specifically about what a model does when it's already wrong, which on a device with no server-side fact-check and no RAG layer behind it is the failure mode a user actually experiences as "the AI lied to me," not just "the AI didn't know."</p>
+
+    <h2>The efficiency gap nobody needed a hallucination test to see</h2>
+    <p>Beyond the intelligence score, Artificial Analysis and Liquid AI's own device measurements show LFM2.5-2.6B pulling ahead on the two numbers that decide whether a phone chat app actually feels usable: on the same iPhone 17 Pro, it answers a standard 1,024-token prompt in 8.0 seconds using 2.3GB of memory. Nanbeige4.2-3B takes 21.4 seconds and 4.0GB for the same prompt — 2.7x slower, 1.7x heavier, for a tied composite score. If a user cares about anything other than the leaderboard number itself — battery drain, whether the reply finishes before they give up and switch apps, whether the model fits alongside everything else running on the phone — the tie doesn't survive contact with the hardware either.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Model</th><th style="padding:6px 10px;">Composite (16K)</th><th style="padding:6px 10px;">Non-hallucination</th><th style="padding:6px 10px;">1,024-tok reply</th><th style="padding:6px 0;">Peak memory</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">LFM2.5-2.6B</td><td style="padding:6px 10px;"><strong>63</strong></td><td style="padding:6px 10px;"><strong>79%</strong></td><td style="padding:6px 10px;"><strong>8.0s</strong></td><td style="padding:6px 0;"><strong>2.3 GB</strong></td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Nanbeige4.2-3B</td><td style="padding:6px 10px;"><strong>63</strong></td><td style="padding:6px 10px;">33%</td><td style="padding:6px 10px;">21.4s</td><td style="padding:6px 0;">4.0 GB</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: Artificial Analysis × Liquid AI, "Intelligence at pocket scale" (Aug 24, 2026), measured on a real iPhone 17 Pro. Composite = average of BFCL, IFBench, AA-Omniscience, GPQA Diamond, MATH-500 at a 16K context cap.</p>
+
+    <h2>Worth naming: Liquid AI ran the device benchmarking</h2>
+    <p>The article is explicit about its own authorship split: "This launch consists of intelligence benchmarking, administered by Artificial Analysis, and inference benchmarking, developed and run by Liquid AI." LFM2.5-2.6B is Liquid AI's own model, and it's the one that comes out fastest, lightest, and — on this framing — tied for first. That doesn't make the numbers wrong; Artificial Analysis, not Liquid, ran the intelligence side of the eval, and the raw per-benchmark scores and the definition of the hallucination metric are published in enough detail to check by hand, which is what this piece just did. But a vendor co-running the benchmark that its own model wins on efficiency is exactly the kind of detail that belongs in the piece, not left for a reader to notice on their own.</p>
+
+    <h2>A second mirage in the same dataset: context length reorders the leaderboard</h2>
+    <p>The same study also reports scores at a 64K-token context cap, and the ranking changes: Ling 3.0 Tiny jumps to 66 (from 59 at 16K) and takes first place; Nanbeige4.2-3B rises to 65; LFM2.5-2.6B and Qwen3.5 9B (Reasoning) both land at 64. Part of the reason: at the realistic 16K cap, Qwen3.5 9B (Reasoning) hits the context ceiling — its answer gets cut off before it finishes reasoning — on 29% of its generations, directly costing it score. Give a reasoning-heavy model more room to think and it climbs; cap it at what a phone conversation actually allows and it gets penalized for not finishing its own thought. "Bigger context window" reads as a pure upgrade on a spec sheet. On a real device with a real battery, it's a dial that reorders who's smartest depending on where you set it.</p>
+
+    <h2>What this means for picking a model to run locally</h2>
+    <p>privateSLM's catalog already carries Nanbeige4.2-3B — it earned its spot in a previous edition on its own published benchmarks, and nothing here changes that those numbers were real. What this study adds is a dimension the catalog page doesn't currently surface: how a model behaves specifically when it's wrong, not just how often it's right. A leaderboard tie is not the same claim as "these two models behave the same," and on a device that has no cloud safety net behind it, the difference between "I don't know" and a confident fabrication is the whole ballgame. If you're choosing between similarly-ranked small models for anything where a wrong-but-confident answer would actually cost you — medical, legal, financial use, or just not wanting to be lied to — the composite score is the wrong number to check first.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — pick a model, not just a leaderboard rank</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
