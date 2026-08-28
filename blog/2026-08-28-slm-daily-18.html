@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #18: This week's smallest 'small' model needs 21.39 GB. Our whole catalog fits in 14. — privateSLM blog</title>
+  <meta name="description" content="Thomson Reuters and Apodex AI both shipped a 'small'/'mini'-branded model this week — 35B and 36B parameters respectively, neither anywhere near phone-sized. Plus a new llama.cpp architecture whose embedding table alone is bigger than our entire eight-model catalog. Zero catalog changes, zero DIY spotlight.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-28-slm-daily-18.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #18: This week's smallest 'small' model needs 21.39 GB. Our whole catalog fits in 14.</h1>
+    <div class="meta">August 28, 2026 · 5 min read</div>
+
+    <p>Thomson Reuters calls its new model "Small." At Q4_K_M — the exact quant tier our own catalog ships as — it's 21.39 GB, bigger on its own than all eight models in our Generalists tier added together (13.97 GB, computed straight from our own catalog's <code>sizeBytes</code> fields). It isn't the only "small"-branded release this week that's actually enormous — a second lab shipped a "mini" the same week. Roughly a day since SLM Daily #17 (2026-08-27T04:18 UTC): two labs, one naming irony, and a new llama.cpp architecture with an embedding table alone bigger than our whole catalog. Zero catalog changes, zero DIY spotlight — here's the full accounting.</p>
+
+    <h2>This week, "small" means 35 billion parameters</h2>
+    <p>Thomson Reuters launched its first proprietary LLM family, Thomson 1.0, on August 24 (<a href="https://www.law.com/legaltechnews/2026/08/24/thomson-reuters-launches-proprietary-llm-thomson-updates-cocounsel/" target="_blank" rel="noopener">Law.com</a>). Thomson-1.0-Small is the open-weight member: continued pre-training of Alibaba's Qwen3.6-35B-A3B on Thomson's own Westlaw, Practical Law, and news archives, per <a href="https://huggingface.co/thomsonreuters/Thomson-1.0-Small" target="_blank" rel="noopener">the model's own Hugging Face card</a>. "Small" describes its place in the Thomson lineup, not its footprint: 35B total parameters, 3B active per token (mixture-of-experts), a 262,144-token context window. We verified <a href="https://huggingface.co/bartowski/thomsonreuters_Thomson-1.0-Small-GGUF" target="_blank" rel="noopener">bartowski's GGUF</a> directly — Q4_K_M lists at 21.39 GB, 8.6x our own 2.5 GB per-model phone cap. It also ships under the Polyform Strict License 1.0.0, a non-commercial, no-redistribution license that would keep it out of our catalog even at a phone-sized file.</p>
+    <p>The same week, a second lab did almost the same thing. Apodex AI's Apodex-1.1-mini (also dated August 24, per its own <a href="https://www.apodex.com/blog/apodex-1.1-scaling-agentic-intelligence-for-complex-work" target="_blank" rel="noopener">launch post</a>) is 36B parameters — confirmed directly from its own <code>config.json</code>: <code>model_type: qwen3_5_moe</code>, 256 experts, 8 active per token, built on a different Qwen base (Qwen3.5-35B-A3B). Its license, Apache 2.0, is one we'd actually take. But it's also multimodal — a real <code>vision_config</code> block with dedicated image and video token IDs — the same gap that's kept every VLM out of our catalog since <a href="2026-08-13-slm-daily-11.html">SLM Daily #11</a>, independent of size. The repo's own BF16 safetensors sum to 71.9 GB; no GGUF has landed on Apodex's own page as of today.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Released</th><th style="padding:6px 10px;">Vendor's own label</th><th style="padding:6px 10px;">Verified size</th><th style="padding:6px 0;">vs. our 2.5 GB per-model cap</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Thomson-1.0-Small (Thomson Reuters)</td><td style="padding:6px 10px;">"Small"</td><td style="padding:6px 10px;">35B params · 21.39 GB Q4_K_M</td><td style="padding:6px 0;"><strong>8.6×</strong></td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Apodex-1.1-mini (Apodex AI)</td><td style="padding:6px 10px;">"mini"</td><td style="padding:6px 10px;">36B params · 71.9 GB BF16 (no GGUF yet)</td><td style="padding:6px 0;">n/a — no quant to compare</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Sizes verified directly from bartowski's file listing (Thomson) and the vendor's own repo file sizes (Apodex), not estimated. Both released August 24, 2026.</p>
+
+    <h2>The engine: an embedding table bigger than our whole catalog</h2>
+    <p>llama.cpp picked up a third oversized release this week too. Tag <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10660" target="_blank" rel="noopener">b10660</a> (merged August 27, 20:02 UTC, <a href="https://github.com/ggml-org/llama.cpp/pull/27742" target="_blank" rel="noopener">PR #27742</a>) adds a new <code>qwen4exp</code> architecture for Qwen's own Qwen3.8-Flash-Next. Per <a href="https://huggingface.co/Qwen/Qwen3.8-Flash-Next" target="_blank" rel="noopener">Qwen's own model card</a>: a 125B-parameter MoE backbone with 6B active per token, plus a separate 51B-parameter "n-gram embedding" table and a 4B multi-token-prediction module bolted on. llama.cpp's own release notes single out that embedding table on its own — 26.8 GiB once quantized to IQ4_NL, more than double the combined size of every model in our Generalists tier added together (13.97 GB, all eight, Q4_K_M or nearest). None of it is remotely phone-sized and none of it touches our catalog, but it's a genuinely new architecture in the engine we vendor, so it's on the record.</p>
+
+    <h2>Zero catalog changes, zero DIY spotlight</h2>
+    <p>Nothing we checked this window cleared the size cap, the license gate, or the engine-compatibility gate — Thomson and Apodex above are the only two candidates that got as far as a real, HEAD-verified GGUF or a real <code>config.json</code> before falling out. On the DIY side, the one build we found with real hardware and real numbers this window — a Qualcomm Dragonwing IQ-9075 running a two-stage hand-tracking pipeline, palm detection plus 21-point landmark tracking, both quantized to int8 and offloaded to the board's Hexagon NPU — doesn't run a language model at all. It's a computer-vision pipeline, not an SLM, so it's outside what this spotlight covers, however real the hardware is. Nothing else this window had both a verifiable source and a genuine on-device-AI angle we hadn't already run.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — a catalog that fits in your pocket, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
