@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.23 tokens a second, on a chip from 1996. The project's own last commit deleted a bigger, fake number. (Edge in the Wild) — privateSLM blog</title>
+  <meta name="description" content="Edge in the Wild: Scott Boudreaux built a real transformer language model — attention, softmax, matrix multiply — running live on a Nintendo 64's 93.75 MHz MIPS CPU. Then he found the on-screen speed counter was a hardcoded constant, and published the correction himself.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-29-elya-n64-llm.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>1.23 tokens a second, on a chip from 1996. The project's own last commit deleted a bigger, fake number.</h1>
+    <div class="meta">August 29, 2026 · 10 min read · Edge in the Wild</div>
+
+    <p>A Nintendo 64 — a console with a 93.75 MHz CPU, designed years before "large language model" meant anything — is running a real transformer: real matrix multiplication, real softmax, real attention, generating text one byte at a time with no cloud, no network stack, and in the current build's case, no operating system doing any of the heavy lifting either. The project shipped a number for how fast it runs. Then the builder found the number was fake, said so in public, and replaced it with one 49 times smaller.</p>
+
+    <p><strong>Source &amp; credit:</strong> this is the independent work of <strong>Scott Boudreaux</strong>, a solo builder working as Elyan Labs (GitHub <a href="https://github.com/Scottcjn" target="_blank" rel="noopener">@Scottcjn</a>). The project is called <strong>Legend of Elya</strong>, part of a broader series called <a href="https://hackaday.io/project/206401-transformers-on-retro-game-consoles" target="_blank" rel="noopener">Transformers on Retro Game Consoles</a> on Hackaday.io, which also runs sibling ports on NES, SNES, Game Boy Color and Sega Genesis. Source is MIT-licensed: <a href="https://github.com/Scottcjn/legend-of-elya-n64" target="_blank" rel="noopener">github.com/Scottcjn/legend-of-elya-n64</a>.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/elya-n64-power8.png" alt="Ares emulator screenshot of Legend of Elya: a pixel-art dungeon scene with an NPC named Sophia Elya speaking the line 'BM POWER8 runs 128 hardware threads' in a dialog box" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">Sophia Elya, the transformer-driven NPC, answering a hardware-trivia prompt — one of 32 seeded topics. Ares emulator capture from the project's own <a href="https://github.com/Scottcjn/legend-of-elya-n64" target="_blank" rel="noopener">GitHub repo</a>, credit Scott Boudreaux / Elyan Labs.</figcaption>
+    </figure>
+
+    <h2>What's actually running, and on what</h2>
+    <p>Legend of Elya is an original N64 homebrew ROM, built with the <a href="https://libdragon.dev/" target="_blank" rel="noopener">libdragon</a> homebrew SDK, playable in the <a href="https://ares-emu.net" target="_blank" rel="noopener">ares</a> emulator or on real hardware via an EverDrive 64 flash cart. Walk up to the NPC Sophia Elya and press A, and the console's own VR4300 MIPS III CPU — 93.75 MHz, no GPU compute, no NPU, nothing resembling AI-accelerator silicon of any kind — runs a full forward pass through an 8-layer transformer: embedding lookup, attention, feed-forward, logits, sampling, all implemented from scratch in C for a chip that predates the word "transformer" in this sense by two decades. The repo's own architecture table is specific: 6,356,992 parameters, 256-dimensional embeddings, 8 attention heads, a 128-token context window, a 256-entry byte-level ASCII vocabulary. Weights are stored in a custom SEQ2 ternary format — 2-bit weights plus float16 block scales — dequantized on the fly per matmul, with every activation and accumulation computed in genuine float32 on the R4300i's own FPU.</p>
+    <p>The engineering underneath that is not a toy port. The R4300i has no <code>trunc.w.s</code> instruction path the code can rely on for float-to-int casts inside the hot loop, so the exp() implementation uses a custom range-reduced Taylor series that avoids float-to-int casts entirely. RMS normalization uses the Quake III fast-inverse-square-root bit trick. The weight file is exported little-endian from Python but the N64 is big-endian, so header fields and float16 scales get explicit byte-swap handling. Random sampling seeds itself off the CPU's own hardware jitter — the MIPS CP0 Count register XOR'd against the frame counter — so two runs of the same prompt don't produce identical output, a small detail that only matters because there's no external source of randomness to reach for on a console with no network connection to phone home to.</p>
+
+    <figure style="margin:1.5rem 0;">
+      <img src="../assets/blogimg/elya-n64-triforce.png" alt="Ares emulator screenshot of Legend of Elya: the same dungeon scene, with Sophia Elya mid-sentence saying 'rinces Zelda guards the Triforce of prines' — a partially-garbled sentence, showing the model's real, imperfect output" loading="lazy" style="width:100%;max-width:640px;border-radius:8px;display:block;">
+      <figcaption style="font-size:0.85rem;color:#888;margin-top:0.4rem;">Real, unedited model output — including the kind of garbled fragment ("prines" for "princess") a 6.36M-parameter byte-level model run this constrained actually produces. Ares emulator capture, same source.</figcaption>
+    </figure>
+
+    <h2>Two generations, and which one is actually proven on real silicon</h2>
+    <p>It's worth being precise about a distinction the project itself is careful to draw. There are two models here, and only the older, smaller one has been verified running on a physical console. In February 2026, an earlier 819K-parameter, Q8-quantized build ran on real N64 hardware over an EverDrive 64 cart — filmed as proof, not simulated. The current, larger 6.36M-parameter ternary model — the one with the architecture table above — has, per the project's own documentation, <strong>not yet</strong> been run on real silicon. Every number for it comes from the ares emulator. The project states this without hedging: "Nothing here has been run on real N64 silicon."</p>
+
+    <h2>The tok/s counter was wrong, and the fix is the interesting part</h2>
+    <p>For months, this project's own README, its video description, its lab homepage, and its launch article all quoted a headline speed of roughly 60 tokens a second — with one video specifically claiming 61.8. On August 13, 2026, Boudreaux published a full self-audit that retracted it. The real figure, measured the same way, on the same build: <strong>1.23 tokens a second</strong>.</p>
+    <p>The bug is worth walking through because it's a clean example of a benchmark that looks like a measurement but isn't one. The on-screen counter computed <code>tokens_generated × 60.0 / elapsed_frames</code>. The game loop calls exactly one token-generation step per iteration of its main loop, and both the token counter and the frame counter increment by exactly 1 on every one of those iterations — so their ratio is pinned at 1 by construction, and the whole expression collapses to the literal constant <code>60.0</code>, regardless of how long any individual step actually took. The 61.8 figure in the video description was the same bug's off-by-one variant: the first-token counter got set to 1 in the same frame that the start-frame counter was zeroed, producing <code>60 × (k+1) / k</code>, which converges toward 60 from above — at <code>k = 33</code>, that's <code>60 × 34 / 33 = 61.818</code>, matching the published number to the digit. As the project's own writeup puts it: "The <code>60.0f</code> encodes an assumption that one loop iteration takes 1/60 s. It takes 0.81 s." Nothing about the original counter depended on elapsed time at all — it wasn't a miscalibrated measurement, it was a constant dressed up as one, and it would have reported "~60" on hardware running at any real speed whatsoever.</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Build</th><th style="padding:6px 0;">Measured throughput</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Published, pre-audit ("~60 tok/s" / "61.8 tok/s")</td><td style="padding:6px 0;">Fabricated — counter was a hardcoded constant</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Scalar CPU (corrected, ares emulator)</td><td style="padding:6px 0;">1.23 tok/s</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">RSP vector-overlay (corrected, ares emulator)</td><td style="padding:6px 0;">2.19 tok/s (1.78x scalar)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: <a href="https://github.com/Scottcjn/legend-of-elya-n64/blob/main/docs/N64_RATE_FINDINGS.md" target="_blank" rel="noopener">Scottcjn/legend-of-elya-n64, docs/N64_RATE_FINDINGS.md</a>, dated 2026-08-13. Both corrected figures are ares-emulator measurements, not real hardware.</p>
+
+    <p>The RSP figure comes from offloading part of the workload to the N64's Reality Signal Processor — the same vector co-processor the console's games used for 3D transforms and audio mixing in the 1990s, repurposed here for matrix-vector arithmetic — for a real, reproducible 1.78x speedup over the scalar CPU path, verified the project says "across three independent denominators," not a single lucky run.</p>
+
+    <h2>Why the correction matters more than the number</h2>
+    <p>1.23 tokens a second is not a fast model by any standard this blog normally covers — plenty of microcontroller builds we've featured, running on hardware built decades after the N64, clear that pace by a wide margin. That's not really the point. The point is what happened when the number was wrong: it reached four separate public places, and instead of quietly editing a README and moving on, the correction is published as its own long-form section, kept visible, with the exact buggy code shown, the exact arithmetic that produced the false 61.8 walked through digit by digit, and the true number left standing next to the retracted one rather than replacing it silently. That's a rarer thing in this space than a fast benchmark is — most inflated AI performance claims never get a public post-mortem from the person who published them, they just quietly stop being repeated.</p>
+
+    <h2>Why it belongs in "Edge in the Wild"</h2>
+    <p>Every project we've covered in this series pushes on-device inference toward smaller, cheaper, more constrained hardware — an ESP32 here, a Raspberry Pi there. This one pushes on a different axis entirely: how old can the hardware be and still run something recognizable as a transformer's actual math, not a lookup table pretending to be one. A console from 1996, with no operating system to speak of in this ROM, no filesystem, no network hardware even present on the board, running byte-level attention over a 128-token window — that's about as close to "the model runs where the data already is, full stop, nothing else involved" as this series has found. It's also, this time, packaged with a genuinely rare kind of honesty about its own limits: which model is emulator-only, which is hardware-verified, and a public correction of a fabricated number that most projects would have just let ride.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a> — running anything stranger than this on hardware nobody expects? Point us at the repo.</p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — on-device AI, no server in the loop</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

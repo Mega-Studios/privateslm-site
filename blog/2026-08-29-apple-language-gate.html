@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple's private on-device AI supports 15 languages. Its own error API has no way to say your language isn't one of them. — privateSLM blog</title>
+  <meta name="description" content="Apple's Foundation Models framework runs entirely on-device for 15 languages. Speak Hindi, Arabic, Russian, Polish or seven other languages as your primary one, and it doesn't degrade — it doesn't run, and there's no dedicated error case for why.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-29-apple-language-gate.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>Apple's private on-device AI supports 15 languages. Its own error API has no way to say your language isn't one of them.</h1>
+    <div class="meta">August 29, 2026 · 13 min read</div>
+
+    <p>Apple's Foundation Models framework — the on-device alternative to routing your prompts through a cloud LLM, the thing Apple points to as proof its AI is private "by design" — recognizes 15 languages across 23 locales, per <a href="https://www.apple.com/newsroom/2026/06/apple-unveils-next-generation-of-apple-intelligence-siri-ai-and-more/" target="_blank" rel="noopener">Apple's own June 2026 announcement</a>. iOS 26, the operating system it ships inside, is localized into 56. Speak Hindi, Arabic, Russian, Bengali, Urdu, Indonesian, Polish, Finnish, Czech, Hungarian, Greek, Romanian or Catalan as your primary language, and the framework doesn't run in some reduced mode — it doesn't run at all. And when it doesn't, Apple's own availability API has no dedicated case that means "your language isn't supported." You get a generic unavailable state, or — if your app skipped a check Apple's documentation says it should make — a runtime crash mid-generation.</p>
+
+    <h2>The list, exactly as Apple states it</h2>
+    <p>Apple's newsroom copy names them directly: "English, Danish, Dutch, French, German, Italian, Norwegian, Portuguese, Spanish, Swedish, Turkish, Vietnamese" plus Chinese (Simplified and Traditional), Japanese and Korean. Count Chinese's two scripts as one language and that's Apple's own "15 languages, 23 locales" figure — the locale count covers regional variants like English (India, Singapore, Australia), Portuguese (Brazil vs. Portugal) and Spanish (Latin America vs. Spain), not additional languages.</p>
+    <p>This list is not where it started. An Apple developer-forum reply from November 2025 states the framework had just added eight of these — Danish, Dutch, Norwegian, Portuguese, Swedish, Turkish, Chinese (Traditional) and Vietnamese — on top of a smaller original set. So the list grows. It has grown once, with no published schedule for when or whether it grows again, and grows by whichever unsupported languages Apple decides to prioritize next — a decision made off-device, on Apple's own timeline, that a privacy-focused developer or user has no way to see coming or influence.</p>
+
+    <h2>The gate isn't your phone's language. It's a setting almost nobody has ever opened.</h2>
+    <p>The obvious assumption is that Foundation Models checks whatever language your iPhone's system UI is set to. It doesn't. An Apple engineer, replying under the handle MB-Researcher in the same forum thread, put it plainly: <a href="https://developer.apple.com/forums/thread/805378" target="_blank" rel="noopener">"Apple Intelligence is actually based on Siri language settings, not the system language setting."</a></p>
+    <p>Settings → Apple Intelligence & Siri → Language is a screen most iPhone owners have never opened, let alone deliberately configured — Siri's language defaults alongside the device's system language at setup and stays there unless someone goes looking for a reason to change it. A user running their phone's entire UI in a fully supported language can still find Foundation Models unavailable if that specific, semi-hidden Siri setting happens to be pointed somewhere the framework doesn't recognize, and — per the same reply — the fix is to change that one setting, not the system language, a distinction nothing in the standard "AI isn't working" troubleshooting flow surfaces on its own.</p>
+    <p>Apple does have one quiet mitigation, and it's worth being precise about how narrow it is. The framework's <code>supportsLocale(_:)</code> check will silently accept a "close enough" locale that isn't itself on the official list — Catalan, for instance, resolves through as Spanish, per Apple's own developer documentation. But that substitution exists only where a linguistic near-neighbor happens to already be supported. There's no near-neighbor mapping for Arabic, Hindi, Russian, Bengali, Urdu or Indonesian — languages that aren't dialectically close to anything already on the list — so for those users, there's no quiet fallback at all, close or otherwise.</p>
+
+    <h2>Apple's own error handling has no case for this</h2>
+    <p>Here's the part that's easy to miss unless you're the developer actually wiring this up. <code>SystemLanguageModel.Availability.UnavailableReason</code> — the enum apps are supposed to switch over to tell a user why on-device AI isn't working right now — has exactly three cases, confirmed directly against Apple's own developer documentation:</p>
+    <ul>
+      <li><code>deviceNotEligible</code> — the hardware itself doesn't support Apple Intelligence</li>
+      <li><code>appleIntelligenceNotEnabled</code> — the feature exists on this device but the user hasn't turned it on</li>
+      <li><code>modelNotReady</code> — the on-device model is still downloading, or otherwise not ready yet</li>
+    </ul>
+    <p>None of those three is "your language isn't one of the 15." A language mismatch instead surfaces through a completely separate mechanism — <code>LanguageModelSession.GenerationError.unsupportedLanguageOrLocale</code> — which is a runtime error thrown mid-generation, not a state your app can check ahead of time through the availability API the way it checks for the other three reasons. An app that dutifully implements every case of <code>UnavailableReason</code>, shows the correct message for a disabled feature, a too-old device, or a still-downloading model, and considers its error handling complete, has still built nothing that explains this specific failure to the one group of users it happens to. The gap isn't that Apple failed to document the behavior — the separate error case is real and it's in the docs. The gap is architectural: two different failure taxonomies, one checked proactively before you try to generate anything, one that only appears after you've already tried, and a developer has to know to handle both to give an affected user any explanation at all.</p>
+
+    <h2>Who that actually excludes</h2>
+    <p>None of the following appear anywhere on Apple's 15-language list, each figure a total (native + second-language) speaker count from Ethnologue-sourced 2026 rankings:</p>
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Language</th><th style="padding:6px 0;">Total speakers (approx.)</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Hindi</td><td style="padding:6px 0;">~611 million</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Arabic (Standard)</td><td style="padding:6px 0;">~335 million</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Bengali</td><td style="padding:6px 0;">~274–284 million</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Russian</td><td style="padding:6px 0;">~255 million</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Urdu</td><td style="padding:6px 0;">~232 million</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Indonesian</td><td style="padding:6px 0;">~199 million</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">Polish</td><td style="padding:6px 0;">~43 million</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Sources: <a href="https://www.visualcapitalist.com/ranked-the-worlds-most-spoken-languages-in-2026/" target="_blank" rel="noopener">Visual Capitalist, "Ranked: The World's Most Spoken Languages in 2026"</a>; <a href="https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers" target="_blank" rel="noopener">Wikipedia, List of languages by total number of speakers</a> (Ethnologue-derived). Figures aren't additive across rows — bilingual and second-language speakers overlap between languages — so treat each as a standalone figure, not a summable total.</p>
+    <p>Finnish, Czech, Hungarian, Greek, Romanian and Catalan are also absent — smaller by speaker count, but worth naming because they cut against the easy read of this story as "only distant, non-European languages get left out." Poland alone is an EU member state with roughly 38 million residents and an iPhone-buying population Apple actively markets to; its majority language gets zero on-device Apple Intelligence, the same as Hindi's 611 million speakers get zero. The gate isn't sorting by geography or market size in any way that tracks who Apple sells phones to — it's sorting by which 15 languages Apple's model team has shipped support for so far, on a schedule nobody outside Apple can see.</p>
+
+    <h2>What a user in one of those languages actually experiences</h2>
+    <p>Not a slower model. Not a worse model. Nothing. <code>SystemLanguageModel.isSupported</code> returns false, or availability resolves to <code>.unavailable</code> with a reason that, per the previous section, won't actually name the real cause — and any Apple-Intelligence-branded feature in any app has two options: hide the feature outright for that user, or fall back to a cloud model. The second option is the one that should give a privacy-focused developer pause. An app built specifically to offer "private, on-device AI" as a feature, for a user whose primary language happens to fall outside Apple's 15, either has no AI feature to offer at all, or quietly becomes an app that sends that specific user's prompts to a server — the exact outcome the on-device framework exists to avoid, triggered by nothing more than which of over 40 languages beyond the supported 15 shows up in a device's Siri setting.</p>
+
+    <h2>What this means for an app built on a downloaded model instead</h2>
+    <p>This is where privateSLM's own architecture makes a genuinely different trade, worth stating plainly rather than glossing over. A downloaded GGUF model running through llama.cpp has no Apple-maintained allowlist gating it at all — no <code>SystemLanguageModel.isSupported</code> check, no Siri-language dependency, no 15-language ceiling set by someone else's roadmap. What a model can do in a given language is set entirely by what that model was actually trained on, which is a property of the specific weights you downloaded, checkable in advance from the model card, not an opaque runtime gate that changes out from under you when Apple ships an update.</p>
+    <p>That's a real structural difference, and it's worth being honest about where it stops being one. A downloaded model with thin non-English training data doesn't refuse to run in that language the way Foundation Models does — it runs, and produces worse output, which is arguably a harder failure mode for a user to notice than an app that plainly tells them a feature is off. We've written before about exactly how uneven that degradation can get: our <a href="2026-08-15-multilingual-quantization-tax.html">August 15 piece on the multilingual quantization tax</a> found one paper where 4-bit quantization pushed a model's Russian score below random chance while its English score barely moved, on a model whose vendor never claimed the two languages would degrade the same way. "No allowlist" is not the same claim as "no limitation" — it trades a hard, visible wall (does this run in my language, yes or no) for a soft, harder-to-see one (how well does this run in my language, and how would I know before trying). Which trade a given user should prefer depends on whether they'd rather be told no upfront or find out empirically — but it should be their choice to make, informed by a model card they can actually read, not a setting three menus deep that most people have never opened.</p>
+
+    <h2>The honest summary</h2>
+    <p>Apple's on-device privacy pitch is real for the roughly 15 languages it currently covers, and Apple has expanded that list before. But "private by design" is currently also "private for a specific, Apple-chosen subset of the world's languages, gated by a setting most users don't know exists, surfaced through an error API that has no name for the actual reason." A native Polish or Hindi speaker with a brand-new iPhone gets exactly the same zero on-device AI as someone whose device is too old to run it at all — except the too-old-device case at least has its own honest, documented error. The wrong-language case, as of this writing, doesn't.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — no language allowlist, no Siri setting to hunt for</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "digestCounter": 17,
+  "digestCounter": 18,
   "catalogIdsEverAdded": [
     "deepseek-r1-distill-qwen-1.5b-q4",
     "g9v3-3b-q4",
@@ -151,6 +151,12 @@
       "slug": "hallucination-tie-benchmark",
       "summary": "Artificial Analysis x Liquid AI 'Intelligence at pocket scale' (published 2026-08-24, artificialanalysis.ai/articles/mobile-phone-intelligence-inference) benchmarks 41 quantized small models on a real iPhone 17 Pro (33 ran successfully); composite = avg of BFCL, IFBench, AA-Omniscience, GPQA Diamond, MATH-500 at a 16K context cap. Nanbeige4.2-3B (already in our own catalog) and LFM2.5-2.6B tie for first at 63. Verified directly (two independent WebFetch passes against the article plus the separate AA-Omniscience methodology page) that the tie is produced almost entirely by one axis: LFM2.5-2.6B scores 79% non-hallucination on AA-Omniscience vs 33% for Nanbeige4.2-3B -- per AA's own methodology this measures confidently-wrong-vs-abstained among non-correct answers, not raw accuracy, and the piece explains that distinction rather than oversimplifying it. Article states outright that stripping this one component would drop LFM2.5-2.6B out of the tie. Also covered: LFM2.5-2.6B is 2.7x faster (8.0s vs 21.4s for a 1,024-token reply) and lighter (2.3GB vs 4.0GB) on the same phone; a disclosed conflict-of-interest angle (Liquid AI, whose own model wins on efficiency, ran the device-benchmarking half of the study); and a secondary self-verified finding that the 16K-vs-64K context cap reorders the leaderboard (Ling 3.0 Tiny 59->66, Qwen3.5 9B Reasoning hits its context ceiling on 29% of 16K generations). Distinct from all prior theses -- first piece specifically about hallucination-rate methodology and leaderboard-tie mechanics, not a quantization/kernel/engine/policy angle.",
       "post": "blog/2026-08-27-hallucination-tie-benchmark.html"
+    },
+    {
+      "date": "2026-08-29",
+      "slug": "apple-language-gate",
+      "summary": "Apple's Foundation Models framework recognizes 15 languages / 23 locales (per Apple's own June 2026 newsroom post); iOS 26 itself ships in 56. Native speakers of Hindi (~611M), Arabic (~335M), Bengali (~274-284M), Russian (~255M), Urdu (~232M), Indonesian (~199M), Polish (~43M), plus Finnish/Czech/Hungarian/Greek/Romanian/Catalan, get zero on-device AI -- not degraded, unavailable outright. Verified two non-obvious mechanics directly against Apple's own sources: (1) availability is gated on the Siri language setting, not the device system language (Apple engineer 'MB-Researcher' confirmed this directly in developer forum thread 805378, Nov 2025), and (2) SystemLanguageModel.Availability.UnavailableReason has exactly three cases (deviceNotEligible, appleIntelligenceNotEnabled, modelNotReady) -- none named for unsupported language; that failure instead only surfaces via a separate runtime error, LanguageModelSession.GenerationError.unsupportedLanguageOrLocale, thrown mid-generation rather than checkable via the availability API apps are told to gate on. Honest caveat included: privateSLM's own GGUF/llama.cpp models have no such allowlist but aren't limitation-free either -- linked back to the 2026-08-15 multilingual quantization tax piece rather than overclaiming. No /post-grader skill available this run; self-graded against the HOOK SCORE GATE rubric (concrete numbers up front, no overclaiming, no generic filler) at 9/10.",
+      "post": "blog/2026-08-29-apple-language-gate.html"
     }
   ],
   "diyProjectsFeatured": [
@@ -259,6 +265,13 @@
       "date": "2026-08-19",
       "post": "blog/2026-08-19-unihiker-m10-ram-ladder.html",
       "note": "MIT licensed. Repo README + RESULTS.md independently fetched and cross-checked (byte-exact GGUF size 219,309,792 confirmed, peak RAM via VmHWM across 3 runs, Mercury/Moon diameter error verified against real astronomical figures: Mercury 4,879km vs Moon 3,475km, ~40% larger not smaller). YouTube video (D5aTJU5-AoU, channel Mayukh Builds) confirmed real via oembed; embedded via youtube-nocookie, no autoplay, paired with a plain-text link to the video and channel. DFRobot's own product page quoted for the UNIHIKER M10's $89.90 price after an initial web-search snippet claiming $40 (and a second claiming $59.90) did not match the live product page — used the direct fetch, not the search summary. Note: repo's creation timestamp (2026-08-18T01:40:23Z) is ~2.5h before the strict 2026-08-18T04:30:00Z research-window cutoff but well inside the routine's 'roughly last 24-36h' framing; flagged here for transparency."
+    },
+    {
+      "name": "Scott Boudreaux's (Elyan Labs) Legend of Elya -- a real 8-layer, 6.36M-parameter transformer running live inference on a Nintendo 64's 93.75 MHz VR4300 MIPS CPU, part of a 'Transformers on Retro Game Consoles' series (sibling NES/SNES/GBC/Genesis ports)",
+      "sourceUrl": "https://github.com/Scottcjn/legend-of-elya-n64",
+      "date": "2026-08-29",
+      "post": "blog/2026-08-29-elya-n64-llm.html",
+      "note": "MIT licensed. Builder identity cross-confirmed across GitHub, elyanlabs.ai and an independent Hackaday.io project page (hackaday.io/project/206401). Verified directly via WebFetch+curl against the repo's own README.md and docs/N64_RATE_FINDINGS.md rather than the scouting agent's summary alone: exact architecture (6,356,992 params, SEQ2 ternary 2-bit+fp16-scale quant), the honest real-hardware-vs-emulator split (819K Q8 model filmed on real N64 silicon via EverDrive64 Feb 2026; the current 6.36M ternary model is emulator-only, ares 147, per the repo's own explicit statement 'Nothing here has been run on real N64 silicon'), and the retracted ~60/61.8 tok/s claim with its root-cause code walkthrough (hardcoded 60.0f constant, corrected figure 1.23 tok/s scalar / 2.19 tok/s RSP overlay). Two real screenshots (both HTTP 200, verified image/png via curl) downloaded from the repo's own screenshots/ dir and committed to assets/blogimg/elya-n64-triforce.png and assets/blogimg/elya-n64-power8.png, captioned as ares-emulator captures (not claimed as real-hardware photos) with credit and a link back to the repo. Two bottube.ai video links exist in the README (an unfamiliar/unverified host) — not embedded, left as-is since they weren't independently confirmed playable from this environment. The builder's separate RustChain crypto side-project (rustchain.org, referenced in the same repo) was noted but deliberately not covered — irrelevant to the technical claims. Do not re-feature without a materially new update (e.g. the ternary model actually verified on real silicon)."
     }
   ],
   "discussionsCreated": [
@@ -381,7 +394,7 @@
       "reason": "Research window: since lastRunAt 2026-08-20T04:14:00Z through 2026-08-21T04:18Z (~24h), run via two parallel research sweeps (model/engine news, DIY edge projects). CATALOG: no qualifying candidate -- HF trending GGUF list skewed entirely large this window (Ornith-1.5 up to 397B, tencent UI-Mate 27B/9B, Ling-3.0-flash 127B, TheDrummer Behemoth-128B-v3, fresh Unsloth Dynamic v3.0 Qwen3.8-27B requants), all at least 4x over the 2.5GB cap; a handful of sub-3B community quants (mradermacher tenorio-0.6B, an uncensored Gemma-2-2B repack, a Qwen3.8-2B distill) failed the reputable-quantizer rule before size even mattered. DIY: zero verifiable new/updated builds -- Hackster, raspberrypi.com, exo/exolabs, NetworkChuck, Habr, HN and GitHub search (created:>2026-08-18, Jetson/LLM keywords) all checked; three GitHub repos surfaced by keyword search (drwjkirkpatrick-web/local-llm-transmission and siblings, Ait0u5hi/jetson-llm-benchoff) were fetched and read directly, then rejected as likely fabricated/bulk-generated (0 stars/forks/watchers, the same author account has 93 unrelated repos created in rapid succession, zero real photos/screenshots, and jetson-llm-benchoff cites a model-size combination -- 'Qwen3.8-27B' benchmarked at implausible specs -- that doesn't match any known release). DIGEST: qualified -- independently verified via WebFetch against github.com/ggml-org/llama.cpp/pull/26079 and the releases page (not just the research subagent's report) three genuinely new, sourced datapoints since Daily #14: (1) PR #26079/release b10534 (merged Aug 20 by ORippler) retunes the CUDA mul_mat_vec_q-to-MMQ decode crossover per-hardware/per-quant -- RTX 5090 Q2_K-Q6_K gains of 6-49%, RTX 4090 gains of 5-45%, confirmed directly against the PR page; (2) b10545 Metal mat-mat K-dimension out-of-bounds clamp (memory-safety fix, not perf); (3) b10532/b10538 Metal KV-cache dequantization-to-F16-before-flash-attention work, gated to large batches; plus b10539 Vulkan FA MMQ fp32 precision fix. All four confirmed directly against the ggml-org/llama.cpp releases page, not taken on the research subagent's word alone. Framed honestly against our own b10488 pin (scripts/fetch-llama.sh, privateslm main) -- none of this reaches the app regardless of relevance, and our own engine links Metal on Apple hardware, never CUDA. Attempted to also check the b10489-b10530 range for a new llm_arch entry between our pin and the covered batch; GitHub's public API 403'd the unauthenticated request, so that specific sub-range is stated as an open gap in the post rather than silently assumed clean. Published SLM Daily #15 only -- no deep-dive (only candidate datapoint, the same CUDA PR, is GPU/home-lab-specific rather than phone/edge and thematically adjacent to the already-published 07-23 cuda-embedding-tax and Aug-18 SYCL-kernel-launch digests; judged too thin and too repetitive in shape to justify a full 1200-2500 word contrarian deep-dive on its own, so it stayed in the digest instead) and no DIY spotlight (nothing cleared QUALITY BAR #8/#9 verification). No /post-grader skill available in this session (checked the full available-skills list; not present) -- self-graded the title+opening paragraph against the HOOK SCORE GATE rubric (concrete number in the first two sentences: 49%, RTX 5090, batch size 8; no overclaiming; no generic filler) at 9/10, stated explicitly per the documented fallback. Also found and merged PR #61 (a prior run's clean, verified lastRunAt-only consolidation covering the 2026-08-19T05:10-2026-08-20T04:14 sub-window with the same no-publish outcome) into main before starting this run's own research, to keep state linear."
     }
   ],
-  "lastRunAt": "2026-08-27T04:18:24Z",
+  "lastRunAt": "2026-08-29T04:25:11Z",
   "postsPublished": [
     {
       "slug": "slm-weekly-1",
@@ -718,6 +731,24 @@
       "type": "digest",
       "publishedAt": "2026-08-27T04:18:24Z",
       "post": "blog/2026-08-27-slm-daily-17.html"
+    },
+    {
+      "slug": "2026-08-29-apple-language-gate",
+      "type": "deepdive",
+      "publishedAt": "2026-08-29T04:25:11Z",
+      "post": "blog/2026-08-29-apple-language-gate.html"
+    },
+    {
+      "slug": "2026-08-29-elya-n64-llm",
+      "type": "diy",
+      "publishedAt": "2026-08-29T04:25:11Z",
+      "post": "blog/2026-08-29-elya-n64-llm.html"
+    },
+    {
+      "slug": "2026-08-29-slm-daily-18",
+      "type": "digest",
+      "publishedAt": "2026-08-29T04:25:11Z",
+      "post": "blog/2026-08-29-slm-daily-18.html"
     }
   ]
 }

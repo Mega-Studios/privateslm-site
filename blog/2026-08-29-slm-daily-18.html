@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLM Daily #18: A free 2.27x speedup exists for a model already in our catalog. Our own engine can't use it yet. — privateSLM blog</title>
+  <meta name="description" content="SLM Daily #18: Liquid AI shipped lossless speculative-decoding draft models for LFM2.5-1.2B and LFM2.5-2.6B, both already in our catalog — up to 2.54x faster, mathematically identical output. The llama.cpp architecture it needs landed two days after our engine pin. Plus a Metal memory-leak fix, a fa-vec tuning burst for every current Apple chip, and one catalog candidate checked and skipped.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-29-slm-daily-18.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>SLM Daily #18: A free 2.27x speedup exists for a model already in our catalog. Our own engine can't use it yet.</h1>
+    <div class="meta">August 29, 2026 · 6 min read</div>
+
+    <p>Two days since our last edition (2026-08-27T04:18 UTC). No catalog changes — one candidate checked and skipped, one free performance win for two models we already ship that our engine pin can't reach yet, and a real Metal bug fix worth naming. Full accounting below.</p>
+
+    <h2>LFM2.5-DSpark: a lossless 2.27–2.54x speedup for models already in our catalog</h2>
+    <p>Liquid AI published <a href="https://www.liquid.ai/blog/lfm2.5-dspark" target="_blank" rel="noopener">DSpark draft-model checkpoints</a> on August 20 for LFM2.5-1.2B-Instruct and LFM2.5-2.6B — both already in privateSLM's catalog — plus LFM2.5-8B-A1B, which isn't. DSpark is speculative decoding: a small draft model proposes several tokens ahead, the full model verifies them in one batched pass, and any token the draft got wrong gets discarded and regenerated normally. The emitted sequence is therefore identical to plain greedy decoding by construction — this isn't a quality trade, it's a scheduling trick. Liquid's own numbers on an M4 Max MacBook running llama.cpp with Metal: LFM2.5-1.2B-Instruct goes from 138 to 350 tok/s (2.54x); LFM2.5-2.6B goes from 61 to 139 tok/s (2.27x). The draft checkpoints themselves are small — LFM2.5-2.6B's draft is roughly 191MB at Q4_K_M.</p>
+    <p>We can't use it yet. The <code>dflash</code> architecture DSpark needs, and the LFM2-specific enablement PR that wires it up (<a href="https://github.com/ggml-org/llama.cpp/pull/27383" target="_blank" rel="noopener">#27383</a>), both landed in llama.cpp after our current engine pin, <code>b10488</code> (2026-08-18) — the base <code>dflash</code>/DFlash2 arch itself only merged on August 27. So this is a real, verified, free speedup sitting on top of two models we already serve, blocked entirely by engine version, not by anything about the models. It's the clearest concrete case yet for bumping the pin — filed as a reason, not shipped as a feature.</p>
+
+    <h2>Catalog: Gemma 4 E2B checked, skipped on size</h2>
+    <p>Google's Gemma 4 E2B (Apache 2.0, up from whatever license terms Gemma 2 shipped under) is a reasonable candidate to eventually replace our day-one Gemma-2-2B-it entry — day-0 llama.cpp support via the <code>gemma4</code> architecture, and genuinely stronger benchmarks on <a href="https://ai.google.dev/gemma/docs/core/model_card_4" target="_blank" rel="noopener">Google's own model card</a> (MMLU-Pro 60.0%, GPQA Diamond 43.4%). It fails our rules on size, not architecture: the smallest quant we could verify, <a href="https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF" target="_blank" rel="noopener">unsloth's Q4_K_S build</a>, is 3.04GB — over our 2.5GB phone-friendly cap even before accounting for Gemma 4's Per-Layer Embeddings, which is why a model marketed as "2.3B effective" ships a GGUF sized like a 5.1B model. Watching for a smaller quant before revisiting.</p>
+
+    <h2>Engine: one real Metal bug fixed, and a burst of chip-specific tuning</h2>
+    <p><a href="https://github.com/ggml-org/llama.cpp/pull/27758" target="_blank" rel="noopener">#27758</a>, merged August 27, wraps three spots in Metal's device/context initialization in <code>@autoreleasepool</code> blocks — without them, Objective-C objects (including an <code>NSString</code> the reviewer called out directly) leaked on every init with no pool around to reclaim them. On a memory-constrained iOS device running repeated inference sessions, that's slow, compounding growth toward a crash, not a one-time cost. In the 48 hours after that, three separate PRs (<a href="https://github.com/ggml-org/llama.cpp/pull/27824" target="_blank" rel="noopener">#27824</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/27863" target="_blank" rel="noopener">#27863</a>, <a href="https://github.com/ggml-org/llama.cpp/pull/27875" target="_blank" rel="noopener">#27875</a>) each hand-tune the flash-attention-vector kernel for one current Apple chip generation — M4 Pro, M3 Max/M5/M5 Pro, and M4 respectively. Worth naming plainly: your tokens/sec on a brand-new Mac or iPhone is gated as much by whether someone has hand-tuned a kernel for that exact chip yet as it is by which model you picked. None of this is a reason to move off <code>b10488</code> by itself — the DSpark gap above is a stronger one — but it's the running list for whenever we do.</p>
+
+    <h2>What we published today</h2>
+    <p>Two pieces instead of a second catalog item. One: Apple's on-device Foundation Models framework supports 15 languages — leaving native speakers of Hindi, Arabic, Russian, Polish and eight others with zero on-device AI, not a degraded version of it, and no dedicated error case in Apple's own API that names why. <a href="2026-08-29-apple-language-gate.html">The full breakdown is here</a>. Two: a solo builder got a real transformer running live inference on a Nintendo 64's 1996-era CPU — then found his own headline speed number was fabricated, and published the correction himself. <a href="2026-08-29-elya-n64-llm.html">That one's here</a>.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — the catalog, checked daily</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>
