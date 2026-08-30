@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>"72% accuracy retained." Scores 25% on the actual test — random chance. Same 6.2GB file. — privateSLM blog</title>
+  <meta name="description" content="Unsloth's own docs say a 1-bit Qwen3.8-27B build retains 72% top-1% accuracy — and separately warn that top-1% accuracy barely reflects real inference. An independent GPQA Diamond test of that exact file scored 25%, the random-chance floor. Here's why the headline number and the real one can both be true.">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="canonical" href="https://www.privateslm.dev/blog/2026-08-30-quant-retention-metric-gap.html">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="../">private<span>SLM</span></a>
+    <div class="links">
+      <a href="./">Blog</a>
+      <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
+      <a href="../circuitai/">circuitAI</a>
+      <a href="https://apps.apple.com/app/id6504996891">App Store</a>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="wrap">
+<article>
+    <h1>"72% accuracy retained." Scores 25% on the actual test — random chance. Same 6.2GB file.</h1>
+    <div class="meta">August 30, 2026 · 7 min read</div>
+
+    <p>Unsloth's own documentation says its 1-bit build of Qwen3.8-27B — a 6.2GB file called UD-IQ1_S — "retains around 72% top-1% accuracy." An independent researcher downloaded that exact file, ran it against GPQA Diamond (a graduate-level science exam), and it scored roughly 25%. GPQA Diamond is four-choice multiple choice. Random guessing scores 25%. Both numbers are true, from credible sources, about the same file. The gap between them is not a scandal — it's a metric that measures something other than what it sounds like it measures, and almost nobody quoting the flattering half of it says so.</p>
+
+    <h2>What "top-1% accuracy" actually is</h2>
+    <p>Unsloth's own <a href="https://unsloth.ai/docs/basics/dynamic-3.0-ggufs" target="_blank" rel="noopener">Dynamic 3.0 GGUF documentation</a> defines it plainly: top-1% accuracy is "an argmax on 1 prediction" — did the quantized model's single most-likely next token match the full-precision model's single most-likely next token, averaged over a test set. The same page states the limitation just as plainly: this is "not truly effective for gauging actual inference," which is why Unsloth introduces a second metric, Divergence-300 @32 — greedy decoding 32 tokens deep against a 300-example held-out set — as a better (though still imperfect) proxy for real behavior. On that stricter metric, the documentation itself reports a much larger fall-off at the bottom of the quant ladder: moving from the 2-bit UD-Q2_K_XL build down to a 2-bit-class UD-IQ2_S variant, Divergence-300 @32 performance drops "from around 25% accuracy to under 8-10%." Unsloth's own page goes further and states outright: "1-bit should not be used for agentic use-cases."</p>
+    <p>None of that is buried. It's in the same document as the 72% figure, a few sections down. But a single-token-match percentage is the number that fits in a table cell and a tweet, and it's the number that traveled: coverage of the release (one widely-shared write-up put it at "retains 77% original accuracy" — a slightly different figure, same genre of headline) repeated the retention percentage as if it described how well the model actually answers questions, with no mention of the argmax caveat or the agentic-use warning sitting right next to it in the primary source.</p>
+
+    <h2>What happens when you actually ask it questions</h2>
+    <p>That's the gap <a href="https://quesma.com/blog/qwen38-27b-quantizations-benchmarked/" target="_blank" rel="noopener">Piotr Migdał's independent benchmark</a> (Quesma, published Aug 26, 2026 — a follow-up to the same author's earlier Qwen3.6-27B quantization study, so this is a repeated methodology, not a one-off) went and measured directly. Using llama.cpp (build from Aug 16, 2026) with an F16 KV-cache, he ran the full Unsloth Dynamic quant ladder for Qwen3.8-27B against three real evaluations: GPQA Diamond (graduate-level science reasoning), IFBench (instruction following), and Terminal-Bench 2.1 (89 real agentic coding tasks, not multiple choice — the model has to actually get a terminal task done).</p>
+
+    <div style="margin:1.5rem 0;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.92rem;">
+      <thead><tr style="text-align:left;border-bottom:1px solid #444;">
+        <th style="padding:6px 10px 6px 0;">Build</th><th style="padding:6px 10px;">File size</th><th style="padding:6px 10px;">GPQA Diamond (xhigh)</th><th style="padding:6px 0;">Terminal-Bench 2.1</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">BF16 (full precision)</td><td style="padding:6px 10px;">55 GB</td><td style="padding:6px 10px;">~92%</td><td style="padding:6px 0;">~75%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">Q8_0</td><td style="padding:6px 10px;">29 GB</td><td style="padding:6px 10px;">~92%</td><td style="padding:6px 0;">~75%</td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;"><strong>Q4_K_M</strong> — what privateSLM ships</td><td style="padding:6px 10px;">17 GB</td><td style="padding:6px 10px;"><strong>~91%</strong></td><td style="padding:6px 0;"><strong>~75%</strong></td></tr>
+        <tr style="border-bottom:1px solid #333;"><td style="padding:6px 10px 6px 0;">UD-Q2_K_XL (2-bit)</td><td style="padding:6px 10px;">10.7 GB</td><td style="padding:6px 10px;">~89%</td><td style="padding:6px 0;">~70%</td></tr>
+        <tr><td style="padding:6px 10px 6px 0;">UD-IQ1_S (1-bit)</td><td style="padding:6px 10px;">6.2 GB</td><td style="padding:6px 10px;">~25% (random chance)</td><td style="padding:6px 0;">collapsed</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cite">Source: Piotr Migdał / Quesma, "Benchmarking Qwen3.8 27B quantizations: 4-bit holds up, 1-bit collapses" (Aug 26, 2026), read from the post's own charts — the article does not publish an exact numeric table, so treat these as close approximations, not to-the-decimal figures. File sizes and the UD-IQ1_S "72% top-1% accuracy" framing cross-checked against unsloth/Qwen3.8-27B-GGUF on Hugging Face.</p>
+
+    <p>Two things stand out. First, the damage is not a slope, it's a cliff: 4-bit and 8-bit are statistically indistinguishable from full precision on every benchmark tested, 2-bit costs a few points, and then 1-bit falls off the table entirely — not "worse," but functionally random on a four-choice exam. Second, IFBench (pure instruction-following, no world knowledge required) showed no measurable change all the way down to 2-bit, while GPQA (knowledge-heavy reasoning) and Terminal-Bench (multi-step agentic tool use) are exactly where the collapse shows up. The failure isn't "the model got dumber everywhere" — it's concentrated in the tasks that need the model to actually know things and follow through on a plan, which happen to be the tasks anyone would use an agentic 1-bit build for in the first place.</p>
+
+    <h2>The part that makes it worse, not just smaller</h2>
+    <p>Migdał's post includes one more finding that a static accuracy number can't show: at the 1-bit build's highest reasoning-effort setting (`xhigh`), scores come out <em>lower</em> than at its lowest setting (`low`) — the opposite of what more thinking budget should do. His explanation: "longer reasoning makes it worse: at xhigh, scores drop below low, as the model more often reasons until the token budget runs out and returns an empty answer." A 1-bit model given more room to think doesn't think better with it — it wanders inside a badly compressed weight space until it runs out of budget and gives up. Giving a broken model more time doesn't fix it; it just gives the breakage more room to happen in.</p>
+
+    <h2>Reproducing the headline number yourself</h2>
+    <p>The "top-1%" metric behind the 72% figure isn't proprietary — it's a documented llama.cpp feature, and it's worth running once to see exactly what it does and doesn't check. First, record the full-precision model's next-token predictions to a logits file:</p>
+    <pre><code>./llama-perplexity --model Qwen3.8-27B-Q8_0.gguf \
+  --kl-divergence-base qwen38-27b.kld \
+  -f wikitext-2-raw/wiki.test.raw</code></pre>
+    <p>Then compare a quantized build's predictions against that same file:</p>
+    <pre><code>./llama-perplexity --model Qwen3.8-27B-UD-IQ1_S.gguf \
+  --kl-divergence-base qwen38-27b.kld \
+  --kl-divergence</code></pre>
+    <p>The output includes a line labeled "Same top p" — per llama.cpp's own <a href="https://github.com/ggml-org/llama.cpp/blob/master/tools/perplexity/README.md" target="_blank" rel="noopener">perplexity tool documentation</a>, "percentage of how often the token was assigned the highest probabilities by both models." That's the entire metric: for each token in a generic text corpus, does the quantized model's single best guess match the full model's single best guess? It says nothing about whether either guess was part of a correct GPQA answer, a working terminal command, or even a coherent sentence three tokens later — it's a local, per-token popularity contest, not a task-completion score. That's a legitimate signal for some purposes (it correlates loosely with general fidelity, and Unsloth is transparent that it's a proxy). It is not a substitute for actually running the eval you care about, which is the whole reason Migdał's benchmark and Unsloth's own Divergence-300 @32 metric both exist.</p>
+
+    <h2>Why this is the reason we've never shipped below Q4</h2>
+    <p>privateSLM's catalog rule has always been Q4_K_M or the nearest equivalent (IQ4_XS for models where the default Q4_K_M quant misses our size cap) — never lower, however tempting a 6.2GB single-file download looks for a 27B-class model on a phone. This data is the concrete reason that rule exists rather than a hunch: on the same benchmark ladder, Q4_K_M loses essentially nothing (~91% vs. ~92% GPQA, identical ~75% Terminal-Bench) while cutting file size more than 3x from full precision. The 1-bit build saves another 2.7x on top of that and, per this same test, that hardware saving no longer means the app carries a slower or dumber version of the same product — it means it carries something that answers a graduate-science question at the same rate as flipping a coin, and gets worse if you let it think longer. Those are different products wearing the same file extension.</p>
+    <p>Two honest caveats. First, this is a single independent benchmark run (methodology repeated across two model generations by the same author, and the numbers are read from published charts rather than an exact printed table) — not a peer-reviewed paper, and worth someone else replicating. Second, it covers one 27B model and one quantizer's dynamic-quant ladder; a different architecture or a plain (non-imatrix) K-quant could land the cliff at a different bit-width. What generalizes, and what Unsloth's own documentation independently corroborates, is the shape of the finding: a single-token retention percentage and real task performance are not the same measurement, they diverge hardest exactly at the extreme-compression end of the ladder, and the divergence is largest on precisely the tasks — knowledge, multi-step agentic work — that a phone-class assistant with no cloud fallback most needs to get right.</p>
+
+    <p><a href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Discuss this on the forum →</a></p>
+
+    <div class="cta"><a class="btn solid" href="https://apps.apple.com/app/id6504996891">Get privateSLM — every model in the catalog ships at Q4_K_M or better, never below</a></div>
+</article>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 privateSLM</span>
+    <span class="spacer"></span>
+    <a href="../">privateSLM</a>
+    <a href="./">Blog</a>
+    <a href="../circuitai/">circuitAI</a>
+  </footer>
+</body>
+</html>

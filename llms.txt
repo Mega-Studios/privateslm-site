@@ -37,6 +37,7 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- "72% accuracy retained." Scores 25% on the actual test — random chance. Same 6.2GB file.: https://www.privateslm.dev/blog/2026-08-30-quant-retention-metric-gap.html
 - 63 to 63: two on-device models tied for first. One admits it doesn't know 79% of the time. The other guesses.: https://www.privateslm.dev/blog/2026-08-27-hallucination-tie-benchmark.html
 - SLM Daily #17 (catalog digest): https://www.privateslm.dev/blog/2026-08-27-slm-daily-17.html
 - 56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.: https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html
