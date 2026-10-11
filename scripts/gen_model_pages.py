@@ -95,6 +95,10 @@ def page_shell(title: str, description: str, canonical: str, body: str, ld: list
   <meta property="og:title" content="{esc(title)}">
   <meta property="og:description" content="{esc(description)}">
   <meta property="og:type" content="article">
+  <meta property="og:url" content="{canonical}">
+  <meta property="og:site_name" content="privateSLM">
+  <meta property="og:image" content="https://www.privateslm.dev/assets/og-default.png">
+  <meta name="twitter:card" content="summary_large_image">
 {ld_tags}
 </head>
 <body>
