@@ -14,6 +14,22 @@ site (duplicate content is bad for SEO):
 3. Once the Vercel deployment is confirmed working, disable the GitHub Pages
    deployment for this repo so `privateslm.dev` is the single canonical origin.
 
+## Blog posts (SEO)
+
+Every post needs a `<title>`, a meta description, a canonical link and a date in
+`<div class="meta">` ("July 20, 2026 · 8 min read"). The rest is generated — run this
+after adding or editing a post:
+
+```
+python3 scripts/gen_blog_meta.py
+```
+
+It writes the Open Graph tags, the Twitter card and the `BlogPosting` structured data
+into the post's `<head>` (between the `seo:start` / `seo:end` comments — do not edit
+by hand) and adds the post to `sitemap.xml`. The preview image is the first image in
+the article, or `assets/og-default.png`. To mark a revision, write
+"Updated October 11, 2026" in the meta line.
+
 ## Model & compare pages (SEO)
 
 `models/*.html` are **generated** — never edit by hand. Regenerate whenever
