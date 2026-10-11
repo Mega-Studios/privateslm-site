@@ -41,6 +41,29 @@ CATEGORY_BLURB = {
 }
 
 
+# Expert categories are sold in one-time packs; everything else is free. Mirrors
+# ModelPacks in the app (privateslm/Sources/ModelPack.swift), including the
+# optional per-model "pack" tag in models.json ("free", or a pack id).
+PACKS = {
+    "tech": ("Tech Pack", ["Coding & SQL", "Math & STEM", "Cybersecurity"]),
+    "business": ("Business Pack", ["Finance", "Lawyer", "Translation"]),
+    "health": ("Health Pack", ["Medical", "Mental Health"]),
+}
+
+
+def pack_of(m: dict):
+    """The pack a model is sold in, or None if it is free."""
+    tag = (m.get("pack") or "").lower()
+    if tag == "free":
+        return None
+    if tag:
+        return PACKS[tag][0] if tag in PACKS else "All Packs"
+    for title, categories in PACKS.values():
+        if m["category"] in categories:
+            return title
+    return None
+
+
 def esc(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
@@ -111,6 +134,9 @@ def model_page(m: dict, siblings: list) -> str:
     tier = RAM_TIERS.get(ram_mb, f"devices with at least {ram_gb} GB of RAM")
     blurb = CATEGORY_BLURB.get(cat, "a local AI assistant")
     canonical = f"{SITE}/models/{mid}.html"
+    pack = pack_of(m)
+    access = f"{pack} — a one-time purchase" if pack else "Free"
+    pick = f"pick {esc(name)} (part of the {pack}, a one-time purchase)" if pack else f"pick {esc(name)}"
     title = f"Run {name} on iPhone, iPad & Mac — Offline | privateSLM"
     description = (
         f"{name}: a {size} GB {quant} GGUF you download once inside privateSLM and run fully "
@@ -134,8 +160,12 @@ def model_page(m: dict, siblings: list) -> str:
         ),
         (
             f"Is {name} free to use in privateSLM?",
-            f"The model itself is open-weights ({quant} GGUF) and the download is free. privateSLM "
-            "is a one-time purchase — no subscription, no per-message fees.",
+            (f"privateSLM is free to download, and {name} is part of its {pack} — a one-time "
+             f"purchase, with no subscription and no per-message fees. The model itself is "
+             f"open-weights ({quant} GGUF).")
+            if pack else
+            (f"Yes. privateSLM is free to download and {name} is one of its free models — no "
+             f"subscription, no per-message fees. The model itself is open-weights ({quant} GGUF)."),
         ),
     ]
     faq_html = "\n".join(
@@ -178,6 +208,7 @@ def model_page(m: dict, siblings: list) -> str:
     <table>
       <tr><th>Model</th><td>{esc(name)}</td></tr>
       <tr><th>Category</th><td>{esc(cat)}</td></tr>
+      <tr><th>In privateSLM</th><td>{access}</td></tr>
       <tr><th>Download size</th><td>{size} GB (one time)</td></tr>
       <tr><th>Quantization</th><td>{quant} (GGUF)</td></tr>
       <tr><th>Minimum device RAM</th><td>{ram_gb} GB</td></tr>
@@ -192,8 +223,8 @@ def model_page(m: dict, siblings: list) -> str:
 
     <h2>How to run {esc(name)} in privateSLM</h2>
     <ol>
-      <li>Get <a href="{APP_STORE}">privateSLM on the App Store</a> — one-time purchase, no subscription.</li>
-      <li>Open <strong>Models</strong>, pick {esc(name)}, and tap <strong>Download</strong> ({size} GB, once).</li>
+      <li>Get <a href="{APP_STORE}">privateSLM on the App Store</a> — free, no account, no subscription.</li>
+      <li>Open <strong>Models</strong>, {pick}, and tap <strong>Download</strong> ({size} GB, once).</li>
       <li>Select it as your active model and chat — airplane mode included.</li>
     </ol>
     <p>On iPhones, iPads and Macs with Apple Intelligence, privateSLM can also answer instantly

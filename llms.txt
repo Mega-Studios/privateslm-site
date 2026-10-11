@@ -3,7 +3,8 @@
 > privateSLM is a fully private AI chat app for iPhone, iPad and Mac. It runs
 > entirely on-device: Apple Intelligence (Foundation Models framework) when
 > available, or a downloaded open SLM (Llama, Qwen, Gemma) via llama.cpp.
-> No cloud, no account, no tracking. One-time purchase.
+> No cloud, no account, no tracking. Free to download; expert model packs are
+> optional one-time purchases, no subscription.
 
 ## Apps
 - privateSLM (App Store): https://apps.apple.com/app/id6504996891
