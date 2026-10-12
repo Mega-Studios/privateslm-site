@@ -14,6 +14,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import promo
+
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://www.privateslm.dev"
 APP_STORE = "https://apps.apple.com/app/id6504996891"
@@ -371,6 +373,7 @@ def main():
     update_llms_txt(models, compare_urls)
 
     print(f"generated {len(models)} model pages + index; sitemap/llms.txt updated")
+    print(f"promotion written to {promo.apply()} pages")
 
 
 if __name__ == "__main__":

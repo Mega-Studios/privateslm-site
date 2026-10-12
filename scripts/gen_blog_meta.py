@@ -20,6 +20,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import promo
+
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://www.privateslm.dev"
 DEFAULT_IMAGE = f"{SITE}/assets/og-default.png"
@@ -142,6 +144,7 @@ def main():
     heads = sum(write_head(p) for p in posts)
     urls = update_sitemap(posts)
     print(f"{len(posts)} posts: {heads} heads written, {urls} sitemap entries added or refreshed")
+    print(f"promotion written to {promo.apply()} pages")
 
 
 if __name__ == "__main__":
