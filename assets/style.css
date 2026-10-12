@@ -242,3 +242,58 @@ footer .spacer { margin-left: auto; }
 
   footer { padding: 28px 22px 40px; }
 }
+
+/* ---------- MegaBrain promotion (markup from scripts/promo.py) ---------- */
+:root { --biz: #ff7a1a; --biz-hi: #ff9a3d; --biz-ink: #1a0d00; }
+
+/* a bar across the top of every page; it stays put while the page scrolls */
+.biz-bar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  height: 40px; padding: 0 16px;
+  background: var(--biz); color: var(--biz-ink);
+  font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden;
+}
+.biz-bar:hover { background: var(--biz-hi); color: #000; text-decoration: none; }
+.biz-bar .biz-tag { opacity: .72; }
+.biz-bar .biz-tag::after { content: "—"; margin-left: 14px; opacity: .6; }
+.biz-bar .biz-short { display: none; }
+.biz-bar .biz-arrow { font-size: 15px; letter-spacing: 0; }
+/* the nav is laid over the top of the page: move it below the bar */
+.biz-bar + nav { top: 40px; }
+
+/* the banner that closes every blog post */
+article a.biz-banner {
+  display: block; margin: 64px 0 0; padding: 30px 32px 32px;
+  border: 2px solid var(--biz); border-radius: 10px;
+  background: rgba(255, 122, 26, .12); color: var(--ink);
+}
+article a.biz-banner:hover { background: rgba(255, 122, 26, .2); text-decoration: none; }
+.biz-banner span { display: block; }
+.biz-banner .biz-kicker {
+  font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--biz); margin-bottom: 12px;
+}
+.biz-banner .biz-title { font-size: clamp(22px, 3.4vw, 30px); font-weight: 700; line-height: 1.12; text-transform: uppercase; color: #fff; }
+.biz-banner .biz-text { margin-top: 12px; font-size: 16px; color: #cfcfd6; }
+.biz-banner .biz-cta {
+  display: inline-block; margin-top: 20px; padding: 13px 28px;
+  background: var(--biz); color: var(--biz-ink);
+  font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase;
+}
+.biz-banner:hover .biz-cta { background: var(--biz-hi); }
+
+/* home page: the MegaBrain panel and footer link in the same colour */
+.panel.biz .kicker { color: var(--biz); }
+.panel.biz .btn.solid { background: var(--biz); border-color: var(--biz); color: var(--biz-ink); }
+.panel.biz .btn.solid:hover { background: var(--biz-hi); border-color: var(--biz-hi); color: #000; }
+.panel.biz::after { background: radial-gradient(ellipse 90% 55% at 50% 115%, rgba(255, 122, 26, 0.30), transparent 60%); }
+footer a.biz-link { color: var(--biz); }
+
+@media (max-width: 640px) {
+  .biz-bar { font-size: 11px; letter-spacing: .1em; gap: 8px; padding: 0 10px; }
+  .biz-bar .biz-tag, .biz-bar .biz-long { display: none; }
+  .biz-bar .biz-short { display: inline; }
+  article a.biz-banner { padding: 24px 22px 26px; }
+}
