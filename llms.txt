@@ -38,6 +38,9 @@
 - Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
+- Local LLM speed on an M5 MacBook Air: 12 models measured: https://www.privateslm.dev/blog/local-llm-speed-m5-macbook-air.html
+- How much RAM do you need to run an LLM on a Mac? Measured: https://www.privateslm.dev/blog/how-much-ram-local-llm-mac.html
+- Mac mini for local AI: which configuration to buy: https://www.privateslm.dev/blog/mac-mini-local-ai.html
 - 63 to 63: two on-device models tied for first. One admits it doesn't know 79% of the time. The other guesses.: https://www.privateslm.dev/blog/2026-08-27-hallucination-tie-benchmark.html
 - SLM Daily #17 (catalog digest): https://www.privateslm.dev/blog/2026-08-27-slm-daily-17.html
 - 56% slower on a Jetson. 81% faster on our own bench. Same 4-bit quantization.: https://www.privateslm.dev/blog/2026-08-22-int4-kernel-tax.html
