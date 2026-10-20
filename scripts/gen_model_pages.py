@@ -306,6 +306,12 @@ def index_page(models: list) -> str:
     return page_shell(title, description, canonical, body, ld)
 
 
+def page_title(path: Path) -> str:
+    """A compare page's <title>, so llms.txt names it the way the page does."""
+    m = re.search(r"<title>(.*?)</title>", path.read_text(), re.S)
+    return m.group(1).strip() if m else f"Comparison: {path.stem.replace('-', ' ')}"
+
+
 def update_sitemap(urls: list):
     sm = ROOT / "sitemap.xml"
     text = sm.read_text()
@@ -359,13 +365,7 @@ def main():
 
     compare_dir = ROOT / "compare"
     compare_pages = sorted(compare_dir.glob("*.html")) if compare_dir.exists() else []
-    compare_urls = [
-        (
-            f"Comparison: {f.stem.replace('-', ' ')}",
-            f"{SITE}/compare/{f.name}",
-        )
-        for f in compare_pages
-    ]
+    compare_urls = [(page_title(f), f"{SITE}/compare/{f.name}") for f in compare_pages]
 
     urls = [f"{SITE}/models/"] + [f"{SITE}/models/{m['id']}.html" for m in models]
     urls += [u for _, u in compare_urls]

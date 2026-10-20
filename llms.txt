@@ -1,14 +1,19 @@
 # privateSLM
 
-> privateSLM is a fully private AI chat app for iPhone, iPad and Mac. It runs
-> entirely on-device: Apple Intelligence (Foundation Models framework) when
-> available, or a downloaded open SLM (Llama, Qwen, Gemma) via llama.cpp.
-> No cloud, no account, no tracking. Free to download; expert model packs are
-> optional one-time purchases, no subscription.
+> privateSLM is a private AI chat app for iPhone, iPad and Mac that runs entirely on the device. Where Apple Intelligence is available it uses Apple's on-device model (Foundation Models framework) with nothing to download; elsewhere it runs open small language models (Llama, Qwen, Gemma, Phi and others) through llama.cpp. It is free, with no account, no cloud, no analytics and no subscription. Specialist model packs are optional one-time purchases.
 
-## Apps
-- privateSLM (App Store): https://apps.apple.com/app/id6504996891
-- Circuit: Productivity AI (App Store): https://apps.apple.com/app/id6774522959
+## Facts
+
+- App Store: "privateSLM: Offline AI Chat", https://apps.apple.com/app/id6504996891 — one download for iPhone, iPad and Mac.
+- Price: free since 11 October 2026 (it was a paid download before that, last at $7.99 in the US; people who bought it then have every pack). No ads, no account, no subscription.
+- Free in the app: Apple Intelligence chat where available, the general models, chatting with documents (PDF, Word, Excel, PowerPoint, Pages, text, scanned pages, read on the device), voice input and spoken replies, chat history with search, Siri and Shortcuts (iOS and macOS 26), a Home Screen widget.
+- Expert packs, one-time in-app purchases with Family Sharing (US prices): Tech Pack $4.99 (coding, SQL, math, security models), Business Pack $4.99 (law, finance, translation), Health Pack $4.99 (medical, mental health). All Packs $9.99 unlocks every pack, including packs added later.
+- Devices: iPhone and iPad with iOS/iPadOS 17 or later; Mac with macOS 14 or later. Apple's on-device model needs iOS, iPadOS or macOS 26 on a device with Apple Intelligence; on other devices a free model is downloaded once (0.7–2.5 GB).
+- Catalog: 22 curated models in 9 categories, each page stating the RAM it needs: https://www.privateslm.dev/models/
+- Privacy: inference runs on the device and works in airplane mode. There is no server component; the internet is only used to download a model.
+- Not the same app as Private LLM (a different developer): see the comparison below.
+- Same developer: Circuit, an iPhone app blocker (https://circuitapp.app/), and Roomtone, AI meeting notes (https://roomtone.io/). Circuit's App Store record was an AI chat app called CircuitAI until September 2026; it is no longer an AI app.
+- For companies: MegaBrain, private AI for a business, is a separate product from the same team: https://getmegabrain.com/
 
 ## Model pages (run these on iPhone/iPad/Mac, offline)
 - Full catalog: https://www.privateslm.dev/models/
@@ -34,8 +39,10 @@
 - SaulLM 7B (Legal) (Lawyer): https://www.privateslm.dev/models/saul-instruct-v1-q4.html
 - Law Chat 7B (Lawyer): https://www.privateslm.dev/models/law-chat-7b-q4.html
 - MentaLLaMA Chat 7B (Mental Health): https://www.privateslm.dev/models/mentallama-chat-7b-q4.html
-- Comparison: pocketpal ai vs privateslm: https://www.privateslm.dev/compare/pocketpal-ai-vs-privateslm.html
-- Comparison: private llm vs privateslm: https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
+- Offline AI chat on iPhone: private apps that work in airplane mode (2026): https://www.privateslm.dev/compare/offline-ai-chat-iphone.html
+- PocketPal AI vs privateSLM — free & open vs curated & instant (2026): https://www.privateslm.dev/compare/pocketpal-ai-vs-privateslm.html
+- Private LLM alternatives for iPhone and Mac (2026): https://www.privateslm.dev/compare/private-llm-alternatives.html
+- Private LLM vs privateSLM — an honest comparison (2026): https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
 ## Blog
 - Local LLM speed on an M5 MacBook Air: 12 models measured: https://www.privateslm.dev/blog/local-llm-speed-m5-macbook-air.html

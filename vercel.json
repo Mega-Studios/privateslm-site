@@ -1,0 +1,7 @@
+{
+  "redirects": [
+    { "source": "/circuitai", "destination": "https://circuitapp.app/", "permanent": true },
+    { "source": "/circuitai/", "destination": "https://circuitapp.app/", "permanent": true },
+    { "source": "/circuitai/index.html", "destination": "https://circuitapp.app/", "permanent": true }
+  ]
+}

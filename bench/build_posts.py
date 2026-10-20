@@ -201,7 +201,6 @@ def shell(slug, title, description, body):
     <div class="links">
       <a href="./">Blog</a>
       <a class="nav-btn" href="https://github.com/Mega-Studios/privateslm-site/discussions" target="_blank" rel="noopener">Community</a>
-      <a href="../circuitai/">circuitAI</a>
       <a href="https://apps.apple.com/app/id6504996891">App Store</a>
     </div>
   </nav>
@@ -220,7 +219,6 @@ def shell(slug, title, description, body):
     <span class="spacer"></span>
     <a href="../">privateSLM</a>
     <a href="./">Blog</a>
-    <a href="../circuitai/">circuitAI</a>
   </footer>
 </body>
 </html>
