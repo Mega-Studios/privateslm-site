@@ -297,3 +297,15 @@ footer a.biz-link { color: var(--biz); }
   .biz-bar .biz-short { display: inline; }
   article a.biz-banner { padding: 24px 22px 26px; }
 }
+
+/* ---------- home: facts and questions ---------- */
+.facts { padding: 110px 0 0; background: var(--bg); }
+.facts article { padding-bottom: 90px; }
+.facts article th { width: 28%; vertical-align: top; }
+.facts article td { vertical-align: top; }
+.facts article h3 { font-size: 17px; margin: 26px 0 8px; color: #fff; }
+
+/* ---------- wide comparison tables ---------- */
+article .table-scroll { overflow-x: auto; margin: 24px 0; }
+article .table-scroll table { min-width: 920px; margin: 0; }
+article .table-scroll td, article .table-scroll th { vertical-align: top; }

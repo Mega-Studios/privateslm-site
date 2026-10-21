@@ -58,3 +58,24 @@ The script also appends any missing `/models/` and `/compare/` URLs to
 `sitemap.xml` and refreshes the "## Model pages" section of `llms.txt`.
 `compare/*.html` are hand-written; keep every competitor claim verifiable and
 update the "Updated <date>" line when facts change.
+
+## Search engines and assistants
+
+ChatGPT's web search reads Bing's index, so a page Bing has not crawled does not
+exist for it.
+
+- `llms.txt` is the site in one text file for assistants. The top (the summary and
+  "Facts") is written by hand and must match the app and the App Store: when a
+  price, a pack or a minimum OS changes, change it here, in the home page's facts
+  table and FAQ, and in its JSON-LD. `scripts/gen_model_pages.py` rewrites only
+  the "Model pages" section (models and every `compare/*.html`, by its `<title>`).
+- IndexNow: the key is served at `/b554a11595e2c5a99c976126fb9e55bb.txt`. After a
+  deploy, `python3 scripts/indexnow.py` sends the whole sitemap to Bing and the
+  other IndexNow engines; `python3 scripts/indexnow.py /compare/x.html` sends one
+  page.
+- `vercel.json` sends `/circuitai/` to circuitapp.app: CircuitAI became Circuit, an
+  app blocker, in September 2026. `circuitai/index.html` does the same for hosts
+  without that rule (GitHub Pages).
+- `privateslm.app` is a parked domain at GoDaddy, not this site. To use it, add it
+  to this Vercel project as a redirect to `www.privateslm.dev` and point its DNS at
+  Vercel.
