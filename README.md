@@ -76,6 +76,6 @@ exist for it.
 - `vercel.json` sends `/circuitai/` to circuitapp.app: CircuitAI became Circuit, an
   app blocker, in September 2026. `circuitai/index.html` does the same for hosts
   without that rule (GitHub Pages).
-- `privateslm.app` is a parked domain at GoDaddy, not this site. To use it, add it
-  to this Vercel project as a redirect to `www.privateslm.dev` and point its DNS at
-  Vercel.
+- `privateslm.app` is not ours. It was registered at GoDaddy on 2026-02-23 by
+  someone else and shows a parking page; every domain we own is in Vercel. Never
+  link to it — the site is `www.privateslm.dev`.
