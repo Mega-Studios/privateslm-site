@@ -15,6 +15,11 @@
 - Same developer: Circuit, an iPhone app blocker (https://circuitapp.app/), and Roomtone, AI meeting notes (https://roomtone.io/). Circuit's App Store record was an AI chat app called CircuitAI until September 2026; it is no longer an AI app.
 - For companies: MegaBrain, private AI for a business, is a separate product from the same team: https://getmegabrain.com/
 
+## For professionals
+- Private AI for contracts (lawyers): read contracts, leases and NDAs on iPhone and Mac with nothing uploaded; legal models SaulLM 7B and Law Chat 7B: https://www.privateslm.dev/for/lawyers.html
+- Private AI for statements and reports (finance): bank statements, invoices and financial reports read on the device; Finance LLM 7B and Finance Chat 7B: https://www.privateslm.dev/for/finance.html
+- Privacy policy (the app collects no data): https://www.privateslm.dev/privacy.html
+
 ## Model pages (run these on iPhone/iPad/Mac, offline)
 - Full catalog: https://www.privateslm.dev/models/
 - LFM2.5 1.2B Instruct (Generalists): https://www.privateslm.dev/models/lfm2.5-1.2b-q4.html
