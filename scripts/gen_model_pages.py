@@ -43,27 +43,39 @@ CATEGORY_BLURB = {
 }
 
 
-# Expert categories are sold in one-time packs; everything else is free. Mirrors
-# ModelPacks in the app (privateslm/Sources/ModelPack.swift), including the
-# optional per-model "pack" tag in models.json ("free", or a pack id).
+# Expert categories come with privateSLM Pro (since app 2.4.0); everything else is
+# free. The categories mirror ModelPacks in the app
+# (privateslm/Sources/ModelPack.swift), including the optional per-model "pack"
+# tag in models.json ("free", or a pack id). The pack ids only group the expert
+# categories: single packs are no longer sold, so the pages never name them.
 PACKS = {
-    "tech": ("Tech Pack", ["Coding & SQL", "Math & STEM", "Cybersecurity"]),
-    "business": ("Business Pack", ["Finance", "Lawyer", "Translation"]),
-    "health": ("Health Pack", ["Medical", "Mental Health"]),
+    "tech": ["Coding & SQL", "Math & STEM", "Cybersecurity"],
+    "business": ["Finance", "Lawyer", "Translation"],
+    "health": ["Medical", "Mental Health"],
 }
 
 
+# How Pro is sold, for the pages. US prices are on the home page and in llms.txt.
+PRO = "privateSLM Pro"
+PRO_PLANS = "yearly with a free trial, monthly, or Lifetime once"
+
+
 def pack_of(m: dict):
-    """The pack a model is sold in, or None if it is free."""
+    """The pack id an expert model belongs to, or None if it is free."""
     tag = (m.get("pack") or "").lower()
     if tag == "free":
         return None
     if tag:
-        return PACKS[tag][0] if tag in PACKS else "All Packs"
-    for title, categories in PACKS.values():
+        return tag
+    for pid, categories in PACKS.items():
         if m["category"] in categories:
-            return title
+            return pid
     return None
+
+
+def needs_pro(m: dict) -> bool:
+    """True for the expert models, which come with privateSLM Pro."""
+    return pack_of(m) is not None
 
 
 def esc(s: str) -> str:
@@ -140,9 +152,9 @@ def model_page(m: dict, siblings: list) -> str:
     tier = RAM_TIERS.get(ram_mb, f"devices with at least {ram_gb} GB of RAM")
     blurb = CATEGORY_BLURB.get(cat, "a local AI assistant")
     canonical = f"{SITE}/models/{mid}.html"
-    pack = pack_of(m)
-    access = f"{pack} — a one-time purchase" if pack else "Free"
-    pick = f"pick {esc(name)} (part of the {pack}, a one-time purchase)" if pack else f"pick {esc(name)}"
+    pro = needs_pro(m)
+    access = f"With {PRO} — {PRO_PLANS}" if pro else "Free"
+    pick = f"pick {esc(name)} (it comes with {PRO})" if pro else f"pick {esc(name)}"
     title = f"Run {name} on iPhone, iPad & Mac — Offline | privateSLM"
     description = (
         f"{name}: a {size} GB {quant} GGUF you download once inside privateSLM and run fully "
@@ -166,12 +178,13 @@ def model_page(m: dict, siblings: list) -> str:
         ),
         (
             f"Is {name} free to use in privateSLM?",
-            (f"privateSLM is free to download, and {name} is part of its {pack} — a one-time "
-             f"purchase, with no subscription and no per-message fees. The model itself is "
-             f"open-weights ({quant} GGUF).")
-            if pack else
+            (f"privateSLM is free to download, and {name} is one of its expert models, which "
+             f"come with {PRO}: {PRO_PLANS}. There are no per-message fees. If a Pro "
+             f"subscription ends, the model stays on your device and opens again with Pro. "
+             f"The model itself is open-weights ({quant} GGUF).")
+            if pro else
             (f"Yes. privateSLM is free to download and {name} is one of its free models — no "
-             f"subscription, no per-message fees. The model itself is open-weights ({quant} GGUF)."),
+             f"account, no per-message fees. The model itself is open-weights ({quant} GGUF)."),
         ),
     ]
     faq_html = "\n".join(
@@ -229,7 +242,7 @@ def model_page(m: dict, siblings: list) -> str:
 
     <h2>How to run {esc(name)} in privateSLM</h2>
     <ol>
-      <li>Get <a href="{APP_STORE}">privateSLM on the App Store</a> — free, no account, no subscription.</li>
+      <li>Get <a href="{APP_STORE}">privateSLM on the App Store</a> — free, no account.</li>
       <li>Open <strong>Models</strong>, {pick}, and tap <strong>Download</strong> ({size} GB, once).</li>
       <li>Select it as your active model and chat — airplane mode included.</li>
     </ol>
