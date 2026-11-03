@@ -16,6 +16,16 @@
       "permanent": true
     },
     {
+      "source": "/support",
+      "destination": "/support.html",
+      "permanent": false
+    },
+    {
+      "source": "/support/",
+      "destination": "/support.html",
+      "permanent": false
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy.html",
       "permanent": false
