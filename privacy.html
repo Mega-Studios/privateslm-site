@@ -26,27 +26,30 @@
     <div class="wrap">
 <article>
     <h1>Privacy Policy</h1>
-    <div class="meta">Effective October 25, 2026 · applies to the Omnimo app (formerly privateSLM) for iPhone, iPad and Mac, and to this website</div>
+    <div class="meta">Effective November 3, 2026 · applies to the Omnimo app (formerly privateSLM) for iPhone, iPad and Mac, and to this website</div>
 
-    <p>Omnimo is made by Mega Studios ("we"). This policy explains what happens to what you type
-    into the app.</p>
+    <p>Omnimo is made by Mega Studios ("we"). This policy explains what happens to what you type,
+    attach and create in the app.</p>
 
     <h2>Apple Intelligence: nothing leaves your device</h2>
     <p>When you chat with Apple Intelligence, your messages and documents are processed on your
     iPhone, iPad or Mac by Apple's on-device model. We receive nothing.</p>
 
     <h2>Cloud models: your messages go to the model's maker, through our server</h2>
-    <p>When you pick a cloud model (for example GPT, Claude, Gemini, Grok or DeepSeek) and agree to
-    the notice the app shows before the first message:</p>
+    <p>The welcome screen says this when you first open the app, and by continuing you accept it.
+    When you chat with a cloud model (for example GPT, Claude, Gemini, Grok or DeepSeek), which is
+    what the app starts with:</p>
     <ul>
       <li><strong>What is sent:</strong> the conversation you are having with that model — your
-      messages, the model's earlier replies in that chat, your system prompt, and the text of any
-      document you attached to the chat. Documents are read on your device; only their text is
-      sent, never the file.</li>
+      messages, the model's earlier replies in that chat, your system prompt or your assistant's
+      instructions, the tone you picked, the text of any document you attached to the chat, and any
+      photo you chose to ask about. Documents are read on your device; only their text is sent,
+      never the file.</li>
       <li><strong>Where it goes:</strong> to our server, which forwards it to our AI routing service
       and from there to the company that makes the model you picked: OpenAI, Anthropic, Google, xAI,
-      DeepSeek, Alibaba (Qwen), Moonshot (Kimi), MiniMax or Zhipu (GLM), in some cases through
-      OpenRouter. What each of them does with it is governed by its own terms and privacy policy.</li>
+      DeepSeek, Alibaba (Qwen), Moonshot (Kimi), MiniMax, Zhipu (GLM), Mistral, Meta (Llama) or
+      Xiaomi (MiMo), in some cases through OpenRouter. What each of them does with it is governed by
+      its own terms and privacy policy.</li>
       <li><strong>What we keep:</strong> no chat content. Our server keeps, per App Store account, a
       count of the day's messages, which it needs to apply the daily limits, and for a subscription,
       which App Store accounts have used it. Our routing service keeps request metadata (model,
@@ -56,14 +59,61 @@
       identifier for your download of this app — not your name, email address or Apple Account.</li>
     </ul>
 
-    <h2>Chats, documents and settings</h2>
-    <p>Your chat history, attached documents and settings are stored on your device only. Deleting
-    a chat or the app deletes them. There is no account and no copy on our side.</p>
+    <h2>Photos in a chat: your photo goes to the model's maker</h2>
+    <p>When you choose or take a photo to ask about, a copy reduced to at most 1536 pixels and
+    without its metadata (such as where it was taken) goes through our server to the company that
+    makes the model answering, as described above. The camera is used only when you press Take a
+    photo. We keep no photos: our server passes the photo on without storing it. The copy stays on
+    your device with the chat, and goes when you delete the chat.</p>
 
-    <h2>Purchases</h2>
-    <p>Subscriptions are sold by Apple. We never see your payment details. Purchases are recorded
-    with RevenueCat, our subscription provider, under the same App Store identifier, so that Pro
-    works on your devices and renewals, refunds and restores are handled correctly.</p>
+    <h2>Images and videos: your description goes to fal.ai</h2>
+    <p>When you ask for an image or a video, the description you type goes through our server to
+    fal.ai, which runs the model you picked, from Alibaba, Black Forest Labs, OpenAI, ByteDance,
+    Recraft, Google, xAI, MiniMax, Lightricks or Kuaishou. What each of them does with it is
+    governed by its own terms. We keep no descriptions and no files: our server keeps your balance
+    of credits, the day's count and, for a couple of days, a record of the job and the temporary
+    link to its file. The finished file is downloaded to your device and stored there.</p>
+
+    <h2>Photo filters: your photo goes to fal.ai</h2>
+    <p>When you apply a filter or describe an edit, a copy of the photo you chose, reduced to at
+    most 1536 pixels and without its metadata, goes through our server to fal.ai, with what you
+    asked for, which runs the model you picked (FLUX.2 from Black Forest Labs or Nano Banana from
+    Google). What each of them does with it is governed by its own terms. We keep no photos: our
+    server passes the photo on without storing it, and keeps the day's count, whether you have used
+    your free filter and, for a couple of days, a record of the job and the temporary link to its
+    result. The result is downloaded to your device and stored there.</p>
+
+    <h2>Web search: your question goes to Parallel</h2>
+    <p>When Ask Web is on, the question you asked, and the one before it in that chat so a
+    follow-up makes sense, goes through our server to Parallel Web Systems, a search service, and
+    the pages it finds go to the model you picked, as described above. What Parallel does with it is
+    governed by its own terms. We keep no questions: our server keeps a count of the day's
+    searches. When Ask Web is off, nothing is searched.</p>
+
+    <h2>Your assistants</h2>
+    <p>The assistants you make stay on your device. A chat with one sends the model its name,
+    purpose and instructions with each message, as described under cloud models.</p>
+
+    <h2>Chats, documents and settings</h2>
+    <p>Your chat history, created images and videos, photos you edited, attached documents and
+    settings are stored on your device only. Deleting a chat or the app deletes them. There is no
+    account and no copy on our side.</p>
+
+    <h2>Purchases and credits</h2>
+    <p>Subscriptions and credits are sold by Apple. We never see your payment details. Purchases are
+    recorded with RevenueCat, our subscription provider, under the same App Store identifier, so
+    that Pro works on your devices and renewals, refunds and restores are handled correctly. Your
+    balance of credits, and an identifier of each purchase of them, are kept on our server against
+    that identifier, so that a reinstall keeps them.</p>
+
+    <h2>Usage statistics</h2>
+    <p>The app sends <a href="https://amplitude.com/privacy">Amplitude</a> statistics about how it is
+    used, so we can see what works: which screens were opened, which features and models were used
+    and how often, how long replies took, how purchases went, your device type, language and
+    storefront, the App Store identifier for your download and a random identifier the
+    statistics library makes for this installation. They never include the text of your
+    messages, replies, descriptions, searches, photos or documents, the names of your files, the
+    pages you open, or your IP address. Turn them off at any time in Settings → Analytics.</p>
 
     <h2>Voice</h2>
     <p>Dictation uses Apple's Speech framework, on the device where your language allows it;
@@ -72,8 +122,8 @@
     are spoken on the device.</p>
 
     <h2>No tracking</h2>
-    <p>Omnimo has no advertising, no analytics SDK and no tracking, and does not track you across
-    apps or websites.</p>
+    <p>Omnimo has no advertising and does not track you across apps or websites. It never asks for
+    the advertising identifier.</p>
 
     <h2>This website</h2>
     <p>www.privateslm.dev uses no cookies, analytics or advertising. The hosting provider keeps
@@ -85,7 +135,7 @@
 
     <h2>Changes and contact</h2>
     <p>If this policy changes, the new version will be posted on this page with a new effective
-    date. Questions: <a href="https://github.com/Mega-Studios/privateslm/discussions">github.com/Mega-Studios/privateslm/discussions</a>.</p>
+    date. Questions: <a href="mailto:team@getmegabrain.com">team@getmegabrain.com</a>.</p>
 </article>
     </div>
   </div>
@@ -93,6 +143,7 @@
     <span>© 2026 Mega Studios</span>
     <span class="spacer"></span>
     <a href="">Home</a>
+    <a href="support.html">Support</a>
     <a href="privacy.html">Privacy</a>
   </footer>
 </body>
