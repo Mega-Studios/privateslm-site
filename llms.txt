@@ -1,13 +1,14 @@
 # privateSLM
 
-> privateSLM is a private AI chat app for iPhone, iPad and Mac that runs entirely on the device. Where Apple Intelligence is available it uses Apple's on-device model (Foundation Models framework) with nothing to download; elsewhere it runs open small language models (Llama, Qwen, Gemma, Phi and others) through llama.cpp. It is free, with no account, no cloud, no analytics and no subscription. Specialist model packs are optional one-time purchases.
+> privateSLM is a private AI chat app for iPhone, iPad and Mac that runs entirely on the device. Where Apple Intelligence is available it uses Apple's on-device model (Foundation Models framework) with nothing to download; elsewhere it runs open small language models (Llama, Qwen, Gemma, Phi and others) through llama.cpp. It is free to download, with no account, no cloud, no analytics and no ads. The expert models (coding, SQL, math, security, legal, finance, translation, medical, mental health) come with privateSLM Pro: a yearly subscription with a free trial, a monthly subscription, or Pro Lifetime bought once.
 
 ## Facts
 
 - App Store: "privateSLM: Offline AI Chat", https://apps.apple.com/app/id6504996891 — one download for iPhone, iPad and Mac.
-- Price: free since 11 October 2026 (it was a paid download before that, last at $7.99 in the US; people who bought it then have every pack). No ads, no account, no subscription.
+- Price: free to download since 11 October 2026 (it was a paid download before that, last at $7.99 in the US). No ads, no account. The free tier has no subscription; the expert models need privateSLM Pro.
 - Free in the app: Apple Intelligence chat where available, the general models, chatting with documents (PDF, Word, Excel, PowerPoint, Pages, text, scanned pages, read on the device), voice input and spoken replies, chat history with search, Siri and Shortcuts (iOS and macOS 26), a Home Screen widget.
-- Expert packs, one-time in-app purchases with Family Sharing (US prices): Tech Pack $4.99 (coding, SQL, math, security models), Business Pack $4.99 (law, finance, translation), Health Pack $4.99 (medical, mental health). All Packs $9.99 unlocks every pack, including packs added later.
+- privateSLM Pro (since app version 2.4.0) unlocks every expert model: coding, SQL, math, security, legal, finance, translation, medical, mental health. US prices: Pro Yearly $9.99 a year with a 1-week free trial and Pro Monthly $2.99 a month, both auto-renewing subscriptions without Family Sharing; Pro Lifetime $19.99 once, with Family Sharing. When a subscription ends, expert models downloaded with it stay on the device and need Pro to open again.
+- Earlier purchases: people who bought the paid app (before 11 October 2026) or the former All Packs already have Pro. The single expert packs sold before 2.4.0 stay unlocked for their models.
 - Devices: iPhone and iPad with iOS/iPadOS 17 or later; Mac with macOS 14 or later. Apple's on-device model needs iOS, iPadOS or macOS 26 on a device with Apple Intelligence; on other devices a free model is downloaded once (0.7–2.5 GB).
 - Catalog: 22 curated models in 9 categories, each page stating the RAM it needs: https://www.privateslm.dev/models/
 - Privacy: inference runs on the device and works in airplane mode. There is no server component; the internet is only used to download a model.

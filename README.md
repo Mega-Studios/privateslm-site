@@ -66,7 +66,7 @@ exist for it.
 
 - `llms.txt` is the site in one text file for assistants. The top (the summary and
   "Facts") is written by hand and must match the app and the App Store: when a
-  price, a pack or a minimum OS changes, change it here, in the home page's facts
+  price, a Pro plan or a minimum OS changes, change it here, in the home page's facts
   table and FAQ, and in its JSON-LD. `scripts/gen_model_pages.py` rewrites only
   the "Model pages" section (models and every `compare/*.html`, by its `<title>`).
 - IndexNow: the key is served at `/b554a11595e2c5a99c976126fb9e55bb.txt`. After a
