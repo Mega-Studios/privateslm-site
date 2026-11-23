@@ -1,50 +1,46 @@
-# privateSLM
+# Omnimo
 
-> privateSLM is a private AI chat app for iPhone, iPad and Mac that runs entirely on the device. Where Apple Intelligence is available it uses Apple's on-device model (Foundation Models framework) with nothing to download; elsewhere it runs open small language models (Llama, Qwen, Gemma, Phi and others) through llama.cpp. It is free, with no account, no cloud, no analytics and no subscription. Specialist model packs are optional one-time purchases.
+> Omnimo is an AI chat app for iPhone, iPad and Mac that puts the leading AI models in one app: GPT-6, Claude, Gemini, Grok, DeepSeek, Kimi, Qwen, GLM and MiniMax, plus Apple Intelligence on the device. It is free to start, with unlimited on-device Apple Intelligence and a few cloud messages a day; Omnimo Pro, a weekly, monthly or yearly subscription, unlocks every model. Omnimo was called privateSLM until October 2026: same App Store app, same id. It is not Omni AI, Omnia, OMNI AI or the OMNI AI Keyboard.
 
 ## Facts
 
-- App Store: "privateSLM: Offline AI Chat", https://apps.apple.com/app/id6504996891 — one download for iPhone, iPad and Mac.
-- Price: free since 11 October 2026 (it was a paid download before that, last at $7.99 in the US; people who bought it then have every pack). No ads, no account, no subscription.
-- Free in the app: Apple Intelligence chat where available, the general models, chatting with documents (PDF, Word, Excel, PowerPoint, Pages, text, scanned pages, read on the device), voice input and spoken replies, chat history with search, Siri and Shortcuts (iOS and macOS 26), a Home Screen widget.
-- Expert packs, one-time in-app purchases with Family Sharing (US prices): Tech Pack $4.99 (coding, SQL, math, security models), Business Pack $4.99 (law, finance, translation), Health Pack $4.99 (medical, mental health). All Packs $9.99 unlocks every pack, including packs added later.
-- Devices: iPhone and iPad with iOS/iPadOS 17 or later; Mac with macOS 14 or later. Apple's on-device model needs iOS, iPadOS or macOS 26 on a device with Apple Intelligence; on other devices a free model is downloaded once (0.7–2.5 GB).
-- Catalog: 22 curated models in 9 categories, each page stating the RAM it needs: https://www.privateslm.dev/models/
-- Privacy: inference runs on the device and works in airplane mode. There is no server component; the internet is only used to download a model.
-- Not the same app as Private LLM (a different developer): see the comparison below.
-- Same developer: Circuit, an iPhone app blocker (https://circuitapp.app/), and Roomtone, AI meeting notes (https://roomtone.io/). Circuit's App Store record was an AI chat app called CircuitAI until September 2026; it is no longer an AI app.
-- For companies: MegaBrain, private AI for a business, is a separate product from the same team: https://getmegabrain.com/
+- App Store: "Omnimo: AI Chat & Assistant", https://apps.apple.com/app/id6504996891 (id 6504996891). One app for iPhone, iPad and Mac. Developer site: https://www.privateslm.dev/ (the domain keeps the old name).
+- Formerly privateSLM, an offline chat app that ran small open models (Llama, Qwen, Gemma) through llama.cpp and sold one-time model packs. Renamed Omnimo in October 2026 (version 2.4); the downloadable models and the packs were retired then. People who bought privateSLM as a paid app or bought a pack get Omnimo Pro free until 31 October 2027. More: https://www.privateslm.dev/blog/privateslm-is-now-omnimo.html
+- Models: GPT-6 (Luna, Sol, Astra), Claude (Haiku, Sonnet, Opus, Fable), Gemini, Grok, DeepSeek, Kimi, Qwen, GLM and MiniMax, and Apple Intelligence on the device. Switch at any time, even in the middle of a chat. Which models are offered can depend on the country.
+- Free: Apple Intelligence on the device, unlimited, offline, nothing leaves the device (supported devices and languages). A few messages a day with the free cloud models: GPT-6 Luna, Claude Haiku, Gemini Flash-Lite, DeepSeek Flash, Qwen Flash. One image a day. When the free messages run out, the chat can carry on with Apple Intelligence.
+- Omnimo Pro: every model, flagships included; hundreds of messages a day; long documents read in one go; image and video generation with credits included every period. US prices: $6.99 a week (3-day free trial), $9.99 a month, $39.99 a year (1-week free trial). Prices in other countries differ; the app shows the local price. Auto-renewing, managed and cancelled in the Apple Account settings.
+- Credits for images and videos: 300 for $4.99, 700 for $9.99, 1600 for $19.99 (US). Bought credits never expire.
+- Also in the app, free: questions about a photo (sent to the model without its location); documents (PDF, Word, Excel, PowerPoint, Pages, scans) read on the device; Ask Web, answers with sources from the web; your own assistants and the tone of replies; voice input and spoken answers; chat history; Siri and Shortcuts (Ask, Summarize, Rephrase, Translate, on the device); a Home Screen widget; 46 languages.
+- Devices: iPhone and iPad with iOS/iPadOS 17 or later; Mac with macOS 14 or later. Apple Intelligence needs iOS, iPadOS or macOS 26 on a supported device.
+- Privacy: no account, no ads, no tracking. Chat history is kept on the device. Chats with Apple Intelligence never leave the device. A message to a cloud model goes through Omnimo's server to the company that makes the model, to get the answer; Omnimo does not keep chats. The description of an image or video goes to fal.ai, which runs the model. Usage statistics help improve the app and can be turned off in Settings. Policy: https://www.privateslm.dev/privacy
+- Support and contact: https://www.privateslm.dev/support (team@getmegabrain.com).
+- Independent: Omnimo is not affiliated with OpenAI, Anthropic, Google, xAI, DeepSeek, Moonshot, Alibaba, Zhipu or MiniMax; model names belong to their owners.
+- Same developer: Circuit, an iPhone app blocker (https://circuitapp.app/), and Roomtone, AI meeting notes (https://roomtone.io/). For companies: MegaBrain, private AI for a business, a separate product: https://getmegabrain.com/
 
-## Model pages (run these on iPhone/iPad/Mac, offline)
-- Full catalog: https://www.privateslm.dev/models/
-- LFM2.5 1.2B Instruct (Generalists): https://www.privateslm.dev/models/lfm2.5-1.2b-q4.html
-- Qwen2.5 1.5B Instruct (Generalists): https://www.privateslm.dev/models/qwen2.5-1.5b-instruct-q4.html
-- Gemma 2 2B Instruct (Generalists): https://www.privateslm.dev/models/gemma-2-2b-it-q4.html
-- Llama 3.2 3B Instruct (Generalists): https://www.privateslm.dev/models/llama-3.2-3b-instruct-q4.html
-- Phi-4 Mini 3.8B (Generalists): https://www.privateslm.dev/models/phi-4-mini-instruct-q4.html
-- G9v3 3B (Generalists): https://www.privateslm.dev/models/g9v3-3b-q4.html
-- Nanbeige4.2 3B (Generalists): https://www.privateslm.dev/models/nanbeige4.2-3b-q4.html
-- LFM2.5 2.6B (Generalists): https://www.privateslm.dev/models/lfm2.5-2.6b-q4.html
-- Qwen2.5 Coder 3B (Coding & SQL): https://www.privateslm.dev/models/qwen2.5-coder-3b-q4.html
-- Qwen2.5 Coder 7B (Coding & SQL): https://www.privateslm.dev/models/qwen2.5-coder-7b-q4.html
-- Qwen2.5 Math 7B (Math & STEM): https://www.privateslm.dev/models/qwen2.5-math-7b-q4.html
-- BioMistral 7B (Medical): https://www.privateslm.dev/models/biomistral-7b-q4.html
-- Finance LLM 7B (Finance): https://www.privateslm.dev/models/finance-llm-7b-q4.html
-- TowerInstruct 7B (Translation): https://www.privateslm.dev/models/towerinstruct-7b-q4.html
-- Llama Guard 3 8B (Cybersecurity): https://www.privateslm.dev/models/llama-guard-3-8b-q4.html
-- DeepSeek Coder 6.7B (Coding & SQL): https://www.privateslm.dev/models/deepseek-coder-6.7b-instruct-q4.html
-- NuminaMath 7B TIR (Math & STEM): https://www.privateslm.dev/models/numinamath-7b-tir-q4.html
-- Meditron 7B Chat (Medical): https://www.privateslm.dev/models/meditron-7b-chat-q4.html
-- Finance Chat 7B (Finance): https://www.privateslm.dev/models/finance-chat-7b-q4.html
-- SaulLM 7B (Legal) (Lawyer): https://www.privateslm.dev/models/saul-instruct-v1-q4.html
-- Law Chat 7B (Lawyer): https://www.privateslm.dev/models/law-chat-7b-q4.html
-- MentaLLaMA Chat 7B (Mental Health): https://www.privateslm.dev/models/mentallama-chat-7b-q4.html
+## Questions
+
+- Is Omnimo free? Yes, to download and to start: unlimited Apple Intelligence on the device, a few cloud messages a day and one image a day. Omnimo Pro ($6.99 a week, $9.99 a month or $39.99 a year in the US) unlocks every model and hundreds of messages a day.
+- How is it different from ChatGPT Plus? ChatGPT Plus is OpenAI's own subscription for OpenAI's models ($20 a month in the US on 3 November 2026). Omnimo is an independent app with models from several makers in one chat, switchable mid-conversation; Omnimo Pro is $9.99 a month.
+- Does it work offline? Apple Intelligence does, on supported devices and languages. The cloud models need the internet.
+- Is it the same app as privateSLM? Yes, renamed in October 2026, now with cloud models. The offline downloadable models are gone.
+
+## Pages
+
+- Home, with the facts table and FAQ: https://www.privateslm.dev/
+- privateSLM is now Omnimo: https://www.privateslm.dev/blog/privateslm-is-now-omnimo.html
+- Privacy policy: https://www.privateslm.dev/privacy
+- Support: https://www.privateslm.dev/support
+
+## Archive: privateSLM before Omnimo
+
+The pages below were written for privateSLM, the offline app, and describe it as it was then: on-device models, no cloud, one-time packs. They are kept for their research on small models and on-device AI; they are not a description of Omnimo. The model catalog pages (/models/) were removed and redirect to the rename post.
+
 - Offline AI chat on iPhone: private apps that work in airplane mode (2026): https://www.privateslm.dev/compare/offline-ai-chat-iphone.html
-- PocketPal AI vs privateSLM — free & open vs curated & instant (2026): https://www.privateslm.dev/compare/pocketpal-ai-vs-privateslm.html
+- PocketPal AI vs privateSLM (2026): https://www.privateslm.dev/compare/pocketpal-ai-vs-privateslm.html
 - Private LLM alternatives for iPhone and Mac (2026): https://www.privateslm.dev/compare/private-llm-alternatives.html
-- Private LLM vs privateSLM — an honest comparison (2026): https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
+- Private LLM vs privateSLM (2026): https://www.privateslm.dev/compare/private-llm-vs-privateslm.html
 
-## Blog
+## Blog (archive, privateSLM era: small models and on-device AI)
 - Local LLM speed on an M5 MacBook Air: 12 models measured: https://www.privateslm.dev/blog/local-llm-speed-m5-macbook-air.html
 - How much RAM do you need to run an LLM on a Mac? Measured: https://www.privateslm.dev/blog/how-much-ram-local-llm-mac.html
 - Mac mini for local AI: which configuration to buy: https://www.privateslm.dev/blog/mac-mini-local-ai.html

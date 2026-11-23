@@ -309,3 +309,17 @@ footer a.biz-link { color: var(--biz); }
 article .table-scroll { overflow-x: auto; margin: 24px 0; }
 article .table-scroll table { min-width: 920px; margin: 0; }
 article .table-scroll td, article .table-scroll th { vertical-align: top; }
+
+/* ---------- the rename note: "privateSLM is now Omnimo" (home page hero) ---------- */
+.panel.hero { padding-top: 120px; }  /* room for the nav above the rename note */
+a.rename-note {
+  display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px;
+  margin-bottom: 30px; padding: 10px 20px;
+  border: 1px solid rgba(167, 139, 255, .55); border-radius: 999px;
+  background: rgba(124, 77, 255, .14);
+  font-size: 14px; line-height: 1.4; color: #fff;
+}
+a.rename-note strong { color: var(--accent); }
+a.rename-note span { color: #cfcfd6; }
+a.rename-note:hover { background: rgba(124, 77, 255, .28); text-decoration: none; }
+p.fine { margin-top: 28px; font-size: 13px; color: var(--muted); }
