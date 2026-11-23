@@ -1,6 +1,21 @@
 {
   "redirects": [
     {
+      "source": "/models",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/:path*",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
       "source": "/circuitai",
       "destination": "https://circuitapp.app/",
       "permanent": true

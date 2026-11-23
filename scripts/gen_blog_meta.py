@@ -53,7 +53,7 @@ def read_post(path: Path) -> dict:
         return found.group(1).strip()
 
     title = need(r"<title>(.*?)</title>", "<title>")
-    title = re.sub(r"\s+[—-]\s+privateSLM blog$", "", html.unescape(title))
+    title = re.sub(r"\s+[—-]\s+(?:privateSLM|Omnimo) blog$", "", html.unescape(title))
     description = html.unescape(need(r'<meta name="description" content="(.*?)">', "meta description"))
     canonical = need(r'<link rel="canonical" href="(.*?)">', "canonical link")
     meta_line = need(r'<div class="meta">(.*?)</div>', 'date line (<div class="meta">)')
@@ -82,16 +82,16 @@ def head_block(post: dict) -> str:
         "dateModified": post["modified"],
         "image": [post["image"]],
         "mainEntityOfPage": post["canonical"],
-        "author": {"@type": "Organization", "name": "privateSLM", "url": f"{SITE}/"},
+        "author": {"@type": "Organization", "name": "Omnimo", "url": f"{SITE}/"},
         "publisher": {
-            "@type": "Organization", "name": "privateSLM",
+            "@type": "Organization", "name": "Omnimo",
             "logo": {"@type": "ImageObject", "url": f"{SITE}/assets/favicon.png"},
         },
     }
     lines = [
         START,
         '  <meta property="og:type" content="article">',
-        '  <meta property="og:site_name" content="privateSLM">',
+        '  <meta property="og:site_name" content="Omnimo">',
         f'  <meta property="og:title" content="{attr(post["title"])}">',
         f'  <meta property="og:description" content="{attr(post["description"])}">',
         f'  <meta property="og:url" content="{attr(post["canonical"])}">',
