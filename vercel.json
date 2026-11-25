@@ -1,17 +1,222 @@
 {
   "redirects": [
     {
-      "source": "/models",
+      "source": "/models/biomistral-7b-q4.html",
       "destination": "/blog/privateslm-is-now-omnimo.html",
       "permanent": true
     },
     {
-      "source": "/models/",
+      "source": "/models/deepseek-coder-6.7b-instruct-q4.html",
       "destination": "/blog/privateslm-is-now-omnimo.html",
       "permanent": true
     },
     {
-      "source": "/models/:path*",
+      "source": "/models/finance-chat-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/finance-llm-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/g9v3-3b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/gemma-2-2b-it-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/law-chat-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/lfm2.5-1.2b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/lfm2.5-2.6b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/llama-3.2-3b-instruct-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/llama-guard-3-8b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/meditron-7b-chat-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/mentallama-chat-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/nanbeige4.2-3b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/numinamath-7b-tir-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/phi-4-mini-instruct-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-1.5b-instruct-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-coder-3b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-coder-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-math-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/saul-instruct-v1-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/towerinstruct-7b-q4.html",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/biomistral-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/deepseek-coder-6.7b-instruct-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/finance-chat-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/finance-llm-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/g9v3-3b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/gemma-2-2b-it-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/law-chat-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/lfm2.5-1.2b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/lfm2.5-2.6b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/llama-3.2-3b-instruct-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/llama-guard-3-8b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/meditron-7b-chat-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/mentallama-chat-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/nanbeige4.2-3b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/numinamath-7b-tir-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/phi-4-mini-instruct-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-1.5b-instruct-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-coder-3b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-coder-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/qwen2.5-math-7b-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/saul-instruct-v1-q4",
+      "destination": "/blog/privateslm-is-now-omnimo.html",
+      "permanent": true
+    },
+    {
+      "source": "/models/towerinstruct-7b-q4",
       "destination": "/blog/privateslm-is-now-omnimo.html",
       "permanent": true
     },
@@ -49,6 +254,17 @@
       "source": "/privacy/",
       "destination": "/privacy.html",
       "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.md",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        }
+      ]
     }
   ]
 }

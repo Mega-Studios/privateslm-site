@@ -323,3 +323,30 @@ a.rename-note strong { color: var(--accent); }
 a.rename-note span { color: #cfcfd6; }
 a.rename-note:hover { background: rgba(124, 77, 255, .28); text-decoration: none; }
 p.fine { margin-top: 28px; font-size: 13px; color: var(--muted); }
+
+/* ---------- generated pages: compare, models, prompts, guides (scripts/gen_pages.py) ---------- */
+article .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+article .crumbs a { color: var(--muted); }
+article .crumbs a:hover { color: #fff; }
+article h3 { font-size: 18px; margin: 26px 0 8px; color: #fff; }
+article .post-list { margin: 28px 0 40px; }
+article a.post-card, article a.post-card:hover { color: var(--ink); }
+article a.post-card h3 { margin: 0 0 8px; }
+article ol.best { padding-left: 26px; }
+article ol.best li { margin-bottom: 28px; }
+article ol.best h3 { margin-top: 0; }
+article pre.prompt code { white-space: pre-wrap; color: #e8e2ff; font-size: 15px; }
+article button.copy {
+  font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+  padding: 11px 22px; border: 2px solid #fff; background: transparent; color: #fff; cursor: pointer;
+}
+article button.copy:hover { background: #fff; color: #000; }
+article .archive-note {
+  border: 1px solid rgba(167, 139, 255, .55); border-radius: 8px; padding: 14px 18px;
+  background: rgba(124, 77, 255, .12); font-size: 15px;
+}
+footer .langs { text-transform: none; letter-spacing: .04em; }
+@media (max-width: 640px) {
+  article table { font-size: 13px; }
+  article th, article td { padding: 8px 6px; overflow-wrap: anywhere; hyphens: auto; }
+}
