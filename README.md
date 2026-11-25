@@ -50,16 +50,57 @@ by hand) and adds the post to `sitemap.xml`. The preview image is the first imag
 the article, or `assets/og-default.png`. To mark a revision, write
 "Updated October 11, 2026" in the meta line.
 
-## Model & compare pages
+## Generated pages: compare, models, prompts, guides, translations
 
-The `/models/` pages described the GGUF models privateSLM ran on the device. They went
-with the rename (Omnimo has no downloadable models), and `vercel.json` sends `/models/`
-and every page under it to `blog/privateslm-is-now-omnimo.html` with a 301.
-**`models.json` stays:** privateSLM builds from before the rename fetch it from
+```
+python3 scripts/gen_pages.py     # write the pages, their .md copies, sitemap and llms.txt
+python3 scripts/check_site.py    # links, anchors, markup, JSON-LD, sitemap, hreflang
+```
+
+`gen_pages.py` writes these pages from the data in `scripts/pagedata/` (the words live
+there; the script only lays them out — do not edit the generated HTML by hand):
+
+| Path | What | Data |
+|---|---|---|
+| `/facts.html` | the fact sheet: models, prices, limits, privacy, changes | `guides.py` |
+| `/compare/` | Omnimo vs ChatGPT, Perplexity, Poe, ChatOn, Genie, Nova, ChatNow, Fello AI, AllChat, TypingMind | `compare.py`, `competitors.py` |
+| `/alternatives/` | alternatives to ChatGPT Plus, Poe, ChatOn, the Claude app, Private LLM | `compare.py` |
+| `/models/` | every cloud model Omnimo offers, by family, and model-vs-model pages | `models.py` |
+| `/use-cases/` | summarize a PDF, homework, translate, email, photo questions, images | `usecases.py` |
+| `/prompts/` | the prompt library: 8 categories, 64 prompts | `prompts.py` |
+| `/status/` | "Is ChatGPT / Claude / Gemini down?": links to the official status pages, no live status | `status.py` |
+| `/best/`, `/guides/` | the best AI chat apps for iPhone; Apple Intelligence with GPT, Claude and Gemini; free offline AI | `guides.py` |
+| `/es/ /de/ /fr/ /pt-br/ /ja/` | the home page with its FAQ and five compare pages, with hreflang | `i18n*.py` |
+
+Facts about Omnimo come from the app repo (`appstore/metadata/en-US/`,
+`docs/monetization.md`, `gateway/src/catalog.ts`); `models.py` copies the catalog, so
+**when the gateway's catalog changes, change `CATALOG` there**. Facts about other apps
+are in `competitors.py`, read from their US App Store listings and in-app purchase lists
+with the date; re-read them before changing a price. Message counts are never given as
+numbers ("a few a day", "hundreds a day"): they change with a gateway deploy. The fact
+sheet's JSON-LD is copied from the home page's, so the two can't disagree.
+
+Pages marked `md` also get a Markdown copy next to them (`/facts.md`,
+`/compare/omnimo-vs-chatgpt.md`...), as do the home page (`/index.md`) and the rename
+post; `llms.txt` lists them in a generated block between `pages:start` and `pages:end`.
+`vercel.json` serves `.md` as `text/markdown`.
+
+The prompt pages copy the prompt and link to the App Store. They do not deep-link into
+the app: Omnimo declares a `privateslm://` scheme, but only the widget uses it and the
+app's `onOpenURL` handles files only, so a link could not carry a prompt.
+
+## The old model pages
+
+The GGUF model pages privateSLM had under `/models/` went with the rename; `vercel.json`
+sends each of the 22 old addresses (`/models/*-q4.html`) to
+`blog/privateslm-is-now-omnimo.html` with a 301, and `/models/` is now Omnimo's model
+list. **`models.json` stays:** privateSLM builds from before the rename fetch it from
 `https://www.privateslm.dev/models.json`, and `bench/build_posts.py` reads it.
 
-`compare/*.html` are hand-written and still compare privateSLM, the offline app;
-`llms.txt` lists them under its archive heading until they are rewritten for Omnimo.
+The four hand-written privateSLM-era compare pages (`compare/*-vs-privateslm.html`,
+`offline-ai-chat-iphone.html`, `private-llm-alternatives.html`) compare privateSLM, the
+offline app; each carries an archive note, and `llms.txt` lists them under its archive
+heading.
 
 ## Search engines and assistants
 
