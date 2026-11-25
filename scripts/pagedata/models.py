@@ -1,49 +1,49 @@
 """/models/ (audit #132): the models Omnimo offers, and model-vs-model pages (#148).
 
 The list is gateway/src/catalog.ts in the app repo (main at 67db037, 25 November
-2026). Only what the catalog says is stated: the tier, the longest prompt the gateway accepts
-(`context`) and whether the model can see a photo (`vision`). The catalog's `weight`
-(what a flagship request costs from the allowance) is internal billing detail and is
-not published; it is kept below only so the list stays a straight copy of the catalog. No benchmark scores: we have not run
+2026). CATALOG below is a trimmed copy of catalog.ts: it keeps only what the pages show, the
+tier, the longest prompt the gateway accepts (`context`) and whether the model can see
+a photo (`vision`). The catalog's other fields are internal and stay out of this
+public repo. No benchmark scores: we have not run
 any, and the makers' own numbers are theirs to publish.
 """
 
 from .common import UPDATED_TEXT, PRICE_LINE, table, cards, ul, p, h2, ext
 
-# id, name, maker, tier, weight, context (tokens), vision
+# id, name, maker, tier, context (tokens), vision
 CATALOG = [
-    ("gpt-6-luna", "GPT-6 Luna", "openai", "free", 1, 64000, True),
-    ("claude-haiku-5.5", "Claude Haiku 5.5", "anthropic", "free", 1, 64000, True),
-    ("gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite", "google", "free", 1, 64000, True),
-    ("deepseek-v4-flash", "DeepSeek V4 Flash", "deepseek", "free", 1, 64000, False),
-    ("qwen-3.8-flash", "Qwen 3.8 Flash", "qwen", "free", 1, 64000, True),
-    ("deepseek-v4-pro", "DeepSeek V4 Pro", "deepseek", "pro", 1, 64000, False),
-    ("glm-5.3", "GLM 5.3", "zhipu", "pro", 1, 64000, False),
-    ("minimax-m3", "MiniMax M3", "minimax", "pro", 1, 64000, True),
-    ("glm-5.3-flash", "GLM 5.3 Flash", "zhipu", "pro", 1, 64000, True),
-    ("deepseek-v4.1-flash", "DeepSeek V4.1 Flash", "deepseek", "pro", 1, 64000, True),
-    ("minimax-m3.1-flash", "MiniMax M3.1 Flash", "minimax", "pro", 1, 64000, True),
-    ("mistral-small", "Mistral Small", "mistral", "pro", 1, 64000, True),
-    ("llama-4-maverick", "Llama 4 Maverick", "meta", "pro", 1, 64000, True),
-    ("gemini-3.5-flash-lite", "Gemini 3.5 Flash-Lite", "google", "pro", 1, 64000, True),
-    ("qwen-3.7-plus", "Qwen 3.7 Plus", "qwen", "pro", 1, 64000, True),
-    ("mimo-v2.6-pro", "MiMo V2.6 Pro", "xiaomi", "pro", 1, 64000, True),
-    ("mistral-large-4", "Mistral Large 4", "mistral", "pro", 1, 64000, True),
-    ("gpt-6-sol", "GPT-6 Sol", "openai", "premium", 1, 48000, True),
-    ("gpt-6.1-sol", "GPT-6.1 Sol", "openai", "premium", 1, 48000, True),
-    ("gpt-6.1-terra", "GPT-6.1 Terra", "openai", "premium", 1, 48000, True),
-    ("claude-sonnet-5.5", "Claude Sonnet 5.5", "anthropic", "premium", 1, 48000, True),
-    ("gemini-3.5-flash", "Gemini 3.5 Flash", "google", "premium", 1, 48000, True),
-    ("gemini-3.8-flash", "Gemini 3.8 Flash", "google", "premium", 1, 48000, True),
-    ("gemini-3.1-pro", "Gemini 3.1 Pro", "google", "premium", 1, 48000, True),
-    ("grok-4.7", "Grok 4.7", "xai", "premium", 1, 48000, True),
-    ("grok-4.3", "Grok 4.3", "xai", "premium", 1, 48000, True),
-    ("kimi-k3", "Kimi K3", "moonshot", "premium", 1, 48000, True),
-    ("kimi-k3.1-pro", "Kimi K3.1 Pro", "moonshot", "premium", 1, 48000, True),
-    ("qwen-3.8-max", "Qwen 3.8 Max", "qwen", "premium", 1, 48000, True),
-    ("claude-opus-5.5", "Claude Opus 5.5", "anthropic", "premium", 2, 32000, True),
-    ("claude-fable-5.1", "Claude Fable 5.1", "anthropic", "premium", 5, 24000, True),
-    ("gpt-6-astra", "GPT-6 Astra", "openai", "premium", 5, 24000, True),
+    ("gpt-6-luna", "GPT-6 Luna", "openai", "free", 64000, True),
+    ("claude-haiku-5.5", "Claude Haiku 5.5", "anthropic", "free", 64000, True),
+    ("gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite", "google", "free", 64000, True),
+    ("deepseek-v4-flash", "DeepSeek V4 Flash", "deepseek", "free", 64000, False),
+    ("qwen-3.8-flash", "Qwen 3.8 Flash", "qwen", "free", 64000, True),
+    ("deepseek-v4-pro", "DeepSeek V4 Pro", "deepseek", "pro", 64000, False),
+    ("glm-5.3", "GLM 5.3", "zhipu", "pro", 64000, False),
+    ("minimax-m3", "MiniMax M3", "minimax", "pro", 64000, True),
+    ("glm-5.3-flash", "GLM 5.3 Flash", "zhipu", "pro", 64000, True),
+    ("deepseek-v4.1-flash", "DeepSeek V4.1 Flash", "deepseek", "pro", 64000, True),
+    ("minimax-m3.1-flash", "MiniMax M3.1 Flash", "minimax", "pro", 64000, True),
+    ("mistral-small", "Mistral Small", "mistral", "pro", 64000, True),
+    ("llama-4-maverick", "Llama 4 Maverick", "meta", "pro", 64000, True),
+    ("gemini-3.5-flash-lite", "Gemini 3.5 Flash-Lite", "google", "pro", 64000, True),
+    ("qwen-3.7-plus", "Qwen 3.7 Plus", "qwen", "pro", 64000, True),
+    ("mimo-v2.6-pro", "MiMo V2.6 Pro", "xiaomi", "pro", 64000, True),
+    ("mistral-large-4", "Mistral Large 4", "mistral", "pro", 64000, True),
+    ("gpt-6-sol", "GPT-6 Sol", "openai", "premium", 48000, True),
+    ("gpt-6.1-sol", "GPT-6.1 Sol", "openai", "premium", 48000, True),
+    ("gpt-6.1-terra", "GPT-6.1 Terra", "openai", "premium", 48000, True),
+    ("claude-sonnet-5.5", "Claude Sonnet 5.5", "anthropic", "premium", 48000, True),
+    ("gemini-3.5-flash", "Gemini 3.5 Flash", "google", "premium", 48000, True),
+    ("gemini-3.8-flash", "Gemini 3.8 Flash", "google", "premium", 48000, True),
+    ("gemini-3.1-pro", "Gemini 3.1 Pro", "google", "premium", 48000, True),
+    ("grok-4.7", "Grok 4.7", "xai", "premium", 48000, True),
+    ("grok-4.3", "Grok 4.3", "xai", "premium", 48000, True),
+    ("kimi-k3", "Kimi K3", "moonshot", "premium", 48000, True),
+    ("kimi-k3.1-pro", "Kimi K3.1 Pro", "moonshot", "premium", 48000, True),
+    ("qwen-3.8-max", "Qwen 3.8 Max", "qwen", "premium", 48000, True),
+    ("claude-opus-5.5", "Claude Opus 5.5", "anthropic", "premium", 32000, True),
+    ("claude-fable-5.1", "Claude Fable 5.1", "anthropic", "premium", 24000, True),
+    ("gpt-6-astra", "GPT-6 Astra", "openai", "premium", 24000, True),
 ]
 
 MAKERS = {
@@ -61,7 +61,7 @@ def rows(models):
     out = []
     for m in models:
         out.append([f"<strong>{m[1]}</strong>", MAKERS[m[2]], TIER[m[3]],
-                    f"~{m[5] // 1000}K tokens", "Yes" if m[6] else "No"])
+                    f"~{m[4] // 1000}K tokens", "Yes" if m[5] else "No"])
     return out
 
 
