@@ -4,13 +4,13 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-**Claude Fable 5.1** is the most expensive Claude model Omnimo offers. On Pro, one request counts as five flagship requests, and Omnimo accepts shorter prompts for it than for the other Claude models, to keep a request's cost bounded.
+**Claude Fable 5.1** is the most expensive Claude model Omnimo offers. It is part of Pro, and Omnimo accepts shorter prompts for it than for the other Claude models.
 
 ## Claude Fable in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Claude Fable 5.1** | Anthropic | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Claude Fable 5.1** | Anthropic | Pro flagship | ~24K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -20,7 +20,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Comparing its answer with Opus or GPT-6 Astra in the same chat.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 Not offered in some countries: the maker's terms don't allow it there, and Omnimo hides these models.
 
@@ -32,7 +32,7 @@ Open Omnimo, tap the model name at the top of the chat and pick it. You can swit
 
 ### How many Fable messages can I send?
 
-Fable counts as five requests from the daily flagship allowance, so you get a fifth as many Fable answers as Sonnet answers. The app shows what is left.
+Fable uses the daily flagship allowance of Omnimo Pro, and as the most expensive Claude model it uses it up faster than Sonnet. The app shows what is left.
 
 [Get Omnimo — free](https://apps.apple.com/app/id6504996891)
 

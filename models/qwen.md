@@ -8,11 +8,11 @@ Qwen is Alibaba's model family. Omnimo offers **Qwen 3.8 Flash** free, **Qwen 3.
 
 ## Qwen in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Qwen 3.8 Flash** | Alibaba (Qwen) | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Qwen 3.7 Plus** | Alibaba (Qwen) | Pro | 1 message | ~64K tokens | Yes |
-| **Qwen 3.8 Max** | Alibaba (Qwen) | Pro flagship | 1 flagship request | ~48K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Qwen 3.8 Flash** | Alibaba (Qwen) | Free and Pro | ~64K tokens | Yes |
+| **Qwen 3.7 Plus** | Alibaba (Qwen) | Pro | ~64K tokens | Yes |
+| **Qwen 3.8 Max** | Alibaba (Qwen) | Pro flagship | ~48K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -22,7 +22,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Translation and multilingual questions.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 In countries where some makers' models are not offered, these models are still available.
 

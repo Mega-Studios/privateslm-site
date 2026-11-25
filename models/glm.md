@@ -8,10 +8,10 @@ GLM is the model family of Zhipu (Z.ai). Omnimo offers **GLM 5.3** and **GLM 5.3
 
 ## GLM in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **GLM 5.3** | Zhipu (Z.ai) | Pro | 1 message | ~64K tokens | No |
-| **GLM 5.3 Flash** | Zhipu (Z.ai) | Pro | 1 message | ~64K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **GLM 5.3** | Zhipu (Z.ai) | Pro | ~64K tokens | No |
+| **GLM 5.3 Flash** | Zhipu (Z.ai) | Pro | ~64K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -19,7 +19,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Text tasks and code on Pro without touching the flagship allowance.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 In countries where some makers' models are not offered, these models are still available.
 

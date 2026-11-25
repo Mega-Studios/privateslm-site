@@ -8,11 +8,11 @@ DeepSeek makes open-weight models. Omnimo offers **DeepSeek V4 Flash** free, and
 
 ## DeepSeek in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **DeepSeek V4 Flash** | DeepSeek | Free and Pro | 1 message | ~64K tokens | No |
-| **DeepSeek V4 Pro** | DeepSeek | Pro | 1 message | ~64K tokens | No |
-| **DeepSeek V4.1 Flash** | DeepSeek | Pro | 1 message | ~64K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **DeepSeek V4 Flash** | DeepSeek | Free and Pro | ~64K tokens | No |
+| **DeepSeek V4 Pro** | DeepSeek | Pro | ~64K tokens | No |
+| **DeepSeek V4.1 Flash** | DeepSeek | Pro | ~64K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -22,7 +22,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - In countries where some makers' models are not offered, DeepSeek V4 Flash is Omnimo's default free model.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 In countries where some makers' models are not offered, these models are still available.
 

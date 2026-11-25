@@ -4,13 +4,13 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-Opus is the larger model in Anthropic's Claude line. In Omnimo, **Claude Opus 5.5** is a Pro flagship and costs twice as much of the day's flagship allowance as Sonnet, roughly in line with Anthropic's price.
+Opus is the larger model in Anthropic's Claude line. In Omnimo, **Claude Opus 5.5** is a Pro flagship.
 
 ## Claude Opus in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Claude Opus 5.5** | Anthropic | Pro flagship | 2 flagship requests | ~32K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Claude Opus 5.5** | Anthropic | Pro flagship | ~32K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -20,7 +20,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - A second opinion on an answer from another model in the same chat.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 Not offered in some countries: the maker's terms don't allow it there, and Omnimo hides these models.
 
@@ -30,9 +30,9 @@ Open Omnimo, tap the model name at the top of the chat and pick it. You can swit
 
 ## Questions
 
-### Why does Opus count as two requests?
+### Is Claude Opus in the free plan?
 
-Omnimo weighs flagship requests roughly by what the maker charges for the model. Opus costs more to run than Sonnet, so one Opus request uses two from the daily flagship allowance.
+No, Claude Opus 5.5 is part of Omnimo Pro and uses the daily flagship allowance. The free plan has Claude Haiku 5.5.
 
 [Get Omnimo — free](https://apps.apple.com/app/id6504996891)
 

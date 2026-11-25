@@ -4,23 +4,23 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-The free pair is **Gemini 3.1 Flash-Lite vs Claude Haiku 5.5**. On Pro, Gemini 3.5 Flash-Lite comes from the large daily allowance, while **Gemini 3.5 Flash, 3.8 Flash and 3.1 Pro** and **Claude Sonnet 5.5** are flagships at one request each. Claude Opus 5.5 (two) and Fable 5.1 (five) cost more of the flagship allowance than any Gemini model in the app.
+The free pair is **Gemini 3.1 Flash-Lite vs Claude Haiku 5.5**. On Pro, Gemini 3.5 Flash-Lite comes from the large daily allowance, while **Gemini 3.5 Flash, 3.8 Flash and 3.1 Pro** and **Claude Sonnet 5.5, Opus 5.5 and Fable 5.1** are Pro flagships, from the daily flagship allowance.
 
-So on Pro, Gemini gives you more flagship answers a day than Claude Opus or Fable. Which writes the better answer to your question is something to try, not something we can promise.
+Which writes the better answer to your question is something to try, not something we can promise.
 
 ## Side by side in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Claude Haiku 5.5** | Anthropic | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.5 Flash-Lite** | Google | Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.5 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.8 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.1 Pro** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Claude Sonnet 5.5** | Anthropic | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Claude Opus 5.5** | Anthropic | Pro flagship | 2 flagship requests | ~32K tokens | Yes |
-| **Claude Fable 5.1** | Anthropic | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | ~64K tokens | Yes |
+| **Claude Haiku 5.5** | Anthropic | Free and Pro | ~64K tokens | Yes |
+| **Gemini 3.5 Flash-Lite** | Google | Pro | ~64K tokens | Yes |
+| **Gemini 3.5 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.8 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.1 Pro** | Google | Pro flagship | ~48K tokens | Yes |
+| **Claude Sonnet 5.5** | Anthropic | Pro flagship | ~48K tokens | Yes |
+| **Claude Opus 5.5** | Anthropic | Pro flagship | ~32K tokens | Yes |
+| **Claude Fable 5.1** | Anthropic | Pro flagship | ~24K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -32,7 +32,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 3. Each answer shows which model wrote it. Keep the one you prefer and carry on.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 ## Questions
 

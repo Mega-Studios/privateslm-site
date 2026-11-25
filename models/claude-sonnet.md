@@ -4,13 +4,13 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-Sonnet sits in the middle of Anthropic's Claude line, between the fast Haiku and the larger Opus. In Omnimo, **Claude Sonnet 5.5** is a flagship on Pro: one request counts as one flagship request.
+Sonnet sits in the middle of Anthropic's Claude line, between the fast Haiku and the larger Opus. In Omnimo, **Claude Sonnet 5.5** is a flagship on Pro.
 
 ## Claude Sonnet in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Claude Sonnet 5.5** | Anthropic | Pro flagship | 1 flagship request | ~48K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Claude Sonnet 5.5** | Anthropic | Pro flagship | ~48K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -22,7 +22,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Code: explaining, reviewing and fixing short programs.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 Not offered in some countries: the maker's terms don't allow it there, and Omnimo hides these models.
 
@@ -34,7 +34,7 @@ Open Omnimo, tap the model name at the top of the chat and pick it. You can swit
 
 ### How many Claude Sonnet messages do I get on Pro?
 
-Sonnet counts against the daily flagship allowance, one request at a time; the app shows how many are left. A very long prompt counts as more than one.
+Sonnet uses the daily flagship allowance; the app shows how many messages are left.
 
 ### Is it the same Claude as in the Claude app?
 

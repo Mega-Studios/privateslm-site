@@ -8,54 +8,54 @@ Omnimo has 32 cloud models from 12 makers, plus Apple Intelligence on the device
 
 ## Free: 5 models
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **GPT-6 Luna** | OpenAI | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Claude Haiku 5.5** | Anthropic | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | 1 message | ~64K tokens | Yes |
-| **DeepSeek V4 Flash** | DeepSeek | Free and Pro | 1 message | ~64K tokens | No |
-| **Qwen 3.8 Flash** | Alibaba (Qwen) | Free and Pro | 1 message | ~64K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **GPT-6 Luna** | OpenAI | Free and Pro | ~64K tokens | Yes |
+| **Claude Haiku 5.5** | Anthropic | Free and Pro | ~64K tokens | Yes |
+| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | ~64K tokens | Yes |
+| **DeepSeek V4 Flash** | DeepSeek | Free and Pro | ~64K tokens | No |
+| **Qwen 3.8 Flash** | Alibaba (Qwen) | Free and Pro | ~64K tokens | Yes |
 
 ## Pro: 12 models
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **DeepSeek V4 Pro** | DeepSeek | Pro | 1 message | ~64K tokens | No |
-| **GLM 5.3** | Zhipu (Z.ai) | Pro | 1 message | ~64K tokens | No |
-| **MiniMax M3** | MiniMax | Pro | 1 message | ~64K tokens | Yes |
-| **GLM 5.3 Flash** | Zhipu (Z.ai) | Pro | 1 message | ~64K tokens | Yes |
-| **DeepSeek V4.1 Flash** | DeepSeek | Pro | 1 message | ~64K tokens | Yes |
-| **MiniMax M3.1 Flash** | MiniMax | Pro | 1 message | ~64K tokens | Yes |
-| **Mistral Small** | Mistral AI | Pro | 1 message | ~64K tokens | Yes |
-| **Llama 4 Maverick** | Meta | Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.5 Flash-Lite** | Google | Pro | 1 message | ~64K tokens | Yes |
-| **Qwen 3.7 Plus** | Alibaba (Qwen) | Pro | 1 message | ~64K tokens | Yes |
-| **MiMo V2.6 Pro** | Xiaomi | Pro | 1 message | ~64K tokens | Yes |
-| **Mistral Large 4** | Mistral AI | Pro | 1 message | ~64K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **DeepSeek V4 Pro** | DeepSeek | Pro | ~64K tokens | No |
+| **GLM 5.3** | Zhipu (Z.ai) | Pro | ~64K tokens | No |
+| **MiniMax M3** | MiniMax | Pro | ~64K tokens | Yes |
+| **GLM 5.3 Flash** | Zhipu (Z.ai) | Pro | ~64K tokens | Yes |
+| **DeepSeek V4.1 Flash** | DeepSeek | Pro | ~64K tokens | Yes |
+| **MiniMax M3.1 Flash** | MiniMax | Pro | ~64K tokens | Yes |
+| **Mistral Small** | Mistral AI | Pro | ~64K tokens | Yes |
+| **Llama 4 Maverick** | Meta | Pro | ~64K tokens | Yes |
+| **Gemini 3.5 Flash-Lite** | Google | Pro | ~64K tokens | Yes |
+| **Qwen 3.7 Plus** | Alibaba (Qwen) | Pro | ~64K tokens | Yes |
+| **MiMo V2.6 Pro** | Xiaomi | Pro | ~64K tokens | Yes |
+| **Mistral Large 4** | Mistral AI | Pro | ~64K tokens | Yes |
 
 ## Pro flagships: 15 models
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **GPT-6 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Terra** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Claude Sonnet 5.5** | Anthropic | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.5 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.8 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.1 Pro** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Grok 4.7** | xAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Grok 4.3** | xAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Kimi K3** | Moonshot AI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Kimi K3.1 Pro** | Moonshot AI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Qwen 3.8 Max** | Alibaba (Qwen) | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Claude Opus 5.5** | Anthropic | Pro flagship | 2 flagship requests | ~32K tokens | Yes |
-| **Claude Fable 5.1** | Anthropic | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
-| **GPT-6 Astra** | OpenAI | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **GPT-6 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Terra** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **Claude Sonnet 5.5** | Anthropic | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.5 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.8 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.1 Pro** | Google | Pro flagship | ~48K tokens | Yes |
+| **Grok 4.7** | xAI | Pro flagship | ~48K tokens | Yes |
+| **Grok 4.3** | xAI | Pro flagship | ~48K tokens | Yes |
+| **Kimi K3** | Moonshot AI | Pro flagship | ~48K tokens | Yes |
+| **Kimi K3.1 Pro** | Moonshot AI | Pro flagship | ~48K tokens | Yes |
+| **Qwen 3.8 Max** | Alibaba (Qwen) | Pro flagship | ~48K tokens | Yes |
+| **Claude Opus 5.5** | Anthropic | Pro flagship | ~32K tokens | Yes |
+| **Claude Fable 5.1** | Anthropic | Pro flagship | ~24K tokens | Yes |
+| **GPT-6 Astra** | OpenAI | Pro flagship | ~24K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 **Omnimo Pro**: $6.99 a week (3-day free trial), $9.99 a month or $39.99 a year (1-week free trial). US prices; the app shows the price for your country.
 
@@ -99,7 +99,7 @@ Anthropic
 
 ### Claude Opus
 
-Claude Opus 5.5, one of Anthropic's largest Claude models, in the Omnimo app for iPhone, iPad and Mac. Part of Omnimo Pro; one request counts as two flagship requests.
+Claude Opus 5.5, one of Anthropic's largest Claude models, in the Omnimo app for iPhone, iPad and Mac. Part of Omnimo Pro.
 
 ](https://www.privateslm.dev/models/claude-opus.html) [
 
@@ -107,7 +107,7 @@ Anthropic
 
 ### Claude Fable
 
-Claude Fable 5.1 from Anthropic in the Omnimo app for iPhone, iPad and Mac. The most expensive Claude model in Omnimo: part of Pro, one request counts as five flagship requests.
+Claude Fable 5.1 from Anthropic in the Omnimo app for iPhone, iPad and Mac. The most expensive Claude model in Omnimo, part of Pro.
 
 ](https://www.privateslm.dev/models/claude-fable.html) [
 

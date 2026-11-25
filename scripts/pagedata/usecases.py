@@ -32,8 +32,7 @@ USE_CASES = [
         "faq": [("Can Omnimo summarize a scanned PDF?", "Yes. Scans and photos of pages are read on your device and "
                  "the text goes to the model."),
                 ("Is there a page limit?", "The limit is the model's longest prompt in Omnimo: about 64K tokens for the "
-                 "free and Pro models, less for some flagships. On Pro a long document is read in one go; a very long "
-                 "prompt counts as more than one request.")],
+                 "free and Pro models, less for some flagships. On Pro a long document is read in one go.")],
     },
     {
         "slug": "homework", "h1": "Homework help with AI: photo of the problem, step-by-step answer",

@@ -8,13 +8,13 @@ Gemini is Google's model family. In Google's naming, Flash-Lite is the lightest,
 
 ## Gemini in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.5 Flash-Lite** | Google | Pro | 1 message | ~64K tokens | Yes |
-| **Gemini 3.5 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.8 Flash** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Gemini 3.1 Pro** | Google | Pro flagship | 1 flagship request | ~48K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Gemini 3.1 Flash-Lite** | Google | Free and Pro | ~64K tokens | Yes |
+| **Gemini 3.5 Flash-Lite** | Google | Pro | ~64K tokens | Yes |
+| **Gemini 3.5 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.8 Flash** | Google | Pro flagship | ~48K tokens | Yes |
+| **Gemini 3.1 Pro** | Google | Pro flagship | ~48K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -24,7 +24,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Flash or Pro for longer answers, explanations and planning.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 Not offered in some countries: the maker's terms don't allow it there, and Omnimo hides these models.
 

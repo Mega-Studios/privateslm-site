@@ -1,9 +1,10 @@
 """/models/ (audit #132): the models Omnimo offers, and model-vs-model pages (#148).
 
 The list is gateway/src/catalog.ts in the app repo (main at 67db037, 25 November
-2026). Only what the catalog says is stated: the tier, what a request costs from the
-flagship allowance (`weight`), the longest prompt the gateway accepts (`context`) and
-whether the model can see a photo (`vision`). No benchmark scores: we have not run
+2026). Only what the catalog says is stated: the tier, the longest prompt the gateway accepts
+(`context`) and whether the model can see a photo (`vision`). The catalog's `weight`
+(what a flagship request costs from the allowance) is internal billing detail and is
+not published; it is kept below only so the list stays a straight copy of the catalog. No benchmark scores: we have not run
 any, and the makers' own numbers are theirs to publish.
 """
 
@@ -56,29 +57,20 @@ RESTRICTED = {"openai", "anthropic", "google", "mistral", "meta"}
 TIER = {"free": "Free and Pro", "pro": "Pro", "premium": "Pro flagship"}
 
 
-def cost(m):
-    tier, weight = m[3], m[4]
-    if tier != "premium":
-        return "1 message"
-    return "1 flagship request" if weight == 1 else f"{weight} flagship requests"
-
-
 def rows(models):
     out = []
     for m in models:
-        out.append([f"<strong>{m[1]}</strong>", MAKERS[m[2]], TIER[m[3]], cost(m),
+        out.append([f"<strong>{m[1]}</strong>", MAKERS[m[2]], TIER[m[3]],
                     f"~{m[5] // 1000}K tokens", "Yes" if m[6] else "No"])
     return out
 
 
-HEAD = ["Model", "Maker", "Plan", "A request counts as", "Longest prompt", "Photos"]
+HEAD = ["Model", "Maker", "Plan", "Longest prompt", "Photos"]
 
 HOW = ("<strong>How the allowance works.</strong> Free users get a few cloud messages a day with the free models, "
        "and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free "
-       "and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as "
-       "more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also "
-       "counts as more than one request: every started 16K tokens counts once. The exact numbers are set on "
-       "Omnimo's server and the app shows how many are left.")
+       "and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server "
+       "and the app shows how many are left.")
 
 SOURCE = ("    <p class=\"cite\">Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. "
           "Models, limits and the longest prompt can change with a server update, without an app update. "
@@ -94,8 +86,7 @@ FAMILIES = [
         "about": "GPT-6 is OpenAI's model family. Omnimo offers five of them. <strong>GPT-6 Luna</strong> is the "
                  "default model for new users and one of the free ones. <strong>GPT-6 Sol</strong>, "
                  "<strong>GPT-6.1 Sol</strong> and <strong>GPT-6.1 Terra</strong> are flagships on Pro. "
-                 "<strong>GPT-6 Astra</strong> is the most expensive model in the app, with Claude Fable: one "
-                 "request counts as five flagship requests, and it takes the shortest prompts.",
+                 "<strong>GPT-6 Astra</strong> is a Pro flagship too, and takes the shortest prompts of the five.",
         "use": ["Luna for everyday questions, quick drafts, translations and photo questions, free.",
                 "Sol or Terra when an answer needs more care: a long email, a tricky explanation, planning.",
                 "Astra for the hardest questions, when it is worth spending more of the day's flagship allowance."],
@@ -123,14 +114,12 @@ FAMILIES = [
         "desc": "Claude Sonnet 5.5, Anthropic's balanced Claude model, in the Omnimo app for iPhone, iPad and Mac. "
                 "Part of Omnimo Pro, next to GPT-6, Gemini and Grok.",
         "about": "Sonnet sits in the middle of Anthropic's Claude line, between the fast Haiku and the larger Opus. "
-                 "In Omnimo, <strong>Claude Sonnet 5.5</strong> is a flagship on Pro: one request counts as one "
-                 "flagship request.",
+                 "In Omnimo, <strong>Claude Sonnet 5.5</strong> is a flagship on Pro.",
         "use": ["Writing that needs care: a cover letter, a difficult email, an essay outline.",
                 "Reading a long document and answering questions about it.",
                 "Code: explaining, reviewing and fixing short programs."],
-        "faq": [("How many Claude Sonnet messages do I get on Pro?", "Sonnet counts against the daily flagship "
-                 "allowance, one request at a time; the app shows how many are left. A very long prompt counts as "
-                 "more than one."),
+        "faq": [("How many Claude Sonnet messages do I get on Pro?", "Sonnet uses the daily flagship allowance; "
+                 "the app shows how many messages are left."),
                 ("Is it the same Claude as in the Claude app?", "It is Anthropic's Claude Sonnet 5.5 model, through "
                  "Anthropic's API. Features of the Claude app itself, such as projects and connectors, are not in "
                  "Omnimo.")],
@@ -139,29 +128,26 @@ FAMILIES = [
         "slug": "claude-opus", "name": "Claude Opus", "maker": "anthropic", "ids": ["claude-opus-5.5"],
         "title": "Claude Opus 5.5 in Omnimo (Pro)",
         "desc": "Claude Opus 5.5, one of Anthropic's largest Claude models, in the Omnimo app for iPhone, iPad and "
-                "Mac. Part of Omnimo Pro; one request counts as two flagship requests.",
+                "Mac. Part of Omnimo Pro.",
         "about": "Opus is the larger model in Anthropic's Claude line. In Omnimo, <strong>Claude Opus 5.5</strong> "
-                 "is a Pro flagship and costs twice as much of the day's flagship allowance as Sonnet, roughly in "
-                 "line with Anthropic's price.",
+                 "is a Pro flagship.",
         "use": ["Hard reasoning: a plan with many constraints, a careful argument, a long analysis.",
                 "A second opinion on an answer from another model in the same chat."],
-        "faq": [("Why does Opus count as two requests?", "Omnimo weighs flagship requests roughly by what the maker "
-                 "charges for the model. Opus costs more to run than Sonnet, so one Opus request uses two from the "
-                 "daily flagship allowance.")],
+        "faq": [("Is Claude Opus in the free plan?", "No, Claude Opus 5.5 is part of Omnimo Pro and uses the daily "
+                 "flagship allowance. The free plan has Claude Haiku 5.5.")],
     },
     {
         "slug": "claude-fable", "name": "Claude Fable", "maker": "anthropic", "ids": ["claude-fable-5.1"],
         "title": "Claude Fable 5.1 in Omnimo (Pro)",
         "desc": "Claude Fable 5.1 from Anthropic in the Omnimo app for iPhone, iPad and Mac. The most expensive Claude "
-                "model in Omnimo: part of Pro, one request counts as five flagship requests.",
-        "about": "<strong>Claude Fable 5.1</strong> is the most expensive Claude model Omnimo offers. On Pro, one "
-                 "request counts as five flagship requests, and Omnimo accepts shorter prompts for it than for "
-                 "the other Claude models, to keep a request's cost bounded.",
+                "model in Omnimo, part of Pro.",
+        "about": "<strong>Claude Fable 5.1</strong> is the most expensive Claude model Omnimo offers. It is part of Pro, and "
+                 "Omnimo accepts shorter prompts for it than for the other Claude models.",
         "use": ["The questions where you want Anthropic's most capable model in the app and a few answers a day are "
                 "enough.",
                 "Comparing its answer with Opus or GPT-6 Astra in the same chat."],
-        "faq": [("How many Fable messages can I send?", "Fable counts as five requests from the daily flagship "
-                 "allowance, so you get a fifth as many Fable answers as Sonnet answers. The app shows what is left.")],
+        "faq": [("How many Fable messages can I send?", "Fable uses the daily flagship allowance of Omnimo Pro, and "
+                 "as the most expensive Claude model it uses it up faster than Sonnet. The app shows what is left.")],
     },
     {
         "slug": "gemini", "name": "Gemini", "maker": "google",
@@ -185,7 +171,7 @@ FAMILIES = [
         "desc": "xAI's Grok 4.7 and Grok 4.3 in the Omnimo app for iPhone, iPad and Mac, next to GPT-6, Claude and "
                 "Gemini. Part of Omnimo Pro.",
         "about": "Grok is xAI's model family. Omnimo offers <strong>Grok 4.7</strong> and <strong>Grok 4.3</strong> "
-                 "as Pro flagships; each request counts as one flagship request, and both can see photos.",
+                 "as Pro flagships; both can see photos.",
         "use": ["Another maker's take on a question you have asked GPT or Claude.",
                 "Everyday questions and writing in Grok's style, without a separate subscription."],
         "faq": [("Can I use Grok without an X subscription?", "In Omnimo, yes: Grok 4.7 and 4.3 are part of Omnimo "
@@ -210,7 +196,7 @@ FAMILIES = [
         "title": "Kimi K3 and K3.1 Pro in Omnimo (Pro)",
         "desc": "Moonshot AI's Kimi K3 and Kimi K3.1 Pro in the Omnimo app for iPhone, iPad and Mac. Part of Omnimo Pro.",
         "about": "Kimi is Moonshot AI's model family. Omnimo offers <strong>Kimi K3</strong> and <strong>Kimi K3.1 "
-                 "Pro</strong> as Pro flagships, each counted as one flagship request.",
+                 "Pro</strong> as Pro flagships.",
         "use": ["Long, structured answers and a different maker's view on a problem."],
         "faq": [("Is Kimi free in Omnimo?", "No, Kimi K3 and K3.1 Pro are part of Omnimo Pro.")],
     },
@@ -347,15 +333,15 @@ VERSUS = [
     {
         "slug": "claude-vs-gpt-6", "a": "Claude", "b": "GPT-6",
         "title": "Claude vs GPT-6 in Omnimo: which to pick, and how to compare them yourself",
-        "desc": "Claude (Anthropic) and GPT-6 (OpenAI) side by side as Omnimo offers them: which is free, what each "
-                "costs on Pro, and a simple way to compare their answers to your own questions.",
+        "desc": "Claude (Anthropic) and GPT-6 (OpenAI) side by side as Omnimo offers them: which is free, which is "
+                "Pro, and a simple way to compare their answers to your own questions.",
         "ids": ["claude-haiku-5.5", "gpt-6-luna", "claude-sonnet-5.5", "gpt-6-sol", "gpt-6.1-sol", "gpt-6.1-terra",
                 "claude-opus-5.5", "claude-fable-5.1", "gpt-6-astra"],
         "body": [
             "Both families come in tiers, and the fair comparison is tier against tier: <strong>Claude Haiku 5.5 vs "
             "GPT-6 Luna</strong> (both free), <strong>Claude Sonnet 5.5 vs GPT-6 Sol or GPT-6.1 Terra</strong> (Pro "
-            "flagships at one request each), and <strong>Claude Fable 5.1 vs GPT-6 Astra</strong> (the two most "
-            "expensive models in the app, five requests each). Claude Opus 5.5 sits between, at two.",
+            "flagships), and <strong>Claude Fable 5.1 vs GPT-6 Astra</strong> (the top of each family in the app, "
+            "also Pro flagships). Claude Opus 5.5 sits between.",
             "We don't publish a winner. The makers publish their own benchmark scores, and which model writes the "
             "answer you prefer depends on the question. What we can say from the catalog: all of these models see "
             "photos; the free pair take the longest prompts; the top pair the shortest.",
@@ -363,18 +349,17 @@ VERSUS = [
     },
     {
         "slug": "gemini-vs-claude", "a": "Gemini", "b": "Claude",
-        "title": "Gemini vs Claude in Omnimo: tiers, cost and how to compare",
-        "desc": "Google's Gemini and Anthropic's Claude as Omnimo offers them: free and Pro models, what each request "
-                "costs, and how to compare their answers in one chat.",
+        "title": "Gemini vs Claude in Omnimo: tiers, limits and how to compare",
+        "desc": "Google's Gemini and Anthropic's Claude as Omnimo offers them: free and Pro models, prompt limits, "
+                "and how to compare their answers in one chat.",
         "ids": ["gemini-3.1-flash-lite", "claude-haiku-5.5", "gemini-3.5-flash-lite", "gemini-3.5-flash",
                 "gemini-3.8-flash", "gemini-3.1-pro", "claude-sonnet-5.5", "claude-opus-5.5", "claude-fable-5.1"],
         "body": [
             "The free pair is <strong>Gemini 3.1 Flash-Lite vs Claude Haiku 5.5</strong>. On Pro, Gemini 3.5 Flash-Lite "
             "comes from the large daily allowance, while <strong>Gemini 3.5 Flash, 3.8 Flash and 3.1 Pro</strong> "
-            "and <strong>Claude Sonnet 5.5</strong> are flagships at one request each. Claude Opus 5.5 (two) and "
-            "Fable 5.1 (five) cost more of the flagship allowance than any Gemini model in the app.",
-            "So on Pro, Gemini gives you more flagship answers a day than Claude Opus or Fable. Which writes the better "
-            "answer to your question is something to try, not something we can promise.",
+            "and <strong>Claude Sonnet 5.5, Opus 5.5 and Fable 5.1</strong> are Pro flagships, from the daily flagship "
+            "allowance.",
+            "Which writes the better answer to your question is something to try, not something we can promise.",
         ],
     },
     {
@@ -447,7 +432,7 @@ def index_page():
     return {
         "path": "models/index.html", "title": "The AI models in Omnimo: GPT-6, Claude, Gemini, Grok, DeepSeek and more",
         "description": f"Every model in the Omnimo app: {len(CATALOG)} cloud models from {len(MAKERS)} makers plus Apple "
-                       "Intelligence on the device. Which are free, which are Pro, and what each request costs.",
+                       "Intelligence on the device. Which are free, which are Pro, and the longest prompt each takes.",
         "h1": "The models in Omnimo", "meta": f"Updated {UPDATED_TEXT} · from Omnimo's model catalog",
         "body": body, "schema": "CollectionPage", "md": True, "llms": "Models",
         "faq": [("Which models are free in Omnimo?", "Apple Intelligence on the device (unlimited, on supported "

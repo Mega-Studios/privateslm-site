@@ -38,7 +38,7 @@ Yes. Scans and photos of pages are read on your device and the text goes to the 
 
 ### Is there a page limit?
 
-The limit is the model's longest prompt in Omnimo: about 64K tokens for the free and Pro models, less for some flagships. On Pro a long document is read in one go; a very long prompt counts as more than one request.
+The limit is the model's longest prompt in Omnimo: about 64K tokens for the free and Pro models, less for some flagships. On Pro a long document is read in one go.
 
 [Get Omnimo — free](https://apps.apple.com/app/id6504996891)
 

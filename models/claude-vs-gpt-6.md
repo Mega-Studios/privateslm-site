@@ -4,23 +4,23 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-Both families come in tiers, and the fair comparison is tier against tier: **Claude Haiku 5.5 vs GPT-6 Luna** (both free), **Claude Sonnet 5.5 vs GPT-6 Sol or GPT-6.1 Terra** (Pro flagships at one request each), and **Claude Fable 5.1 vs GPT-6 Astra** (the two most expensive models in the app, five requests each). Claude Opus 5.5 sits between, at two.
+Both families come in tiers, and the fair comparison is tier against tier: **Claude Haiku 5.5 vs GPT-6 Luna** (both free), **Claude Sonnet 5.5 vs GPT-6 Sol or GPT-6.1 Terra** (Pro flagships), and **Claude Fable 5.1 vs GPT-6 Astra** (the top of each family in the app, also Pro flagships). Claude Opus 5.5 sits between.
 
 We don't publish a winner. The makers publish their own benchmark scores, and which model writes the answer you prefer depends on the question. What we can say from the catalog: all of these models see photos; the free pair take the longest prompts; the top pair the shortest.
 
 ## Side by side in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **Claude Haiku 5.5** | Anthropic | Free and Pro | 1 message | ~64K tokens | Yes |
-| **GPT-6 Luna** | OpenAI | Free and Pro | 1 message | ~64K tokens | Yes |
-| **Claude Sonnet 5.5** | Anthropic | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Terra** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **Claude Opus 5.5** | Anthropic | Pro flagship | 2 flagship requests | ~32K tokens | Yes |
-| **Claude Fable 5.1** | Anthropic | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
-| **GPT-6 Astra** | OpenAI | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **Claude Haiku 5.5** | Anthropic | Free and Pro | ~64K tokens | Yes |
+| **GPT-6 Luna** | OpenAI | Free and Pro | ~64K tokens | Yes |
+| **Claude Sonnet 5.5** | Anthropic | Pro flagship | ~48K tokens | Yes |
+| **GPT-6 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Terra** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **Claude Opus 5.5** | Anthropic | Pro flagship | ~32K tokens | Yes |
+| **Claude Fable 5.1** | Anthropic | Pro flagship | ~24K tokens | Yes |
+| **GPT-6 Astra** | OpenAI | Pro flagship | ~24K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -32,7 +32,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 3. Each answer shows which model wrote it. Keep the one you prefer and carry on.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 ## Questions
 

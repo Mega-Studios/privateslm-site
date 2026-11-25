@@ -40,7 +40,7 @@ Both are free to try: [Poe on the App Store](https://apps.apple.com/us/app/id164
 
 ### Does Omnimo use points like Poe?
 
-No. Omnimo gives a number of messages a day: a few on the free plan, hundreds on Pro. Flagship models count against a smaller daily allowance, and the most expensive ones count as more than one request.
+No. Omnimo gives a number of messages a day: a few on the free plan, hundreds on Pro. Flagship models count against a smaller daily allowance.
 
 ### Is Poe cheaper than Omnimo?
 

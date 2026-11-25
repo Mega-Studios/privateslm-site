@@ -118,7 +118,7 @@ COMPARES = [
         "faq": [
             ("Does Omnimo use points like Poe?",
              "No. Omnimo gives a number of messages a day: a few on the free plan, hundreds on Pro. Flagship models "
-             "count against a smaller daily allowance, and the most expensive ones count as more than one request."),
+             "count against a smaller daily allowance."),
             ("Is Poe cheaper than Omnimo?",
              f"Poe Basic is $4.99 a month and Poe Plus $19.99 a month in the App Store's list ({READ}). Omnimo Pro is "
              "$9.99 a month, $6.99 a week or $39.99 a year in the US."),

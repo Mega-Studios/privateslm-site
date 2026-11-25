@@ -4,17 +4,17 @@
 
 Updated November 25, 2026 · from Omnimo's model catalog
 
-GPT-6 is OpenAI's model family. Omnimo offers five of them. **GPT-6 Luna** is the default model for new users and one of the free ones. **GPT-6 Sol**, **GPT-6.1 Sol** and **GPT-6.1 Terra** are flagships on Pro. **GPT-6 Astra** is the most expensive model in the app, with Claude Fable: one request counts as five flagship requests, and it takes the shortest prompts.
+GPT-6 is OpenAI's model family. Omnimo offers five of them. **GPT-6 Luna** is the default model for new users and one of the free ones. **GPT-6 Sol**, **GPT-6.1 Sol** and **GPT-6.1 Terra** are flagships on Pro. **GPT-6 Astra** is a Pro flagship too, and takes the shortest prompts of the five.
 
 ## GPT-6 in Omnimo
 
-| Model | Maker | Plan | A request counts as | Longest prompt | Photos |
-| --- | --- | --- | --- | --- | --- |
-| **GPT-6 Luna** | OpenAI | Free and Pro | 1 message | ~64K tokens | Yes |
-| **GPT-6 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Sol** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6.1 Terra** | OpenAI | Pro flagship | 1 flagship request | ~48K tokens | Yes |
-| **GPT-6 Astra** | OpenAI | Pro flagship | 5 flagship requests | ~24K tokens | Yes |
+| Model | Maker | Plan | Longest prompt | Photos |
+| --- | --- | --- | --- | --- |
+| **GPT-6 Luna** | OpenAI | Free and Pro | ~64K tokens | Yes |
+| **GPT-6 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Sol** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6.1 Terra** | OpenAI | Pro flagship | ~48K tokens | Yes |
+| **GPT-6 Astra** | OpenAI | Pro flagship | ~24K tokens | Yes |
 
 Source: Omnimo's model catalog (the gateway that serves the app), 25 November 2026. Models, limits and the longest prompt can change with a server update, without an app update. Which models are offered can depend on your country.
 
@@ -26,7 +26,7 @@ Source: Omnimo's model catalog (the gateway that serves the app), 25 November 20
 
 - Astra for the hardest questions, when it is worth spending more of the day's flagship allowance.
 
-**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships, where the most expensive models count as more than one request (roughly in proportion to what the maker charges). On Pro a very long prompt also counts as more than one request: every started 16K tokens counts once. The exact numbers are set on Omnimo's server and the app shows how many are left.
+**How the allowance works.** Free users get a few cloud messages a day with the free models, and unlimited Apple Intelligence on supported devices. Omnimo Pro has hundreds of messages a day for the free and Pro models, and a smaller daily allowance for the flagships. The exact numbers are set on Omnimo's server and the app shows how many are left.
 
 Not offered in some countries: the maker's terms don't allow it there, and Omnimo hides these models.
 

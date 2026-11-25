@@ -100,7 +100,7 @@ iPhone and iPad with iOS or iPadOS 17 or later, and Mac with macOS 14 or later. 
 
 - [Fact sheet](https://www.privateslm.dev/facts.html): models, prices, limits and privacy on one page
 
-- [The models](https://www.privateslm.dev/models/): which are free, which are Pro, what each request costs
+- [The models](https://www.privateslm.dev/models/): which are free and which are Pro
 
 - [Comparisons](https://www.privateslm.dev/compare/): Omnimo vs ChatGPT, Perplexity, Poe, ChatOn and more, and [alternatives](https://www.privateslm.dev/alternatives/)
 
